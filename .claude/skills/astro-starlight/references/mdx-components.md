@@ -21,6 +21,14 @@ import { Aside, Tabs, TabItem, Card, CardGrid, Steps, Badge, LinkCard } from '@a
 - `Aside` 的 type：`note`、`tip`、`caution`、`danger`
 - 純 Markdown 也可以用 `:::tip` … `:::` 語法產生 Aside，不需要改成 MDX
 
+## 放在 Markdown 裡的自訂元件要加 `not-content`
+
+MDX 裡的元件會被包在 `.sl-markdown-content` 裡，Starlight（以及 `site/styles/theme.css`）的文章樣式會套用到元件內的 `table`、`h2`、`a`，造成雙重框線、格線錯位、連結變色。實際發生在首頁存摺元件上。
+
+- 元件最外層加 `class="not-content"`
+- 自訂的文章樣式寫成 `.sl-markdown-content table:not(:where(.not-content *))`，排除這些元件
+- 加了 `not-content` 之後，連結顏色等要在元件裡自己設定（例如 `color: var(--sl-color-text-accent)`）
+
 ## 自訂 Astro 元件（不需要額外框架）
 
 `site/components/Counter.astro`：

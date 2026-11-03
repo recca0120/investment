@@ -1,0 +1,177 @@
+---
+// 首頁主視覺：用真實回測結果做成一頁「0050 定期定額存摺」
+// 資料由 scripts/export_passbook.py 產生
+import data from '../data/passbook.json';
+
+const n = (v: number) => v.toLocaleString('zh-TW', { maximumFractionDigits: 0 });
+const pct = (v: number) => `${(v * 100).toFixed(1)}%`;
+const rows = data.rows;
+const last = rows[rows.length - 1];
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+---
+
+<figure class="passbook not-content" aria-labelledby="passbook-caption">
+  <figcaption id="passbook-caption">
+    <span class="account">{data.symbol} 定期定額存摺</span>
+    <span class="terms">每月 {n(data.monthly)} 元，{data.start.slice(0, 4)} 年起</span>
+  </figcaption>
+  <table>
+    <thead>
+      <tr>
+        <th scope="col">日期</th>
+        <th scope="col" class="num">存入</th>
+        <th scope="col" class="num">累計存入</th>
+        <th scope="col" class="num">結餘（市值）</th>
+      </tr>
+    </thead>
+    <tbody>
+      {
+        rows.slice(0, -1).map((r) => (
+          <tr>
+            <td>{r.date}</td>
+            <td class="num">{n(r.deposit ?? 0)}</td>
+            <td class="num">{n(r.invested)}</td>
+            <td class="num">{n(r.value)}</td>
+          </tr>
+        ))
+      }
+      <tr class="balance">
+        <td>{last.date}</td>
+        <td class="num">—</td>
+        <td class="num">{n(last.invested)}</td>
+        <td class="num final">
+          {n(last.value)}
+          <span class="seal" aria-label="印章：含息再投入">
+            <span>含息</span><span>再投</span>
+          </span>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+  <p class="note">
+    共存入 {data.months} 個月，年化報酬 {pct(data.annualized)}，期間最大跌幅 {pct(data.maxDrawdown)}。
+    每年只列一月，歷史報酬不代表未來。<a href={`${base}/knowledge/07-dca-backtest-2016-2026/`}>看完整回測</a>
+  </p>
+</figure>
+
+<style>
+  .passbook {
+    margin: 0;
+    background: var(--pb-paper-raised);
+    border: 1px solid var(--pb-rule);
+    border-radius: 4px;
+    padding: 1.25rem 1.25rem 1rem;
+    color: var(--pb-ink);
+    font-variant-numeric: tabular-nums;
+  }
+  figcaption {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 0.25rem 1rem;
+    padding-bottom: 0.6rem;
+    border-bottom: 2px solid var(--pb-ink);
+  }
+  .account {
+    font-weight: 900;
+    font-size: var(--sl-text-lg);
+  }
+  .terms {
+    color: var(--sl-color-gray-3);
+    align-self: end;
+  }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 0;
+    display: table;
+    font-size: var(--sl-text-sm);
+  }
+  th,
+  td {
+    padding: 0 0.4rem;
+    height: 2.4rem;
+    border: 0;
+    border-bottom: 1px solid var(--pb-rule);
+    background: transparent;
+    white-space: nowrap;
+    text-align: left;
+  }
+  th {
+    color: var(--sl-color-gray-3);
+    font-weight: 400;
+  }
+  .num {
+    text-align: right;
+  }
+  .balance td {
+    font-weight: 700;
+    border-top: 2px solid var(--pb-ink);
+  }
+  .final {
+    position: relative;
+    font-size: var(--sl-text-lg);
+    font-weight: 900;
+    padding-right: 4.2rem;
+  }
+  .seal {
+    position: absolute;
+    right: 0.2rem;
+    top: 50%;
+    display: grid;
+    place-items: center;
+    width: 3.4rem;
+    height: 3.4rem;
+    margin-top: -1.7rem;
+    background: var(--pb-seal);
+    color: var(--pb-seal-ink);
+    border-radius: 6px;
+    font-size: 0.78rem;
+    font-weight: 900;
+    line-height: 1.15;
+    letter-spacing: 0.15em;
+    transform: rotate(-8deg);
+    box-shadow: inset 0 0 0 2px var(--pb-seal-ink), inset 0 0 0 4px var(--pb-seal);
+    opacity: 0.92;
+    animation: stamp 420ms cubic-bezier(0.2, 0.9, 0.3, 1.2) 600ms both;
+  }
+  .seal span {
+    display: block;
+  }
+  @keyframes stamp {
+    from {
+      transform: rotate(-8deg) scale(1.6);
+      opacity: 0;
+    }
+    to {
+      transform: rotate(-8deg) scale(1);
+      opacity: 0.92;
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .seal {
+      animation: none;
+    }
+  }
+  .balance td {
+    border-bottom: 0;
+  }
+  .note a {
+    color: var(--sl-color-text-accent);
+  }
+  .note {
+    margin: 0.75rem 0 0;
+    font-size: var(--sl-text-xs);
+    color: var(--sl-color-gray-3);
+    line-height: 1.7;
+  }
+  @media (max-width: 30rem) {
+    .passbook {
+      padding: 1rem 0.75rem 0.75rem;
+    }
+    th:nth-child(2),
+    td:nth-child(2) {
+      display: none;
+    }
+  }
+</style>

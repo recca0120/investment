@@ -1,0 +1,25 @@
+---
+title: 投資學習筆記
+description: 股市新手從零開始的投資學習紀錄：整理過的知識、做過的決定，和自己寫的回測工具
+template: splash
+---
+
+import { LinkButton } from '@astrojs/starlight/components';
+import Passbook from '@site/components/Passbook.astro';
+import ReadingOrder from '@site/components/ReadingOrder.astro';
+
+<div class="home-hero">
+  <div class="home-intro">
+    <h1>投資學習筆記</h1>
+    <p>
+      股市新手從零開始的學習紀錄：整理過的知識、做過的決定，和自己寫的回測工具。內容是學習筆記，不構成投資建議。
+    </p>
+    <div class="home-actions">
+      <LinkButton href="/investment/knowledge/01-getting-started/">從新手入門讀起</LinkButton>
+      <LinkButton href="https://github.com/recca0120/investment" variant="minimal">GitHub 原始碼</LinkButton>
+    </div>
+  </div>
+  <Passbook />
+</div>
+
+<ReadingOrder />
