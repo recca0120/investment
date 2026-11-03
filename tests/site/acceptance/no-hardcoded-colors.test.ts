@@ -21,3 +21,9 @@ test('[#17-3] 元件和頁面裡沒有寫死的顏色值', () => {
   );
   expect(offenders).toEqual([]);
 });
+
+test('[#17-2] 元件只用 utility class，沒有 <style>', () => {
+  // 實際案例：ReadingOrder 的 Tailwind 改寫被 git checkout 意外還原，只檢查 Passbook 的測試沒發現
+  const withStyle = files('site/components', /\.astro$/).filter((f) => /<style[\s>]/.test(readFileSync(f, 'utf8')));
+  expect(withStyle).toEqual([]);
+});
