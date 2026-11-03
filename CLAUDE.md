@@ -88,13 +88,15 @@
 ## 系統開發規則（之後會補充）
 
 - 語言：Python，套件管理用 `uv`
-- 開發流程依 `tdd` skill（先寫驗收測試）
+- 開發流程依 `atdd` skill（repo 版）：先從 issue 的 Given/When/Then 寫驗收測試，紅燈原因要正確
 - 資料來源候選：證交所 OpenAPI、FinMind、yfinance（待 research issue 評估）
 
 ## 專案 Skills
 
 - 位置：`.claude/skills/`（跟著 repo 版控，只在本專案生效）
 - `astro-starlight`：Astro 7 ＋ Starlight 建站、設定、部署；動到網站相關檔案前先讀
+- `atdd`：Python 系統的 ATDD 流程與 pytest／Streamlit AppTest 寫法；寫任何程式前先讀
+- 共用 skill `atdd-principles`（`~/.claude/skills/`）是通用原則；和 repo 版衝突時以 repo 版為準
 - 新增或修改 skill 時用內建的 `skill-creator`；技術類 skill 要先上網查最新版並實測驗證
 
 ## 待整理
