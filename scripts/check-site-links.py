@@ -1,5 +1,8 @@
 #!/usr/bin/env python3
-"""檢查 build 出來的網站（dist/）：站內連結都指向存在的頁面，且沒有殘留未轉換的 .md 相對連結。
+"""檢查 build 出來的網站（dist/）：
+- 站內連結都指向存在的頁面
+- 沒有殘留未轉換的 .md 相對連結
+- 每一篇文章都出現在側欄（Starlight 的 autogenerate 設錯目錄時，側欄會是空的，但 build 不會報錯）
 
 用法：npm run build && python3 scripts/check-site-links.py [--base /investment]
 """
@@ -27,6 +30,21 @@ for page in sorted(dist.rglob("*.html")):
         elif not re.match(r"^[a-z]+:|^#|^/", href) and re.search(r"\.mdx?(#|$)", href):
             problems.append(f"{page}: 未轉換的 .md 相對連結 {href}")
 
-print(f"檢查 {checked} 個站內連結，問題 {len(problems)} 個")
+# 側欄：取一個有側欄的頁面，比對所有文章頁是否都在側欄裡
+pages = {
+    prefix + str(p.parent.relative_to(dist)) + "/"
+    for p in dist.rglob("index.html")
+    if p.parent != dist  # 首頁是 splash，不在側欄
+}
+sidebar_page = next((p for p in sorted(dist.rglob("index.html")) if 'class="top-level' in p.read_text()), None)
+if sidebar_page is None:
+    problems.append("找不到有側欄的頁面")
+else:
+    html = sidebar_page.read_text()
+    sidebar = html[html.find('class="top-level'):html.find("</sl-sidebar-state-persist>")]
+    missing = sorted(pages - set(re.findall(r'href="([^"]+)"', sidebar)))
+    problems += [f"側欄缺少文章：{m}" for m in missing]
+
+print(f"檢查 {checked} 個站內連結、{len(pages)} 篇文章的側欄，問題 {len(problems)} 個")
 print("\n".join(f"  {p}" for p in problems))
 sys.exit(1 if problems else 0)

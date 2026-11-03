@@ -43,6 +43,18 @@ investment/
 
 `.gitignore` 若有 `site/`（MkDocs 的輸出目錄慣例），建站時要移除，否則原始碼不會被 commit。
 
+## 驗證要看「畫面」，不是只看 build 和 HTTP 200
+
+這份 skill 第一版只驗證了 build 成功、連結正確、HTTP 200，結果上線後側欄整個是空的（2026-11-03 實際發生）。建站或改設定後：
+
+1. `npm run build && python3 scripts/check-site-links.py`（含側欄完整性檢查）
+2. **實際截圖看畫面**。沒有瀏覽器擴充功能時可以用 headless Chrome：
+   ```bash
+   "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome" --headless=new --hide-scrollbars \
+     --window-size=1400,1000 --virtual-time-budget=5000 --screenshot=out.png "https://recca0120.github.io/investment/knowledge/01-getting-started/"
+   ```
+   檢查：側欄有文章、首頁、文章頁、手機寬度（`--window-size=390,844`）
+
 ## 建站步驟
 
 1. 安裝：`npm i astro @astrojs/starlight sharp`，需要相對連結改寫時再加 `@astrojs/markdown-remark unist-util-visit`
@@ -78,6 +90,7 @@ investment/
 | 相鄰的行內元素之間空白不見了 | Astro 7 的 `compressHTML` 預設改為 `'jsx'` | 寫 `{" "}`，或設定 `compressHTML: true` 回到舊行為 |
 | 未關閉的 HTML 標籤造成 build 錯誤 | Rust compiler 對 HTML 更嚴格，也不再自動修正錯誤的巢狀結構 | 修正 HTML；不要在 `<p>` 裡放 `<div>` |
 | `docsLoader()` 讀不到 `docs/` | `docsLoader()` 的路徑寫死在 `src/content/docs` | 改用 `glob({ pattern, base: './docs' })` ＋ `docsSchema()` |
+| **側欄分組是空的**，但 build 成功、頁面也都在 | autogenerate 用 `entry.filePath` 去掉寫死的 `<srcDir>/content/docs/` 前綴後比對目錄；內容在 `docs/` 時前綴去不掉 | `directory` 寫 `'docs/knowledge'`（相對專案根目錄），不要寫 `'knowledge'`。`scripts/check-site-links.py` 會檢查每篇文章都在側欄 |
 | `:::tip` 被輸出成普通 `<div>`、標題沒有錨點連結 | Starlight 的 Markdown 轉換只套用在 `src/content/docs` 底下的檔案 | 在 `starlight({ markdown: { processedDirs: ['./docs'] } })` 加上內容目錄 |
 | 改了設定，輸出結果卻沒變 | content layer 會快取渲染結果 | `rm -rf .astro node_modules/.astro dist` 後再 build |
 | `The collection "i18n" does not exist` 警告 | 沒有定義 i18n collection | 無害，可忽略；需要自訂 UI 翻譯時再加 |
