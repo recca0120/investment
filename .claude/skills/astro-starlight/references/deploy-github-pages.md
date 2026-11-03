@@ -61,10 +61,20 @@ jobs:
 - `concurrency`：避免兩次部署互相覆蓋；`cancel-in-progress: false` 讓正在進行的部署跑完
 - 版本是 2026-11-03 查 GitHub releases 的最新版：`withastro/action v6.1.4`、`actions/checkout v7.0.1`、`actions/deploy-pages v5.0.1`
 
+## 本 repo 實際採用的版本：部署前檢查連結
+
+`withastro/action` 把安裝、建置、上傳包在一起，中間沒辦法插入檢查。本 repo 的 `.github/workflows/site.yml` 改成自己寫各個步驟：
+
+- `actions/setup-node@v7`（Node 24、npm cache）→ `npm ci` → `npm run build`
+- `python3 scripts/check-site-links.py --base /investment`：站內連結都要存在、不能殘留 `.md` 相對連結
+- `actions/upload-pages-artifact@v5`（`path: dist`）→ `actions/deploy-pages@v5`
+- PR 只跑建置和連結檢查，不部署；push 到 main 才部署
+- 沒有使用 YAML anchor，路徑清單在 push 和 pull_request 各寫一次（保守做法）
+
 ## 部署後驗證
 
 ```bash
-gh run list --workflow deploy.yml --limit 1
+gh run list --workflow site.yml --limit 1   # 本 repo 的 workflow 檔名
 gh run watch <run-id>
 curl -sI https://recca0120.github.io/investment/ | head -1
 ```

@@ -23,9 +23,14 @@
 ## 內容放置規則：什麼東西放哪裡
 
 - `docs/knowledge/`：**整理過的知識**（定稿內容），未來網站的主要來源
-  - 一個主題一個檔案，檔名用 `NN-kebab-case.md`
+  - 一個主題一個檔案，檔名用 `NN-kebab-case.md`（小寫）
   - 每篇結尾要有 `## 資料來源`，附上網址
   - 內容更新時直接改檔，不另開新版本檔
+- `docs/` 底下所有 `.md` 都會發佈到網站，寫作規則：
+  - 開頭一定要有 frontmatter `title`（少了網站 build 會失敗），內文從 `##` 開始，不要再寫 `# 標題`
+  - 文件之間用相對路徑連到 `.md`（例如 `../knowledge/01-getting-started.md`），GitHub 和網站都能點
+  - `README.md` 不會發佈到網站，只給 GitHub 瀏覽資料夾用
+  - 新增或修改後跑 `npm run build && python3 scripts/check-site-links.py`
 - `docs/log/`：**每次討論的紀錄**（原始脈絡）
   - 檔名 `YYYY-MM-DD-主題.md`，同一天多次討論加後綴
   - 記錄：使用者問了什麼、結論、待辦、產生了哪些 issue
@@ -35,7 +40,10 @@
   - 對應的 decision issue 關閉時要寫一份
 - `private/`：**真實持股、金額、帳戶資訊**，已在 `.gitignore`，絕不 commit
 - `src/`、`tests/`：系統程式碼（尚未建立，等第一個開發 issue 開始時再建）
-- 網站：Astro Starlight，先走「網站與系統分開」架構（見 `docs/decisions/0002-site-framework.md`），網站專案目錄待建立網站時決定
+- 網站：Astro Starlight（見 `docs/decisions/0002-site-framework.md`），https://recca0120.github.io/investment/
+  - Astro 專案在 repo 根目錄（`package.json`、`astro.config.mjs`），原始碼在 `site/`，靜態檔在 `public/`
+  - 本機：`npm run dev`；檢查：`npm run build && python3 scripts/check-site-links.py`
+  - push 到 main 後由 `.github/workflows/site.yml` 自動部署；PR 只建置與檢查連結
 
 ## Issue 規則
 
