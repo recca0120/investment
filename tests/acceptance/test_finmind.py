@@ -122,3 +122,23 @@ def test_沒有成交的日子_收盤價為0_會被略過():
     # Then 略過 0 元那天；除息因子用前一個「有成交」的收盤價 40：1 - 1/40 = 0.975
     assert [p.date for p in points] == [date(2013, 5, 17), date(2013, 5, 21)]
     assert [p.total_return for p in points] == pytest.approx([39, 41])
+
+
+# ---------- 匯率（issue #12） ----------
+
+def test_美元匯率_買美元用即期賣出價_換回新台幣用即期買入價():
+    from invest.finmind import FinMindFxSource
+    from invest.prices import FxRate
+
+    # 2026-10-20 的真實數字（台灣銀行牌告，FinMind TaiwanExchangeRate）
+    fetch = FakeFetch({("TaiwanExchangeRate", "USD"): [
+        {"date": "2026-10-21", "currency": "USD", "cash_buy": 32.085, "cash_sell": 32.755, "spot_buy": 32.435, "spot_sell": 32.535},
+        {"date": "2026-10-20", "currency": "USD", "cash_buy": 32.23, "cash_sell": 32.9, "spot_buy": 32.58, "spot_sell": 32.68},
+        {"date": "2026-11-02", "currency": "USD", "cash_buy": -1, "cash_sell": -1, "spot_buy": -1, "spot_sell": -1},
+    ]})
+    rates = FinMindFxSource(fetch).usd_twd(date(2026, 10, 1), date(2026, 10, 31))
+    # 依日期排序、只取期間內；沒有報價（-1）的日子略過
+    assert rates == [
+        FxRate(date(2026, 10, 20), to_usd=32.68, to_twd=32.58),
+        FxRate(date(2026, 10, 21), to_usd=32.535, to_twd=32.435),
+    ]

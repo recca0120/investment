@@ -62,3 +62,13 @@ def test_0050_含息報酬和_yfinance_相差在_2_百分比內(finmind):
 def test_VT_含息報酬和_yfinance_相差在_0_1_百分比內(finmind):
     ours = multiple(finmind.daily("VT", START, END))
     assert ours == pytest.approx(yahoo_multiple("VT"), rel=0.001)
+
+
+def test_美元匯率_每個營業日都有_買價高於賣價且在合理範圍(tmp_path):
+    from invest.finmind import FinMindFxSource
+
+    rates = FinMindFxSource(FinMindHttpFetch(cache_dir=tmp_path)).usd_twd(START, END)
+    assert len(rates) > 2000  # 十年約 2,600 個營業日
+    assert rates == sorted(rates)
+    assert all(r.to_usd > r.to_twd for r in rates)  # 銀行賣出價 > 買入價（匯差）
+    assert all(25 < r.to_twd < 36 for r in rates)  # 2016～2026 美元兌新台幣大約 27～34

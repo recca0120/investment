@@ -4,6 +4,7 @@
   - close：只調整分割（分割前價格 ÷ 分割比例）
   - total_return：再乘上除息調整因子 (1 - 股利 / 除息前一日收盤)，等同股利在除息前一日收盤價再投入
 - 美股：直接使用 Close 與 Adj_Close
+- 匯率：TaiwanExchangeRate 的美元即期匯率（issue #12）
 """
 from __future__ import annotations
 
@@ -16,7 +17,7 @@ from collections.abc import Callable
 from datetime import date
 from pathlib import Path
 
-from invest.prices import PricePoint, UnknownSymbolError
+from invest.prices import FxRate, PricePoint, UnknownSymbolError, currency
 
 Fetch = Callable[[str, str], list[dict]]
 
@@ -28,7 +29,7 @@ class FinMindPriceSource:
         self._fetch = fetch
 
     def daily(self, symbol: str, start: date, end: date) -> list[PricePoint]:
-        points = self._taiwan(symbol) if _is_taiwan(symbol) else self._us(symbol)
+        points = self._taiwan(symbol) if currency(symbol) == "TWD" else self._us(symbol)
         if not points:
             raise UnknownSymbolError(symbol)
         return [p for p in points if start <= p.date <= end]
@@ -58,8 +59,19 @@ class FinMindPriceSource:
         return _adjust(raw, splits, dividends)
 
 
-def _is_taiwan(symbol: str) -> bool:
-    return symbol[:1].isdigit()
+class FinMindFxSource:
+    """美元兌新台幣。買美元用銀行即期賣出價（spot_sell），換回新台幣用即期買入價（spot_buy）。"""
+
+    def __init__(self, fetch: Fetch):
+        self._fetch = fetch
+
+    def usd_twd(self, start: date, end: date) -> list[FxRate]:
+        rates = (
+            FxRate(date.fromisoformat(r["date"]), to_usd=r["spot_sell"], to_twd=r["spot_buy"])
+            for r in self._fetch("TaiwanExchangeRate", "USD")
+            if r.get("spot_sell", 0) > 0 and r.get("spot_buy", 0) > 0  # 沒有報價的日子記為 -1
+        )
+        return sorted(r for r in rates if start <= r.date <= end)
 
 
 def _split_ratio(before: float, after: float) -> float:

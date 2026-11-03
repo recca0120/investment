@@ -6,17 +6,19 @@ from collections.abc import Iterator
 from contextlib import contextmanager
 from dataclasses import dataclass
 
-from invest.finmind import FinMindHttpFetch, FinMindPriceSource
-from invest.prices import PriceSource
+from invest.finmind import FinMindFxSource, FinMindHttpFetch, FinMindPriceSource
+from invest.prices import FxSource, PriceSource
 
 
 @dataclass(frozen=True)
 class Container:
     prices: PriceSource
+    fx: FxSource
 
 
 def build_container() -> Container:
-    return Container(prices=FinMindPriceSource(FinMindHttpFetch(token=os.environ.get("FINMIND_TOKEN"))))
+    fetch = FinMindHttpFetch(token=os.environ.get("FINMIND_TOKEN"))
+    return Container(prices=FinMindPriceSource(fetch), fx=FinMindFxSource(fetch))
 
 
 _override: Container | None = None
