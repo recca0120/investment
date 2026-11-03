@@ -1,8 +1,10 @@
 #!/usr/bin/env python3
 """確認 issue 的每一條驗收條件都有對應的驗收測試（PR 合併前執行）。
 
-測試用 @pytest.mark.criteria("#<issue>-<序號>") 標記對應的驗收條件；
-還停留在範本（含「TODO: 尚未撰寫」）的測試不算數。
+測試標記對應驗收條件的方式：
+  pytest：@pytest.mark.criteria("#<issue>-<序號>")
+  Vitest：測試名稱以 [#<issue>-<序號>] 開頭，例如 test('[#15-1] 側欄列出每一篇文章', …)
+還停留在範本（含「TODO: 尚未撰寫」）或 test.todo 的測試不算數。
 
 用法（在專案根目錄）：
     GH_TOKEN=$(gh auth token -u recca0120) python3 .claude/skills/atdd/scripts/check_criteria.py 5
@@ -14,6 +16,7 @@ from __future__ import annotations
 
 import argparse
 import ast
+import re
 import sys
 from pathlib import Path
 
@@ -31,9 +34,28 @@ def criteria_ids(decorator: ast.expr) -> list[str]:
     return []
 
 
+# test('[#15-1] …')、it.only("[#15-1] …")、test.todo(`[#15-1] …`)、test.each(rows)('[#15-1] …')
+VITEST_CASE = re.compile(r"(?<![\w.])(?:test|it)((?:\.\w+(?:\([^()]*\))?)*)\(\s*(['\"`])\[(#\d+-\d+)\]\s*([^'\"`]*)")
+VITEST_FILES = ("*.test.ts", "*.test.tsx", "*.test.js", "*.test.mjs", "*.spec.ts", "*.spec.js")
+
+
+def scan_vitest(path: Path, found: dict[str, list[tuple[str, bool]]]) -> None:
+    source = path.read_text()
+    matches = list(VITEST_CASE.finditer(source))
+    for i, m in enumerate(matches):
+        # 測試內容：到下一個測試開頭為止（近似值，足以判斷是否還是範本）
+        body = source[m.end(): matches[i + 1].start() if i + 1 < len(matches) else len(source)]
+        is_template = ".todo" in m.group(1) or TEMPLATE_MARK in body
+        found.setdefault(m.group(3), []).append((f"{path}::{m.group(4).strip()}", is_template))
+
+
 def scan_tests(tests_dir: Path) -> dict[str, list[tuple[str, bool]]]:
     """回傳 {驗收條件編號: [(測試名稱, 是否還是範本)]}。"""
     found: dict[str, list[tuple[str, bool]]] = {}
+    for pattern in VITEST_FILES:
+        for path in sorted(tests_dir.rglob(pattern)):
+            if "node_modules" not in path.parts:
+                scan_vitest(path, found)
     for path in sorted(tests_dir.rglob("test_*.py")):
         source = path.read_text()
         for node in ast.walk(ast.parse(source, filename=str(path))):
@@ -51,7 +73,7 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("issue", type=int)
     ap.add_argument("--repo", help="GitHub repo（owner/name），預設為目前目錄的 repo")
     ap.add_argument("--body-file", help="從檔案讀取 issue 內文（離線或測試用）")
-    ap.add_argument("--tests", default="tests", help="測試目錄（預設：tests）")
+    ap.add_argument("--tests", action="append", help="測試目錄，可以指定多次（預設：tests）")
     args = ap.parse_args(argv)
 
     criteria = parse_criteria(load_issue_body(args.issue, args.repo, args.body_file))
@@ -59,7 +81,11 @@ def main(argv: list[str] | None = None) -> int:
         print(f"❌ issue #{args.issue} 沒有找到驗收條件：需要一個標題含「驗收條件」的段落，底下用 - [ ] 列出每一條")
         return 1
 
-    tests = scan_tests(Path(args.tests)) if Path(args.tests).exists() else {}
+    tests: dict[str, list[tuple[str, bool]]] = {}
+    for d in args.tests or ["tests"]:
+        if Path(d).exists():
+            for cid, names in scan_tests(Path(d)).items():
+                tests.setdefault(cid, []).extend(names)
     done = 0
     lines = []
     for n, text in enumerate(criteria, start=1):

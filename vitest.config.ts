@@ -1,0 +1,38 @@
+/// <reference types="vitest/config" />
+// 網站測試設定（Python 系統的測試在 pyproject.toml）
+// - node：驗收（讀 dist/ HTML）、元件（Astro Container API）、rehype 外掛
+// - browser：真實瀏覽器裡檢查版面（手機寬度不能水平捲動）
+import { getViteConfig } from 'astro/config';
+import { playwright } from '@vitest/browser-playwright';
+import { serveDist } from './tests/site/support/serve-dist.ts';
+
+export default getViteConfig({
+  test: {
+    projects: [
+      {
+        extends: true,
+        test: {
+          name: 'node',
+          environment: 'node',
+          include: ['tests/site/**/*.test.ts'],
+          exclude: ['tests/site/browser/**'],
+          setupFiles: ['tests/site/support/setup.ts'],
+        },
+      },
+      {
+        plugins: [serveDist()],
+        test: {
+          name: 'browser',
+          include: ['tests/site/browser/**/*.test.ts'],
+          browser: {
+            enabled: true,
+            headless: true,
+            // 用本機（或 CI runner 上）已安裝的 Chrome，不另外下載瀏覽器
+            provider: playwright({ launchOptions: { channel: 'chrome' } }),
+            instances: [{ browser: 'chromium' }],
+          },
+        },
+      },
+    ],
+  },
+});

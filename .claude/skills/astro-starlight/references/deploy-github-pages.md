@@ -61,14 +61,14 @@ jobs:
 - `concurrency`：避免兩次部署互相覆蓋；`cancel-in-progress: false` 讓正在進行的部署跑完
 - 版本是 2026-11-03 查 GitHub releases 的最新版：`withastro/action v6.1.4`、`actions/checkout v7.0.1`、`actions/deploy-pages v5.0.1`
 
-## 本 repo 實際採用的版本：部署前檢查連結
+## 本 repo 實際採用的版本：部署前跑網站測試
 
-`withastro/action` 把安裝、建置、上傳包在一起，中間沒辦法插入檢查。本 repo 的 `.github/workflows/site.yml` 改成自己寫各個步驟：
+`withastro/action` 把安裝、建置、上傳包在一起，中間沒辦法插入測試。本 repo 的 `.github/workflows/site.yml` 改成自己寫各個步驟：
 
 - `actions/setup-node@v7`（Node 24、npm cache）→ `npm ci` → `npm run build`
-- `python3 scripts/check-site-links.py --base /investment`：站內連結都要存在、不能殘留 `.md` 相對連結
+- `npm test`：Vitest 網站測試（讀 `dist/` 的驗收測試、元件、外掛、Browser Mode 手機版面）。Browser Mode 用 runner 內建的 Google Chrome（`channel: 'chrome'`），不用 `npx playwright install`
 - `actions/upload-pages-artifact@v5`（`path: dist`）→ `actions/deploy-pages@v5`
-- PR 只跑建置和連結檢查，不部署；push 到 main 才部署
+- PR 只跑建置和測試，不部署；push 到 main 才部署
 - 沒有使用 YAML anchor，路徑清單在 push 和 pull_request 各寫一次（保守做法）
 
 ## 部署後驗證
