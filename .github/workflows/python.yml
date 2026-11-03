@@ -1,0 +1,43 @@
+name: Python
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'src/**'
+      - 'tests/**'
+      - 'pyproject.toml'
+      - 'uv.lock'
+      - '.claude/skills/atdd/scripts/**'
+      - '.github/workflows/python.yml'
+  pull_request:
+    paths:
+      - 'src/**'
+      - 'tests/**'
+      - 'pyproject.toml'
+      - 'uv.lock'
+      - '.claude/skills/atdd/scripts/**'
+      - '.github/workflows/python.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: python-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: astral-sh/setup-uv@v10.3.3  # 這個 action 沒有 v10 主版本 tag，必須寫完整版本
+        with:
+          python-version: '3.12'
+          enable-cache: true
+      - run: uv sync --locked
+      - name: Acceptance / UI / unit tests（不含需要連網的契約測試）
+        run: uv run pytest
+      - name: ATDD skill scripts
+        run: uv run pytest .claude/skills/atdd/scripts/tests -p no:cacheprovider --rootdir .claude/skills/atdd/scripts -o addopts=""

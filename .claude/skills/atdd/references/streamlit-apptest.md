@@ -31,6 +31,28 @@ def open_page() -> AppTest:
 
 `AppTest` 和測試在同一個 process 執行，所以 `override()` 設定的值，畫面讀得到。沒有 override 時，畫面會走 `build_container()` 的真實路徑（已實測確認）。
 
+## 畫面的骨架：先擺好輸入元件
+
+畫面的「API」就是輸入元件和它們的 `key`。寫第一個 UI 測試時，骨架要先放好所有輸入元件，只有按下按鈕後的邏輯才 `raise NotImplementedError`：
+
+```python
+symbols = st.text_input("代號", value="0050", key="symbols")
+if st.button("開始回測", key="run"):
+    raise NotImplementedError
+```
+
+骨架是空的（例如整個檔案只有 `raise NotImplementedError`）時，測試會在 `at.text_input(key="symbols")` 出現 `KeyError`，`check_red.py` 會判定為錯誤的紅燈。這是實際踩過的情況。
+
+## 先斷言沒有例外，再讀畫面內容
+
+畫面丟出的例外會被 `AppTest` 接住、放在 `at.exception`，**不會讓測試失敗**。如果直接讀 `at.dataframe[0]`，看到的是 `IndexError`（找不到表格），而不是真正的原因。所以讀取畫面內容之前，先斷言：
+
+```python
+def table(at: AppTest) -> list[dict]:
+    assert not at.exception, at.exception[0].message
+    return at.dataframe[0].value.to_dict("records")
+```
+
 ## 每個輸入元件都要給 `key`
 
 用 `key` 找元件，不要依賴元件在畫面上的順序（`at.text_input[0]`）。順序一改測試就壞，這就是在測實作細節。

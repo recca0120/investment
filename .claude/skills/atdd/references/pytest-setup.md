@@ -79,3 +79,10 @@ uv run pytest --lf                  # 只重跑上次失敗的
 ## 為什麼不用 pytest-bdd（Gherkin）
 
 pytest-bdd 讓非工程師也能讀寫 `.feature` 檔，但需要額外維護 step 綁定這一層。本專案的讀者只有使用者和 Claude，所以改用「中文測試名稱 ＋ Given/When/Then 註解」來達到同樣的可讀性，也比較省事。如果之後有不寫程式的人要參與撰寫規格，再重新評估。
+
+## CI
+
+`.github/workflows/python.yml`：`uv sync --locked` → `uv run pytest` → 跑 ATDD script 的測試。
+
+- `astral-sh/setup-uv` **沒有發布 `v10` 這種主版本 tag**，只有 `v10.3.3` 這種完整版本，寫 `@v10` 會出現 `unable to find version`（2026-11 實際踩過）。用 `gh api repos/astral-sh/setup-uv/git/matching-refs/tags/v10` 查可用的 tag
+- 契約測試需要連網，CI 不跑（`addopts` 預設 `-m 'not contract'`）

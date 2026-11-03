@@ -34,6 +34,14 @@ description: 本 repo（Python 投資輔助系統）的 ATDD 規則：新功能�
    - use case 透過參數接收依賴（`Protocol`），只有最外層從 composition root（`container.py`）取得
    - 測試直接把 Fake 傳給 use case；UI 測試用 `override()` 換掉 container
 
+## 完成前：用真實資料跑一次
+
+假資料只涵蓋你想得到的情況。功能接上真實資料來源後，合併前要**實際跑一次端到端**（例如用 `AppTest` 不 override、直接跑真實 container），看有沒有例外、數字是否合理。
+
+實際案例（#5）：所有測試都通過，但用真實資料一跑就 `ZeroDivisionError`，原因是 006208 早期有 198 天沒有成交，FinMind 收盤價記為 0。發現後先把這個情況寫成測試，再修正。
+
+合理性檢查的例子：追蹤同一個指數的兩檔 ETF（0050、006208），回測結果應該幾乎一樣。
+
 ## 彈性區（依照情況判斷）
 
 - 第一個測試通過之後，實作與其他測試的先後順序
@@ -99,8 +107,8 @@ GH_TOKEN=$(gh auth token -u recca0120) python3 .claude/skills/atdd/scripts/check
 
 驗收條件的編號依照 issue「驗收條件」段落中 checkbox 的順序：`#5-1`、`#5-2`…。新增條件請加在最後，不要調整順序。
 
-Script 本身的測試在 `scripts/tests/`（13 個），修改 script 後執行：
-`uv run --with pytest pytest .claude/skills/atdd/scripts/tests -p no:cacheprovider --rootdir .claude/skills/atdd/scripts`
+Script 本身的測試在 `scripts/tests/`（13 個），CI 也會跑。修改 script 後執行：
+`uv run pytest .claude/skills/atdd/scripts/tests -p no:cacheprovider --rootdir .claude/skills/atdd/scripts -o addopts=""`
 
 ## 資料來源
 
