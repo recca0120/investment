@@ -1,6 +1,6 @@
 ---
 name: atdd
-description: 本 repo（Python 投資輔助系統）的 ATDD 規則：新功能的第一個驗收測試一定要先寫、而且要確認紅燈原因正確；issue 的每條驗收條件在合併前都要有測試。附 pytest／Streamlit AppTest／DI（composition root）寫法與三個檢查 script，2026-11 實測驗證。只要要寫程式、開發功能、修 bug、寫或改測試、處理 issue、建立新模組（回測器、持股追蹤、比較器、資料來源），都一定要先讀。即使使用者只說「幫我做 XX」「把 issue #N 做掉」而沒提到測試也要使用。不適用於 Astro 網站（用 astro-starlight skill）。
+description: 本 repo 的 ATDD 規則，Python 投資輔助系統（pytest）和 Astro 網站（Vitest ＋ Testing Library ＋ msw-fetch-mock）都適用：新功能的第一個驗收測試一定要先寫、而且要確認紅燈原因正確；issue 的每條驗收條件在合併前都要有測試。附 pytest／Streamlit AppTest／DI（composition root）／網站測試分層的寫法與三個檢查 script，2026-11 實測驗證。只要要寫程式、開發功能、修 bug、寫或改測試、處理 issue、建立新模組（回測器、持股追蹤、比較器、資料來源），或改網站元件、外掛、版面、設定，都一定要先讀。即使使用者只說「幫我做 XX」「把 issue #N 做掉」「改一下網站」而沒提到測試也要使用。網站的建站與設定細節另見 astro-starlight skill。
 ---
 
 # ATDD（本專案規則）
@@ -24,7 +24,7 @@ description: 本 repo（Python 投資輔助系統）的 ATDD 規則：新功能�
    - 用 `scripts/check_red.py` 跑**一次**，確認紅燈是因為「功能還沒做」，而不是 import 失敗、簽名不符（TypeError），或測試根本沒驗證到東西
    - 通過後才開始寫實作
 2. **issue 每條驗收條件在合併前都有測試**
-   - 測試用 `@pytest.mark.criteria("#<issue>-<序號>")` 標記
+   - pytest 用 `@pytest.mark.criteria("#<issue>-<序號>")` 標記；Vitest 的測試名稱以 `[#<issue>-<序號>]` 開頭
    - 第二條之後可以先寫實作再補測試
    - PR 前執行 `scripts/check_criteria.py <issue>`，必須全部通過
 3. **不准為了讓測試通過而弱化斷言**
@@ -33,6 +33,8 @@ description: 本 repo（Python 投資輔助系統）的 ATDD 規則：新功能�
 4. **測試不連網，外部依賴透過 DI 替換**
    - use case 透過參數接收依賴（`Protocol`），只有最外層從 composition root（`container.py`）取得
    - 測試直接把 Fake 傳給 use case；UI 測試用 `override()` 換掉 container
+   - 網站：元件的資料和 base 用 props 傳入；HTTP 由 msw-fetch-mock 攔截，沒設定的請求一律失敗
+5. **為既有行為補測試時，故意弄壞一次**：測試一寫就綠，沒有紅燈可確認。暫時把程式改壞（重現 bug），確認測試失敗而且訊息指出問題，再改回來
 
 ## 完成前：用真實資料跑一次
 
@@ -67,7 +69,27 @@ GH_TOKEN=$(gh auth token -u recca0120) python3 .claude/skills/atdd/scripts/check
 
 `check_red.py` 要指定**第一個測試的 node id**：其他測試還是範本時，對整個檔案執行會把範本判定為不合格。
 
-## 測試分層
+## 網站（Astro）
+
+網站功能同樣適用上面的硬規則，工具換成 Vitest。完整寫法、限制與實測結果見 `references/vitest-site.md`。
+
+```bash
+npm run test:site                      # build ＋ 全部網站測試（驗收、元件、外掛、瀏覽器）
+npx vitest run --project node          # 不需要瀏覽器的部分
+python3 .claude/skills/atdd/scripts/check_red.py "tests/site/acceptance/xxx.test.ts::<describe> > [#N-1] <測試名稱>"
+GH_TOKEN=$(gh auth token -u recca0120) python3 .claude/skills/atdd/scripts/check_criteria.py N --tests tests --tests .claude/skills/atdd/scripts/tests
+```
+
+| 層 | 目錄 | 打在哪裡 |
+|---|---|---|
+| 驗收（主幹） | `tests/site/acceptance/` | build 好的 `dist/` HTML，Testing Library `getByRole` 查詢。第一個驗收測試寫在這層 |
+| 元件 | `tests/site/components/` | Astro Container API，資料與 base 用 props 傳入 |
+| 外掛 | `tests/site/plugins/` | rehype 外掛，用 unified 直接跑 |
+| 瀏覽器 | `tests/site/browser/` | Vitest Browser Mode ＋ Chrome：版面、互動 |
+
+驗收和瀏覽器測試讀的是 `dist/`：改了程式要先 build，否則測到的是舊網站。
+
+## 測試分層（Python）
 
 | 層 | 目錄 | 打在哪裡 | 什麼時候寫 |
 |---|---|---|---|
@@ -93,21 +115,22 @@ GH_TOKEN=$(gh auth token -u recca0120) python3 .claude/skills/atdd/scripts/check
 | 選擇 Fake／Stub／Mock、寫契約測試 | `references/test-doubles.md` |
 | 做有畫面的功能 | `references/streamlit-apptest.md` |
 | 第一次建立 Python 專案或調整 pytest 設定 | `references/pytest-setup.md` |
+| 寫網站測試（驗收、元件、外掛、瀏覽器、HTTP） | `references/vitest-site.md` |
 | 想看完整可執行的例子 | `assets/example/`（回測器：驗收、UI、性質測試、container，共 7 個測試） |
 
 ## Scripts
 
-只依賴 Python 標準函式庫（`check_criteria.py` 另外需要 `gh`），在專案根目錄執行。
+只依賴 Python 標準函式庫（`check_criteria.py` 另外需要 `gh`），在專案根目錄執行。`check_red.py`、`check_criteria.py` 同時支援 pytest 與 Vitest（檔名 `*.test.ts` 就用 Vitest）。
 
 | Script | 對應規則 | 結束碼 |
 |---|---|---|
 | `new_feature.py <模組> --entry <函式> [--issue N]` | 1：讓測試先行變成最省事的起手式 | 0 建立成功；1 檔案已存在（不覆蓋） |
-| `check_red.py <測試 node id> [--runner "uv run pytest"]` | 1：紅燈原因正確 | 0 正確的紅燈；1 不是 |
-| `check_criteria.py <issue> [--repo] [--body-file]` | 2：每條驗收條件都有測試 | 0 全部都有；1 有缺漏 |
+| `check_red.py <node id 或 檔案::完整測試名稱> [--runner]` | 1：紅燈原因正確 | 0 正確的紅燈；1 不是 |
+| `check_criteria.py <issue> [--tests 目錄]… [--repo] [--body-file]` | 2：每條驗收條件都有測試 | 0 全部都有；1 有缺漏 |
 
 驗收條件的編號依照 issue「驗收條件」段落中 checkbox 的順序：`#5-1`、`#5-2`…。新增條件請加在最後，不要調整順序。
 
-Script 本身的測試在 `scripts/tests/`（13 個），CI 也會跑。修改 script 後執行：
+Script 本身的測試在 `scripts/tests/`（26 個，Vitest 部分用假的 runner 回放實際的 junit 報告），CI 也會跑。修改 script 後執行：
 `uv run pytest .claude/skills/atdd/scripts/tests -p no:cacheprovider --rootdir .claude/skills/atdd/scripts -o addopts=""`
 
 ## 資料來源
@@ -116,4 +139,4 @@ Script 本身的測試在 `scripts/tests/`（13 個），CI 也會跑。修改 s
 - [How to start with ATDD（PMI Disciplined Agile）](https://www.pmi.org/disciplined-agile/how-to-start-with-acceptance-test-driven-development)
 - [BDD from scratch（Hackernoon）](https://sia.hackernoon.com/behavior-driven-development-from-scratch-99r32fj)
 - [Understanding pytest-bdd（BrowserStack）](https://www.browserstack.com/guide/pytest-bdd)：評估後決定不使用 Gherkin，理由見 `references/pytest-setup.md`
-- 實測：pytest 9.2.0、streamlit 1.66.1、hypothesis 6.170、pytest-socket 0.8.1（2026-11-03）
+- 實測：pytest 9.2.0、streamlit 1.66.1、hypothesis 6.170、pytest-socket 0.8.1；vitest 5.1.0、@testing-library/dom 10.4.2、msw 3.0.3、msw-fetch-mock 0.7.1（2026-11-03）

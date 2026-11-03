@@ -1,13 +1,19 @@
 ---
 // 首頁主視覺：用真實回測結果做成一頁「0050 定期定額存摺」
-// 資料由 scripts/export_passbook.py 產生
-import data from '../data/passbook.json';
+// 資料由 scripts/export_passbook.py 產生；data、base 可以用 props 傳入（測試用）
+import passbook from '../data/passbook.json';
 
+interface Props {
+  data?: typeof passbook;
+  /** 網站 base，例如 '/investment/'（Vitest 裡 BASE_URL 固定是 '/'，所以要能從外面傳） */
+  base?: string;
+}
+const { data = passbook, base: siteBase = import.meta.env.BASE_URL } = Astro.props;
 const n = (v: number) => v.toLocaleString('zh-TW', { maximumFractionDigits: 0 });
 const pct = (v: number) => `${(v * 100).toFixed(1)}%`;
 const rows = data.rows;
 const last = rows[rows.length - 1];
-const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+const base = siteBase.replace(/\/$/, '');
 ---
 
 <figure class="passbook not-content" aria-labelledby="passbook-caption">

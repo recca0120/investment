@@ -30,7 +30,7 @@
   - 開頭一定要有 frontmatter `title`（少了網站 build 會失敗），內文從 `##` 開始，不要再寫 `# 標題`
   - 文件之間用相對路徑連到 `.md`（例如 `../knowledge/01-getting-started.md`），GitHub 和網站都能點
   - `README.md` 不會發佈到網站，只給 GitHub 瀏覽資料夾用
-  - 新增或修改後跑 `npm run build && python3 scripts/check-site-links.py`
+  - 新增或修改後跑 `npm run test:site`（build ＋ 網站測試，會檢查側欄和站內連結）
 - `docs/log/`：**每次討論的紀錄**（原始脈絡）
   - 檔名 `YYYY-MM-DD-主題.md`，同一天多次討論加後綴
   - 記錄：使用者問了什麼、結論、待辦、產生了哪些 issue
@@ -45,7 +45,8 @@
   - FinMind token（選用）放 `.env` 的 `FINMIND_TOKEN`，不 commit
 - 網站：Astro Starlight（見 `docs/decisions/0002-site-framework.md`），https://recca0120.github.io/investment/
   - Astro 專案在 repo 根目錄（`package.json`、`astro.config.mjs`），原始碼在 `site/`，靜態檔在 `public/`
-  - 本機：`npm run dev`；檢查：`npm run build && python3 scripts/check-site-links.py`
+  - 本機：`npm run dev`；測試：`npm run test:site`（build ＋ 測試）或 `npm test`（只跑測試，要先 build）
+  - 網站測試在 `tests/site/`（Vitest ＋ Testing Library ＋ msw-fetch-mock），寫法見 `atdd` skill；需要 Node 22.12 以上
   - push 到 main 後由 `.github/workflows/site.yml` 自動部署；PR 只建置與檢查連結
   - 視覺設計見 `docs/decisions/0004-site-design.md`；配色只改 `site/styles/theme.css` 的變數，不要在元件裡寫死顏色
   - 改網站外觀時用 `frontend-design` skill，並實際截圖檢查日間、夜間、手機（方法見 astro-starlight skill）
@@ -102,14 +103,14 @@
 ## 系統開發規則（之後會補充）
 
 - 語言：Python 3.12，套件管理用 `uv`；CI：`.github/workflows/python.yml`
-- 開發流程依 `atdd` skill（repo 版）：第一個驗收測試先寫並用 check_red.py 確認紅燈；PR 前用 check_criteria.py 確認每條驗收條件都有測試
+- 開發流程依 `atdd` skill（repo 版，Python 系統與網站都適用）：第一個驗收測試先寫並用 check_red.py 確認紅燈；PR 前用 check_criteria.py 確認每條驗收條件都有測試
 - 資料來源：FinMind（台股自己用原始價＋股利＋分割計算還原價；美股用 Adj_Close），yfinance 只做交叉驗證（見 `docs/decisions/0003-data-source.md`）
 
 ## 專案 Skills
 
 - 位置：`.claude/skills/`（跟著 repo 版控，只在本專案生效）
 - `astro-starlight`：Astro 7 ＋ Starlight 建站、設定、部署；動到網站相關檔案前先讀
-- `atdd`：第一個驗收測試先寫（設計 API）＋確認紅燈、每條驗收條件都要有測試；附 3 個檢查 script（new_feature／check_red／check_criteria）；寫任何程式前先讀
+- `atdd`：第一個驗收測試先寫（設計 API）＋確認紅燈、每條驗收條件都要有測試；pytest 與 Vitest 都適用；附 3 個檢查 script（new_feature／check_red／check_criteria）；寫任何程式（含網站）前先讀
 - 共用 skill `atdd-principles`（`~/.claude/skills/`）是通用原則；和 repo 版衝突時以 repo 版為準
 - 新增或修改 skill 時用內建的 `skill-creator`；技術類 skill 要先上網查最新版並實測驗證
 

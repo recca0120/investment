@@ -11,7 +11,8 @@ on:
       - 'package.json'
       - 'package-lock.json'
       - 'tsconfig.json'
-      - 'scripts/check-site-links.py'
+      - 'tests/site/**'
+      - 'vitest.config.ts'
       - '.github/workflows/site.yml'
   pull_request:
     paths:
@@ -22,7 +23,8 @@ on:
       - 'package.json'
       - 'package-lock.json'
       - 'tsconfig.json'
-      - 'scripts/check-site-links.py'
+      - 'tests/site/**'
+      - 'vitest.config.ts'
       - '.github/workflows/site.yml'
   workflow_dispatch:
 
@@ -44,8 +46,9 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npm run build
-      - name: Check internal links
-        run: python3 scripts/check-site-links.py --base /investment
+      # 驗收（dist/ HTML）、元件、外掛、手機版面（Browser Mode，用 runner 內建的 Chrome）
+      - name: Test site
+        run: npm test
       - uses: actions/upload-pages-artifact@v5
         if: github.event_name != 'pull_request'
         with:

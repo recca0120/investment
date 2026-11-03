@@ -4,6 +4,8 @@ import sys
 import textwrap
 from pathlib import Path
 
+import pytest
+
 SCRIPTS = Path(__file__).parents[1]
 
 ISSUE_BODY = textwrap.dedent("""\
@@ -121,3 +123,74 @@ def test_check_criteria_issue_沒有驗收條件時提醒(tmp_path):
     r = run("check_criteria.py", "9", "--body-file", str(f), cwd=tmp_path)
     assert r.returncode == 1
     assert "沒有找到驗收條件" in r.stdout
+
+
+@pytest.mark.criteria("#15-10")
+def test_check_criteria_也辨識_Vitest_測試名稱開頭的編號(tmp_path):
+    write_test(tmp_path, """
+        import pytest
+
+        @pytest.mark.criteria("#5-1")
+        def test_計算總投入():
+            assert True
+    """)
+    ts = tmp_path / "tests/site/backtest.test.ts"
+    ts.parent.mkdir(parents=True)
+    ts.write_text(textwrap.dedent("""\
+        import { describe, expect, it, test } from 'vitest';
+
+        describe('回測頁', () => {
+          test('[#5-2] 顯示最大跌幅', () => {
+            expect(1).toBe(1);
+          });
+          it.todo("[#5-3] 查不到代號時回報錯誤");
+        });
+    """))
+    r = run("check_criteria.py", "5", "--body-file", issue_file(tmp_path), cwd=tmp_path)
+    assert r.returncode == 1
+    assert "2/3" in r.stdout
+    assert "backtest.test.ts" in r.stdout
+    assert "#5-3" in r.stdout and "範本" in r.stdout  # test.todo 還不算數
+
+
+def test_check_criteria_Vitest_測試內容還是範本時不算數(tmp_path):
+    ts = tmp_path / "tests/site/backtest.test.ts"
+    ts.parent.mkdir(parents=True)
+    ts.write_text(textwrap.dedent("""\
+        import { expect, test } from 'vitest';
+        test('[#5-1] 計算總投入', () => {
+          throw new Error('TODO: 尚未撰寫此驗收條件的測試');
+        });
+        test('[#5-2] 顯示最大跌幅', () => expect(1).toBe(1));
+        test.each(['0050', 'VT'])(`[#5-3] %s 查不到代號`, async (code) => {
+          expect(code).toBeTruthy();
+        });
+    """))
+    r = run("check_criteria.py", "5", "--body-file", issue_file(tmp_path), cwd=tmp_path)
+    assert r.returncode == 1
+    assert "2/3" in r.stdout
+    assert "#5-1" in r.stdout and "範本" in r.stdout
+
+
+def test_check_criteria_可以掃描多個測試目錄(tmp_path):
+    write_test(tmp_path, """
+        import pytest
+
+        @pytest.mark.criteria("#5-1")
+        def test_計算總投入():
+            assert True
+    """)
+    other = tmp_path / "skill/tests/test_more.py"
+    other.parent.mkdir(parents=True)
+    other.write_text(textwrap.dedent("""\
+        import pytest
+
+        @pytest.mark.criteria("#5-2")
+        @pytest.mark.criteria("#5-3")
+        def test_其他():
+            assert True
+    """))
+    r = run("check_criteria.py", "5", "--body-file", issue_file(tmp_path),
+            "--tests", "tests", "--tests", "skill/tests", cwd=tmp_path)
+    assert r.returncode == 0, r.stdout + r.stderr
+    assert "3/3" in r.stdout
