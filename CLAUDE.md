@@ -16,7 +16,9 @@
 - 不要執行 `gh auth switch`（會影響使用者其他專案）
 - `git push` 走 SSH，已是 recca0120 身分，可直接使用
 - GitHub Projects（board）需要 `project` scope；若權限不足，請使用者執行：
-  - `! gh auth refresh -h github.com -u recca0120 -s project,read:project`
+  - `! gh auth switch -u recca0120 && gh auth refresh -h github.com -s project,read:project`
+  - `gh auth refresh` 沒有 `-u` 參數，只能對 active 帳號操作，所以要先 switch
+  - 完成後提醒使用者自行切回原本的帳號；不要在 repo 中寫出其他帳號名稱
 
 ## 內容放置規則：什麼東西放哪裡
 
