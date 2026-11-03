@@ -30,6 +30,12 @@ export default getViteConfig({
             // 用本機（或 CI runner 上）已安裝的 Chrome，不另外下載瀏覽器
             provider: playwright({ launchOptions: { channel: 'chrome' } }),
             instances: [{ browser: 'chromium' }],
+            commands: {
+              // 模擬作業系統的「減少動態效果」，iframe 裡的頁面也會套用
+              setReducedMotion: async (ctx, reduce: boolean) => {
+                await ctx.page.emulateMedia({ reducedMotion: reduce ? 'reduce' : 'no-preference' });
+              },
+            },
           },
         },
       },

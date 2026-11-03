@@ -56,6 +56,8 @@ npm run build && python3 .claude/skills/atdd/scripts/check_red.py "tests/site/ac
 git checkout astro.config.mjs && npm run build
 ```
 
+**弄壞時注意 build 有沒有成功**：用 `npm run build && npx vitest …` 串起來時，改壞的程式如果讓 build 失敗（例如在 script 頂層寫 `return`），後面的測試根本沒跑，輸出是空的，很容易誤以為「測試沒抓到」或「測試過了」。#19 實際踩過。
+
 #15 實際做過的：側欄目錄改錯、文章加一個壞連結、外掛拿掉錨點、表格加 `min-width: 600px`、關掉 msw-fetch-mock，五個都讓對應測試失敗。**弄壞後要重新 build**，驗收和瀏覽器測試讀的是 `dist/`。
 
 ## 驗收測試：讀 dist/
@@ -120,6 +122,26 @@ test: {
 - 頁面清單用 `import.meta.glob('/docs/knowledge/[0-9]*.md')` 產生，新增文章自動納入
 - GitHub Actions 的 ubuntu runner 已安裝 Google Chrome，`channel: 'chrome'` 可以直接用
 - 截圖人工檢查（日間、夜間、手機）仍然要做：測試只檢查寫得出條件的東西
+
+### 動畫與「減少動態效果」
+
+在 `vitest.config.ts` 的 browser 設定加自訂 command，用 Playwright 模擬作業系統設定，iframe 裡的頁面也會套用：
+
+```ts
+commands: {
+  setReducedMotion: async (ctx, reduce: boolean) => {
+    await ctx.page.emulateMedia({ reducedMotion: reduce ? 'reduce' : 'no-preference' });
+  },
+},
+```
+
+```ts
+import { commands } from 'vitest/browser';
+afterEach(() => commands.setReducedMotion(false));   // 一定要還原，否則影響後面的測試
+```
+
+- **不要等 iframe 的 load 再檢查動畫的起始狀態**：平行跑測試時，外部字型樣式表會拖慢 load，動畫早就播完了（#19 實際遇到：單獨跑會過，全部一起跑就失敗）。改成元素一出現就用 `MutationObserver` 記錄每一次變化，最後檢查「經過了哪些值」
+- 檢查動畫有沒有套用：`getComputedStyle(el).animationName`；iframe 裡的元素要用 `el.ownerDocument.defaultView.getComputedStyle`
 
 ## HTTP：msw-fetch-mock
 

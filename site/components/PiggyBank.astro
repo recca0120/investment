@@ -1,0 +1,149 @@
+---
+// 首頁主視覺：小豬撲滿（#19）
+// 每一筆年度紀錄是一枚硬幣：硬幣依序掉進撲滿，句子裡的金額跟著換成那一年的真實數字。
+// 不執行 JS、或開啟「減少動態效果」時，直接顯示最終狀態（HTML 裡就是最終數字）。
+// 資料由 scripts/export_passbook.py 產生；data、base 可以用 props 傳入（測試用）
+import passbook from '../data/passbook.json';
+
+interface Props {
+  data?: typeof passbook;
+  /** 網站 base，例如 '/investment/'（Vitest 裡 BASE_URL 固定是 '/'，所以要能從外面傳） */
+  base?: string;
+}
+const { data = passbook, base: siteBase = import.meta.env.BASE_URL } = Astro.props;
+const n = (v: number) => v.toLocaleString('zh-TW', { maximumFractionDigits: 0 });
+const pct = (v: number) => `${(v * 100).toFixed(1)}%`;
+const rows = data.rows;
+const last = rows[rows.length - 1];
+const base = siteBase.replace(/\/$/, '');
+
+// 動畫節奏：第一枚在 START 毫秒開始掉，之後每 STEP 毫秒一枚；CSS 和 script 共用這兩個值
+const START = 500;
+const STEP = 260;
+const steps = rows.map((r) => [Math.round(r.invested / data.monthly), r.invested, r.value]);
+
+const cell = 'h-9.5 border-b border-rule px-1.5 whitespace-nowrap';
+const deposit = 'max-xs:hidden';
+---
+
+<figure
+  class="piggy not-content m-0 rounded-3xl border border-rule bg-cloud px-6 pt-5 pb-5 text-ink tabular-nums max-xs:px-4"
+  aria-labelledby="piggy-caption"
+  data-piggy={JSON.stringify(steps)}
+  data-start={START}
+  data-step={STEP}
+>
+  <figcaption id="piggy-caption" class="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
+    <span class="text-lg font-black">{data.symbol} 定期定額撲滿</span>
+    <span class="text-sm text-muted">{data.start.slice(0, 4)} 年開始，每年一枚硬幣</span>
+  </figcaption>
+
+  <svg
+    class="mx-auto mt-2 block w-full max-w-72 overflow-visible"
+    viewBox="0 30 260 170"
+    role="img"
+    aria-label="小豬撲滿：硬幣一枚一枚掉進投幣孔"
+  >
+    <g class="fill-pig stroke-pig-ink stroke-3" stroke-linejoin="round" stroke-linecap="round">
+      <path class="fill-none" d="M42 118 c-16 -4 -18 -24 -5 -26 c11 -2 11 13 0 13" />
+      <rect x="78" y="158" width="22" height="34" rx="9" />
+      <rect x="108" y="162" width="22" height="32" rx="9" />
+      <rect x="150" y="162" width="22" height="32" rx="9" />
+      <rect x="178" y="158" width="22" height="34" rx="9" />
+      <path d="M166 82 C162 56 172 38 186 40 C198 42 205 60 202 84 Z" />
+      <ellipse cx="130" cy="124" rx="92" ry="64" />
+      <ellipse cx="220" cy="128" rx="17" ry="21" />
+    </g>
+    <path class="fill-cloud opacity-40" d="M66 96 q14 -26 46 -32 q-30 16 -38 40 z" />
+    <path class="fill-pig-ink opacity-30" d="M175 70 C174 56 179 48 186 49 C193 50 196 60 194 70 Z" />
+    <rect class="fill-pig-ink" x="108" y="64" width="44" height="8" rx="4" />
+    <circle class="fill-pig-ink" cx="188" cy="104" r="6" />
+    <circle class="fill-pig-ink opacity-25" cx="196" cy="134" r="9" />
+    <ellipse class="fill-pig-ink" cx="214" cy="128" rx="3" ry="5" />
+    <ellipse class="fill-pig-ink" cx="226" cy="128" rx="3" ry="5" />
+    {
+      rows.map((_, i) => (
+        <g
+          data-coin
+          class="opacity-0 motion-safe:animate-coin-drop"
+          style={`animation-delay: ${START + i * STEP}ms`}
+        >
+          <circle class="fill-coin stroke-coin-ink stroke-2" cx="130" cy="48" r="13" />
+          <circle class="fill-none stroke-coin-ink stroke-1 opacity-40" cx="130" cy="48" r="7.5" />
+        </g>
+      ))
+    }
+  </svg>
+
+  <p class="mt-3 mb-0 text-center text-lg leading-relaxed text-balance">
+    {/* 每個子句是一個 inline-block：換行只會發生在子句之間，不會把「撲滿」拆開 */}
+    <span class="inline-block">每月丟 <b>{n(data.monthly)}</b> 元進撲滿，</span><span class="inline-block">存了 <b data-piggy-months>{n(data.months)}</b> 個月，</span><span class="inline-block">放進 <b data-piggy-invested>{n(last.invested)}</b> 元，</span><span class="inline-block">現在變成 <b data-piggy-value class="text-2xl font-black">{n(last.value)}</b> 元</span>
+  </p>
+  <p class="mt-2 mb-0 text-center text-xs leading-relaxed text-muted">
+    股利自動再投入，年化報酬 {pct(data.annualized)}，期間最大跌幅 {pct(data.maxDrawdown)}。歷史報酬不代表未來。<a class="whitespace-nowrap text-link" href={`${base}/knowledge/07-dca-backtest-2016-2026/`}>看完整回測</a>
+  </p>
+
+  <details class="group mt-4 rounded-2xl bg-sky px-4 py-2.5">
+    <summary class="cursor-pointer font-bold text-heading">看每一年的存入紀錄</summary>
+    <table class="mt-2 mb-1 table w-full border-collapse text-sm">
+      <thead class="text-muted">
+        <tr>
+          <th scope="col" class:list={[cell, 'text-left font-normal']}>日期</th>
+          <th scope="col" class:list={[cell, deposit, 'text-right font-normal']}>存入</th>
+          <th scope="col" class:list={[cell, 'text-right font-normal']}>累計存入</th>
+          <th scope="col" class:list={[cell, 'text-right font-normal']}>結餘（市值）</th>
+        </tr>
+      </thead>
+      <tbody>
+        {
+          rows.slice(0, -1).map((r) => (
+            <tr>
+              <td class:list={[cell, 'text-left']}>{r.date}</td>
+              <td class:list={[cell, deposit, 'text-right']}>{n(r.deposit ?? 0)}</td>
+              <td class:list={[cell, 'text-right']}>{n(r.invested)}</td>
+              <td class:list={[cell, 'text-right']}>{n(r.value)}</td>
+            </tr>
+          ))
+        }
+        <tr class="font-bold [&>td]:border-b-0">
+          <td class:list={[cell, 'text-left']}>{last.date}</td>
+          <td class:list={[cell, deposit, 'text-right']}>—</td>
+          <td class:list={[cell, 'text-right']}>{n(last.invested)}</td>
+          <td class:list={[cell, 'py-2 text-right']}>
+            {n(last.value)}
+            <span
+              class="ml-1.5 inline-grid size-11 place-items-center rounded-full bg-coin align-middle text-xs leading-none font-black text-coin-ink shadow-coin"
+              aria-label="金幣：含息再投入"
+            >
+              <span>含息<br />再投</span>
+            </span>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </details>
+</figure>
+
+<script>
+  // 金額跟著硬幣跳：每枚硬幣落進投幣孔時，換成那一年的數字
+  const fmt = (v: number) => v.toLocaleString('zh-TW', { maximumFractionDigits: 0 });
+  const LAND = 0.7 * 900; // coin-drop 動畫在 70% 時落到投幣孔（global.css）
+
+  if (!matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    for (const fig of document.querySelectorAll<HTMLElement>('[data-piggy]')) {
+      const steps: [number, number, number][] = JSON.parse(fig.dataset.piggy!);
+      const start = Number(fig.dataset.start);
+      const step = Number(fig.dataset.step);
+      const [months, invested, value] = ['months', 'invested', 'value'].map(
+        (k) => fig.querySelector(`[data-piggy-${k}]`)!,
+      );
+      const show = ([m, i, v]: [number, number, number]) => {
+        months.textContent = fmt(m);
+        invested.textContent = fmt(i);
+        value.textContent = fmt(v);
+      };
+      show([0, 0, 0]);
+      steps.forEach((s, k) => setTimeout(() => show(s), start + k * step + LAND));
+    }
+  }
+</script>

@@ -3,6 +3,7 @@ title: 0004 網站視覺設計：存摺帳本
 ---
 
 - 日期：2026-11-03
+- 狀態：配色與首頁主視覺已被 [0005 小豬撲滿](./0005-site-style-piggy-bank.md) 取代；下方「Tailwind」一節的分工仍然有效
 
 ## 背景
 
@@ -51,6 +52,6 @@ title: 0004 網站視覺設計：存摺帳本
 
 | 檔案 | 放什麼 |
 |---|---|
-| `site/styles/theme.css` | 配色原始值（日間／夜間各一組 `--pb-*`）、Starlight 變數 `--sl-color-*`、文章表格與側欄的調整 |
-| `site/styles/global.css` | Tailwind 入口；把配色包成語意 token（`paper`、`ink`、`seal`、`rule`、`muted`、`link`…）、字級、字體、印章動畫 |
+| `site/styles/theme.css` | 配色原始值（日間／夜間各一組 `--c-*`）、Starlight 變數 `--sl-color-*`、文章表格與側欄的調整 |
+| `site/styles/global.css` | Tailwind 入口；把配色包成語意 token（0005 之後是 `sky`、`cloud`、`ink`、`coin`、`pig`、`rule`、`muted`、`link`…）、字級、字體、印章動畫 |
 | 元件、`docs/*.mdx` | 只用 utility class 和 token，**不能寫死顏色**（`tests/site/acceptance/no-hardcoded-colors.test.ts` 會檢查） |

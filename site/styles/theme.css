@@ -1,70 +1,75 @@
 /*
  * 配色原始值與 Starlight 樣式調整（由 global.css 載入；元件請用 global.css 的語意 token）
- * 設計方向：存摺帳本（見 docs/decisions/0004-site-design.md）
- * - 紙：存摺的灰綠色，不用米色
- * - 墨：深青墨色文字；連結用藍墨水
- * - 印章紅：全站唯一的強調色，只用在首頁印章與極少數重點
+ * 設計方向：小豬撲滿（見 docs/decisions/0005-site-style-piggy-bank.md）
+ * - 天空：淡天空藍的底，夜間是夜空
+ * - 金幣：主要強調色，用在硬幣、編號、引言線這些「存錢」的地方
+ * - 小豬粉：只用在撲滿本身
  */
 
 /* 配色變數不放進圖層：要蓋過 starlight-tailwind 在 utilities 圖層裡依 Tailwind 灰階產生的 --sl-color-* */
 
-/* 夜間版（Starlight 預設為深色） */
+/* 夜間版（Starlight 預設為深色）：夜空 */
 :root {
-  --pb-paper: #172124;
-  --pb-paper-raised: #1d292d;
-  --pb-rule: #2f4045;
-  --pb-ink: #e6eeeb;
-  --pb-seal: #e0605a;
-  --pb-seal-ink: #1b0f0e;
+  --c-sky: #121b26;
+  --c-cloud: #1a2533;
+  --c-rule: #2b3a4d;
+  --c-ink: #e8eef5;
+  --c-coin: #f5c451;
+  --c-coin-ink: #2e2100;
+  --c-pig: #e98aa6;
+  --c-pig-ink: #8a3b57;
 
-  --sl-color-white: #f4f8f6;
-  --sl-color-gray-1: #e1eae6;
-  --sl-color-gray-2: #c2d0cb;
-  --sl-color-gray-3: #8fa3a9;
-  --sl-color-gray-4: #5a6d73;
-  --sl-color-gray-5: #2f4045;
-  --sl-color-gray-6: #1d292d;
-  --sl-color-black: #172124;
+  --sl-color-white: #f1f5fa;
+  --sl-color-gray-1: #e1e9f2;
+  --sl-color-gray-2: #c3d0de;
+  --sl-color-gray-3: #9fb0c4;
+  --sl-color-gray-4: #66788e;
+  --sl-color-gray-5: #2b3a4d;
+  --sl-color-gray-6: #1a2533;
+  --sl-color-black: #121b26;
 
-  --sl-color-accent-low: #1f3a4c;
-  --sl-color-accent: #8db6d3;
-  --sl-color-accent-high: #c6dceb;
+  --sl-color-accent-low: #1c3550;
+  --sl-color-accent: #8ec1f2;
+  --sl-color-accent-high: #c8e1fa;
+  --sl-color-text-accent: #a9d0f6;
 
-  --sl-color-bg-nav: var(--pb-paper);
-  --sl-color-bg-sidebar: var(--pb-paper);
-  --sl-color-hairline: var(--pb-rule);
-  --sl-color-hairline-light: var(--pb-rule);
+  --sl-color-bg-nav: var(--c-sky);
+  --sl-color-bg-sidebar: var(--c-sky);
+  --sl-color-hairline: var(--c-rule);
+  --sl-color-hairline-light: var(--c-rule);
 }
 
-/* 日間版：存摺 */
+/* 日間版：天空 */
 :root[data-theme='light'] {
-  --pb-paper: #e9efec;
-  --pb-paper-raised: #f3f7f5;
-  --pb-rule: #c5d3cd;
-  --pb-ink: #1f2a2e;
-  --pb-seal: #b3261e;
-  --pb-seal-ink: #fff6f4;
+  --c-sky: #eaf2fa;
+  --c-cloud: #f8fbfe;
+  --c-rule: #c9d8e8;
+  --c-ink: #1e2a3a;
+  --c-coin: #f2b632;
+  --c-coin-ink: #3d2a00;
+  --c-pig: #f29cb4;
+  --c-pig-ink: #b5577a;
 
-  --sl-color-white: #1f2a2e;
-  --sl-color-gray-1: #24323a;
-  --sl-color-gray-2: #33444c;
-  --sl-color-gray-3: #52646b;
-  --sl-color-gray-4: #7f9198;
-  --sl-color-gray-5: #b9c8c2;
-  --sl-color-gray-6: #d6e1dc;
-  --sl-color-gray-7: #e1e9e5;
-  --sl-color-black: #e9efec;
+  --sl-color-white: #1e2a3a;
+  --sl-color-gray-1: #263548;
+  --sl-color-gray-2: #34465c;
+  --sl-color-gray-3: #4e5f73;
+  --sl-color-gray-4: #8193a8;
+  --sl-color-gray-5: #b9c9da;
+  --sl-color-gray-6: #d6e2ef;
+  --sl-color-gray-7: #e2ecf6;
+  --sl-color-black: #eaf2fa;
 
-  --sl-color-accent-low: #d3e1ea;
-  --sl-color-accent: #2f5d7c;
-  --sl-color-accent-high: #1e3f56;
-  --sl-color-text-accent: #2f5d7c;
+  --sl-color-accent-low: #d4e5f7;
+  --sl-color-accent: #1f64a8;
+  --sl-color-accent-high: #164c82;
+  --sl-color-text-accent: #1f64a8;
 
-  --sl-color-bg-nav: var(--pb-paper);
-  --sl-color-bg-sidebar: var(--pb-paper);
-  --sl-color-bg-inline-code: #dbe5e0;
-  --sl-color-hairline: var(--pb-rule);
-  --sl-color-hairline-light: var(--pb-rule);
+  --sl-color-bg-nav: var(--c-sky);
+  --sl-color-bg-sidebar: var(--c-sky);
+  --sl-color-bg-inline-code: #dce8f4;
+  --sl-color-hairline: var(--c-rule);
+  --sl-color-hairline-light: var(--c-rule);
 }
 
 /* Starlight 頁面的樣式調整：放在 components 圖層，蓋過 starlight 圖層，utility class 仍然可以覆寫 */
@@ -80,14 +85,14 @@
     letter-spacing: 0;
   }
 
-  /* 表格：像存摺的帳務列，數字等寬、右對齊（.num 由 rehype-num-cells 加上） */
+  /* 表格：數字等寬、右對齊（.num 由 rehype-num-cells 加上） */
   .sl-markdown-content table:not(:where(.not-content *)) {
     font-variant-numeric: tabular-nums;
     border-collapse: collapse;
   }
   .sl-markdown-content :is(th, td):not(:where(.not-content *)) {
     border: 0;
-    border-bottom: 1px solid var(--pb-rule);
+    border-bottom: 1px solid var(--c-rule);
     padding: 0.55em 0.9em;
   }
   .sl-markdown-content th:not(:where(.not-content *)) {
@@ -106,17 +111,23 @@
 
   /* 引言（每篇開頭的日期與免責說明）：像存摺上的附註 */
   .sl-markdown-content blockquote {
-    border-inline-start: 3px solid var(--pb-rule);
+    border-inline-start: 4px solid var(--c-coin);
+    border-radius: 0 0.75rem 0.75rem 0;
+    background: var(--c-cloud);
+    padding: 0.6rem 1rem;
     color: var(--sl-color-gray-3);
     font-size: var(--sl-text-sm);
   }
 
-  /* 側欄目前頁面：不用整塊色塊，改用左側墨線 */
+  /* 側欄目前頁面：圓角的淡色底，像貼了一張便條 */
   .sidebar-content a[aria-current='page'] {
-    background: transparent;
+    background: var(--sl-color-accent-low);
     color: var(--sl-color-white);
     font-weight: 700;
-    box-shadow: inset 3px 0 0 var(--sl-color-accent);
+    border-radius: 0.6rem;
+  }
+  .sidebar-content a {
+    border-radius: 0.6rem;
   }
 
   /* 首頁：splash 版面會自動顯示頁面標題，首頁自己有大標題，隱藏重複的那一個 */

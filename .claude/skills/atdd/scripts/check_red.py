@@ -111,8 +111,12 @@ def main(argv: list[str] | None = None) -> int:
         if not cases:
             print("❌ 不是正確的紅燈：沒有執行到任何測試，請確認檔案路徑與測試名稱")
             return 1
+        # Vitest 用 -t 篩選時，同檔案沒被指定的測試會記成 skipped，不列入判斷
+        wanted = {t.partition("::")[2] for t in args.targets} - {""} if vitest else set()
         for tc in cases:
             name = f"{tc.get('classname')}::{tc.get('name')}"
+            if wanted and tc.get("name") not in wanted and tc.get("name") != tc.get("classname"):
+                continue
             # 只看結果元素：<system-out>／<system-err> 可能排在 <failure> 前面
             result = next((c for c in tc if c.tag in ("failure", "error", "skipped")), None)
             if result is None:
@@ -129,6 +133,9 @@ def main(argv: list[str] | None = None) -> int:
                 ok, why = classify_vitest(result.get("type") or "", message) if vitest else classify_pytest(message)
                 (good if ok else bad).append(f"{name}：{why}")
 
+    if not good and not bad:
+        print("❌ 不是正確的紅燈：沒有執行到指定的測試，請確認測試名稱（describe 與 test 名稱用 \" > \" 連接）")
+        return 1
     if bad:
         print("❌ 不是正確的紅燈：")
         print("\n".join(f"   - {line}" for line in bad))

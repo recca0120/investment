@@ -5,20 +5,20 @@ template: splash
 ---
 
 import { LinkButton } from '@astrojs/starlight/components';
-import Passbook from '@site/components/Passbook.astro';
+import PiggyBank from '@site/components/PiggyBank.astro';
 import ReadingOrder from '@site/components/ReadingOrder.astro';
 
-<div class="home-hero grid items-start gap-10 pt-8 pb-4 lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)] lg:gap-14">
+<div class="home-hero grid items-center gap-10 pt-8 pb-4 lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)] lg:gap-14">
   <div class="home-intro">
     <h1 class="m-0 text-display font-black text-heading">投資學習筆記</h1>
     {/* 內文要和 <p> 寫在同一行：換行的話 MDX 會在裡面再包一層 <p>，class 就套不到文字上 */}
-    <p class="max-w-intro text-lg text-soft">股市新手從零開始的學習紀錄：整理過的知識、做過的決定，和自己寫的回測工具。內容是學習筆記，不構成投資建議。</p>
+    <p class="max-w-intro text-lg text-soft">股市新手從零開始的學習紀錄。每個月丟一點錢進撲滿，看看十年後會變成多少；也整理了投資知識、做過的決定，和自己寫的回測工具。內容是學習筆記，不構成投資建議。</p>
     <div class="mt-6 flex flex-wrap gap-x-5 gap-y-3">
       <LinkButton href="/investment/knowledge/01-getting-started/">從新手入門讀起</LinkButton>
       <LinkButton href="https://github.com/recca0120/investment" variant="minimal">GitHub 原始碼</LinkButton>
     </div>
   </div>
-  <Passbook />
+  <PiggyBank />
 </div>
 
 <ReadingOrder />
