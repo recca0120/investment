@@ -63,7 +63,8 @@
 
 ## Project Board
 
-- 用一個 GitHub Project（名稱：`Investment`）管理所有 issue
+- 用一個 GitHub Project（名稱：`Investment`，編號 `3`，https://github.com/users/recca0120/projects/3）管理所有 issue
+- 加入 board：`gh project item-add 3 --owner recca0120 --url <issue網址>`，再用 `gh project item-edit` 設定 Status
 - 欄位：`Backlog` → `Todo` → `In Progress` → `Done`
 - 新開的 issue 一律加入 board，預設放 `Backlog`
 

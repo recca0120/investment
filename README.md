@@ -12,7 +12,7 @@
 | [`docs/log/`](docs/log/) | 每次討論的紀錄 |
 | [`docs/decisions/`](docs/decisions/) | 已做出的決定 |
 | [Issues](https://github.com/recca0120/investment/issues) | 待研究、待決定、待開發事項 |
-| [Projects](https://github.com/users/recca0120/projects) | 任務看板 |
+| [Projects](https://github.com/users/recca0120/projects/3) | 任務看板 |
 
 ## 知識文章
 
