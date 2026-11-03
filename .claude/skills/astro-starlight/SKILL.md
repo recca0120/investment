@@ -1,6 +1,6 @@
 ---
 name: astro-starlight
-description: Astro 7 ＋ Starlight 0.42 文件網站指南（2026-11 實測驗證）。用 Starlight 建立或修改文件網站、設定 astro.config／content.config、側欄、繁體中文介面、把 repo 的 docs/ 當內容來源、處理 .md 相對連結、部署到 GitHub Pages、在 MDX 嵌入元件或互動圖表時，一定要先讀這個 skill。只要使用者提到「網站」「Starlight」「Astro」「GitHub Pages」「把 docs 發佈出去」「網站側欄／搜尋／中文」，或要改 site/、astro.config.mjs、.github/workflows/deploy.yml，即使沒有明講 Starlight 也要使用。不適用於 Python 投資系統（Streamlit）本身。
+description: Astro 7 ＋ Starlight 0.42 文件網站指南（2026-11 實測驗證）。用 Starlight 建立或修改文件網站、設定 astro.config／content.config、側欄、繁體中文介面、把 repo 的 docs/ 當內容來源、處理 .md 相對連結、部署到 GitHub Pages、在 MDX 嵌入元件或互動圖表、用 Tailwind 調整網站樣式時，一定要先讀這個 skill。只要使用者提到「網站」「Starlight」「Astro」「GitHub Pages」「把 docs 發佈出去」「網站側欄／搜尋／中文」，或要改 site/、astro.config.mjs、.github/workflows/deploy.yml，即使沒有明講 Starlight 也要使用。不適用於 Python 投資系統（Streamlit）本身。
 ---
 
 # Astro 7 ＋ Starlight 文件網站
@@ -112,6 +112,7 @@ investment/
 
 - `references/config.md`：完整的設定檔範例（astro.config、content.config、tsconfig、package.json），開始建站或改設定時讀
 - `references/deploy-github-pages.md`：GitHub Actions workflow 與 Pages 設定，要部署或部署出錯時讀
+- `references/tailwind.md`：Tailwind v4 與 Starlight 的圖層、日夜模式 token、MDX 的 `<p>` 陷阱，要改樣式時讀
 - `references/mdx-components.md`：Starlight 內建元件、自訂 Astro 元件、互動元件（React island）、未來嵌入回測圖表的做法，要在頁面放元件時讀
 - `assets/rehype-md-links.mjs`：已測試過的相對連結改寫 plugin，直接複製使用
 

@@ -41,8 +41,16 @@ title: 0004 網站視覺設計：存摺帳本
 - 首頁主視覺直接用自己回測出來的真實數字（`scripts/export_passbook.py` 產生）
 - 刻意避開「米色＋襯線＋陶土色」這組常見的 AI 設計套路：紙色改用存摺的灰綠，標題用黑體
 
-## 為什麼不用 Tailwind
+## Tailwind：一開始不用，2026-11-03 改用
 
-- 這次主要是改 Starlight 的 CSS 變數，自訂元件只有兩個，Astro 的 scoped style 就夠了
-- Starlight 使用 cascade layers，要搭配 `@astrojs/starlight-tailwind` 才能共存，多一個依賴
-- **之後改用的時機**：走到架構 B／C、網站要放很多自訂元件（互動回測、圖表）時。配色已經集中在 `site/styles/theme.css` 的變數，可以直接搬成 Tailwind theme
+**原本不用的理由**：這次主要是改 Starlight 的 CSS 變數，自訂元件只有兩個，Astro 的 scoped style 就夠了；Starlight 使用 cascade layers，要搭配 `@astrojs/starlight-tailwind` 才能共存。
+
+**改用的理由**：使用者想把風格改得輕鬆一點，之後也會有更多自訂元件。改風格前先換成 Tailwind（[#17](https://github.com/recca0120/investment/issues/17)），之後調整用 token ＋ utility class，不用在每個元件寫 CSS。這一步只換工具、外觀不變（導入前後截圖比對，文章頁完全相同，首頁只有不到 1px 的列高差異）。
+
+現在的分工：
+
+| 檔案 | 放什麼 |
+|---|---|
+| `site/styles/theme.css` | 配色原始值（日間／夜間各一組 `--pb-*`）、Starlight 變數 `--sl-color-*`、文章表格與側欄的調整 |
+| `site/styles/global.css` | Tailwind 入口；把配色包成語意 token（`paper`、`ink`、`seal`、`rule`、`muted`、`link`…）、字級、字體、印章動畫 |
+| 元件、`docs/*.mdx` | 只用 utility class 和 token，**不能寫死顏色**（`tests/site/acceptance/no-hardcoded-colors.test.ts` 會檢查） |

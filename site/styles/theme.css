@@ -1,9 +1,12 @@
 /*
+ * 配色原始值與 Starlight 樣式調整（由 global.css 載入；元件請用 global.css 的語意 token）
  * 設計方向：存摺帳本（見 docs/decisions/0004-site-design.md）
  * - 紙：存摺的灰綠色，不用米色
  * - 墨：深青墨色文字；連結用藍墨水
  * - 印章紅：全站唯一的強調色，只用在首頁印章與極少數重點
  */
+
+/* 配色變數不放進圖層：要蓋過 starlight-tailwind 在 utilities 圖層裡依 Tailwind 灰階產生的 --sl-color-* */
 
 /* 夜間版（Starlight 預設為深色） */
 :root {
@@ -31,8 +34,6 @@
   --sl-color-bg-sidebar: var(--pb-paper);
   --sl-color-hairline: var(--pb-rule);
   --sl-color-hairline-light: var(--pb-rule);
-
-  --sl-font: 'Noto Sans TC', 'PingFang TC', 'Microsoft JhengHei', system-ui, sans-serif;
 }
 
 /* 日間版：存摺 */
@@ -66,89 +67,60 @@
   --sl-color-hairline-light: var(--pb-rule);
 }
 
-/* 字體：中文內文略放大行高，標題用粗黑體 */
-:root {
-  --sl-line-height: 1.8;
-  --sl-line-height-headings: 1.35;
-}
-.sl-markdown-content :is(h1, h2, h3),
-h1#_top {
-  font-weight: 900;
-  letter-spacing: 0;
-}
-
-/* 表格：像存摺的帳務列，數字等寬、右對齊（.num 由 rehype-num-cells 加上） */
-.sl-markdown-content table:not(:where(.not-content *)) {
-  font-variant-numeric: tabular-nums;
-  border-collapse: collapse;
-}
-.sl-markdown-content :is(th, td):not(:where(.not-content *)) {
-  border: 0;
-  border-bottom: 1px solid var(--pb-rule);
-  padding: 0.55em 0.9em;
-}
-.sl-markdown-content th:not(:where(.not-content *)) {
-  border-bottom: 2px solid var(--sl-color-white);
-  color: var(--sl-color-white);
-  font-weight: 700;
-  background: transparent;
-}
-.sl-markdown-content tr:nth-child(2n):not(:where(.not-content *)) {
-  background: transparent;
-}
-.sl-markdown-content :is(td, th).num:not(:where(.not-content *)) {
-  text-align: right;
-  white-space: nowrap;
-}
-
-/* 引言（每篇開頭的日期與免責說明）：像存摺上的附註 */
-.sl-markdown-content blockquote {
-  border-inline-start: 3px solid var(--pb-rule);
-  color: var(--sl-color-gray-3);
-  font-size: var(--sl-text-sm);
-}
-
-/* 側欄目前頁面：不用整塊色塊，改用左側墨線 */
-.sidebar-content a[aria-current='page'] {
-  background: transparent;
-  color: var(--sl-color-white);
-  font-weight: 700;
-  box-shadow: inset 3px 0 0 var(--sl-color-accent);
-}
-
-/* 首頁：splash 版面會自動顯示頁面標題，首頁自己有大標題，隱藏重複的那一個 */
-main:has(.home-hero) .content-panel:has(h1#_top) {
-  display: none;
-}
-
-/* 首頁：左邊介紹，右邊存摺 */
-.home-hero {
-  display: grid;
-  gap: 2.5rem;
-  align-items: start;
-  padding-block: 2rem 1rem;
-}
-@media (min-width: 64rem) {
-  .home-hero {
-    grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
-    gap: 3.5rem;
+/* Starlight 頁面的樣式調整：放在 components 圖層，蓋過 starlight 圖層，utility class 仍然可以覆寫 */
+@layer components {
+  /* 字體：中文內文略放大行高，標題用粗黑體 */
+  :root {
+    --sl-line-height: 1.8;
+    --sl-line-height-headings: 1.35;
   }
-}
-.sl-markdown-content .home-intro h1 {
-  font-size: clamp(2.4rem, 5vw, 3.6rem);
-  font-weight: 900;
-  line-height: 1.15;
-  margin: 0;
-  color: var(--sl-color-white);
-}
-.home-intro p {
-  font-size: var(--sl-text-lg);
-  color: var(--sl-color-gray-2);
-  max-width: 28em;
-}
-.home-actions {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.75rem 1.25rem;
-  margin-top: 1.5rem;
+  .sl-markdown-content :is(h1, h2, h3),
+  h1#_top {
+    font-weight: 900;
+    letter-spacing: 0;
+  }
+
+  /* 表格：像存摺的帳務列，數字等寬、右對齊（.num 由 rehype-num-cells 加上） */
+  .sl-markdown-content table:not(:where(.not-content *)) {
+    font-variant-numeric: tabular-nums;
+    border-collapse: collapse;
+  }
+  .sl-markdown-content :is(th, td):not(:where(.not-content *)) {
+    border: 0;
+    border-bottom: 1px solid var(--pb-rule);
+    padding: 0.55em 0.9em;
+  }
+  .sl-markdown-content th:not(:where(.not-content *)) {
+    border-bottom: 2px solid var(--sl-color-white);
+    color: var(--sl-color-white);
+    font-weight: 700;
+    background: transparent;
+  }
+  .sl-markdown-content tr:nth-child(2n):not(:where(.not-content *)) {
+    background: transparent;
+  }
+  .sl-markdown-content :is(td, th).num:not(:where(.not-content *)) {
+    text-align: right;
+    white-space: nowrap;
+  }
+
+  /* 引言（每篇開頭的日期與免責說明）：像存摺上的附註 */
+  .sl-markdown-content blockquote {
+    border-inline-start: 3px solid var(--pb-rule);
+    color: var(--sl-color-gray-3);
+    font-size: var(--sl-text-sm);
+  }
+
+  /* 側欄目前頁面：不用整塊色塊，改用左側墨線 */
+  .sidebar-content a[aria-current='page'] {
+    background: transparent;
+    color: var(--sl-color-white);
+    font-weight: 700;
+    box-shadow: inset 3px 0 0 var(--sl-color-accent);
+  }
+
+  /* 首頁：splash 版面會自動顯示頁面標題，首頁自己有大標題，隱藏重複的那一個 */
+  main:has(.home-hero) .content-panel:has(h1#_top) {
+    display: none;
+  }
 }

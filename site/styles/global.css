@@ -1,0 +1,61 @@
+/*
+ * 網站樣式入口（astro.config.mjs 的 customCss）
+ * - Tailwind v4 ＋ @astrojs/starlight-tailwind：只載入 theme 與 utilities，不載入 preflight（Starlight 有自己的 reset）
+ * - 圖層順序：base < starlight < theme < components < utilities；沒有放進圖層的規則最優先
+ * - 配色的原始值在 theme.css（日間／夜間各一組），這裡把它們包成語意 token，元件只用 token
+ */
+@layer base, starlight, theme, components, utilities;
+
+@import '@astrojs/starlight-tailwind';
+@import 'tailwindcss/theme.css' layer(theme);
+@import 'tailwindcss/utilities.css' layer(utilities);
+@import './theme.css';
+
+/* inline：utility 直接輸出 var(--pb-*)，切換日夜模式時跟著變 */
+@theme inline {
+  --color-paper: var(--pb-paper);
+  --color-paper-raised: var(--pb-paper-raised);
+  --color-rule: var(--pb-rule);
+  --color-ink: var(--pb-ink);
+  --color-seal: var(--pb-seal);
+  --color-seal-ink: var(--pb-seal-ink);
+  --color-heading: var(--sl-color-white); /* Starlight 的 white 是「最強的文字色」，日間其實是深色 */
+  --color-soft: var(--sl-color-gray-2);
+  --color-muted: var(--sl-color-gray-3);
+  --color-link: var(--sl-color-text-accent);
+  --color-mark: var(--sl-color-accent);
+
+  /* 字級沿用 Starlight 的尺度，全站只有一套；行高繼承內文 */
+  --text-xs: var(--sl-text-xs);
+  --text-xs--line-height: inherit;
+  --text-sm: var(--sl-text-sm);
+  --text-sm--line-height: inherit;
+  --text-lg: var(--sl-text-lg);
+  --text-lg--line-height: inherit;
+  --text-h3: var(--sl-text-h3);
+  --text-h3--line-height: 1.35;
+
+  --shadow-seal: inset 0 0 0 2px var(--pb-seal-ink), inset 0 0 0 4px var(--pb-seal);
+}
+
+@theme {
+  --font-sans: 'Noto Sans TC', 'PingFang TC', 'Microsoft JhengHei', system-ui, sans-serif;
+
+  --text-display: clamp(2.4rem, 5vw, 3.6rem);
+  --text-display--line-height: 1.15;
+  --container-intro: 28em;
+  --breakpoint-xs: 30rem;
+
+  /* 首頁印章：蓋下去的動作。只動 scale／opacity，旋轉角度由 -rotate-8 決定 */
+  --animate-stamp: stamp 420ms cubic-bezier(0.2, 0.9, 0.3, 1.2) 600ms both;
+  @keyframes stamp {
+    from {
+      scale: 1.6;
+      opacity: 0;
+    }
+    to {
+      scale: 1;
+      opacity: 0.92;
+    }
+  }
+}
