@@ -25,6 +25,7 @@
 5. [投資輔助系統規劃](docs/knowledge/05-system-design.md)
 6. [股價資料來源評估](docs/knowledge/06-data-sources.md)
 7. [定期定額回測：0050、006208、VT（2016～2026）](docs/knowledge/07-dca-backtest-2016-2026.md)
+8. [美股投資管道與稅務](docs/knowledge/08-us-stock-channels-tax.md)
 
 ## 投資輔助系統
 
