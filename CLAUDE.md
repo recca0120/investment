@@ -97,7 +97,7 @@
 
 - 語言：Python，套件管理用 `uv`
 - 開發流程依 `atdd` skill（repo 版）：第一個驗收測試先寫並用 check_red.py 確認紅燈；PR 前用 check_criteria.py 確認每條驗收條件都有測試
-- 資料來源候選：證交所 OpenAPI、FinMind、yfinance（待 research issue 評估）
+- 資料來源：FinMind（台股自己用原始價＋股利＋分割計算還原價；美股用 Adj_Close），yfinance 只做交叉驗證（見 `docs/decisions/0003-data-source.md`）
 
 ## 專案 Skills
 

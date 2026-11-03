@@ -23,6 +23,7 @@
 3. [投資商品優缺點比較](docs/knowledge/03-products-comparison.md)
 4. [入門方案（依個性選擇）](docs/knowledge/04-starter-plans.md)
 5. [投資輔助系統規劃](docs/knowledge/05-system-design.md)
+6. [股價資料來源評估](docs/knowledge/06-data-sources.md)
 
 ## Roadmap
 
