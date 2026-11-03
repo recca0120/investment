@@ -91,6 +91,12 @@
 - 開發流程依 `tdd` skill（先寫驗收測試）
 - 資料來源候選：證交所 OpenAPI、FinMind、yfinance（待 research issue 評估）
 
+## 專案 Skills
+
+- 位置：`.claude/skills/`（跟著 repo 版控，只在本專案生效）
+- `astro-starlight`：Astro 7 ＋ Starlight 建站、設定、部署；動到網站相關檔案前先讀
+- 新增或修改 skill 時用內建的 `skill-creator`；技術類 skill 要先上網查最新版並實測驗證
+
 ## 待整理
 
 - 本檔案之後會逐步拆成 memory 與 skill，拆出去的規則要從這裡刪除，避免重複

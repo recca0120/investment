@@ -20,7 +20,6 @@ data/cache/
 node_modules/
 dist/
 .astro/
-site/
 
 # OS / IDE
 .DS_Store
