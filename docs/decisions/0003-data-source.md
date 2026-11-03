@@ -20,6 +20,8 @@ title: 0003 股價資料來源
 - 主要來源：FinMind
   - 台股：原始收盤價＋現金股利＋分割事件，自己計算還原價
   - 美股：`USStockPrice` 的 `Adj_Close`
+  - 美股股利（扣預扣稅用，issue #12）：FinMind 沒有美股股利資料集，從 `Adj_Close`／`Close` 比值在除息日的變化反推。VT 2024 年四次除息日和 yfinance 完全一致，金額誤差最多 0.009 美元（Adj_Close 只有兩位小數）
+  - 匯率（issue #12）：`TaiwanExchangeRate` 的美元即期匯率（台灣銀行牌告）
 - yfinance 只用於契約測試的交叉驗證
 - 資料在本機快取，不進 git
 - 先不註冊 token；呼叫次數不夠時再註冊（token 放在 `.env`，不 commit）

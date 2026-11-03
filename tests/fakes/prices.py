@@ -1,7 +1,7 @@
 """假的價格來源：取代 FinMind，讓測試快速、可重複、不連網。"""
 from datetime import date
 
-from invest.prices import PricePoint, UnknownSymbolError
+from invest.prices import FxRate, PricePoint, UnknownSymbolError
 
 
 class FakePriceSource:
@@ -18,3 +18,13 @@ class FakePriceSource:
         if symbol not in self._prices:
             raise UnknownSymbolError(symbol)
         return sorted(p for p in self._prices[symbol] if start <= p.date <= end)
+
+
+class FakeFxSource:
+    """固定的美元匯率清單，取代 FinMind 的 TaiwanExchangeRate。"""
+
+    def __init__(self, rates: list[FxRate]):
+        self._rates = sorted(rates)
+
+    def usd_twd(self, start: date, end: date) -> list[FxRate]:
+        return [r for r in self._rates if start <= r.date <= end]
