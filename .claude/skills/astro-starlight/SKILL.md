@@ -53,7 +53,18 @@ investment/
    "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome" --headless=new --hide-scrollbars \
      --window-size=1400,1000 --virtual-time-budget=5000 --screenshot=out.png "https://recca0120.github.io/investment/knowledge/01-getting-started/"
    ```
-   檢查：側欄有文章、首頁、文章頁、手機寬度（`--window-size=390,844`）
+   檢查：側欄有文章、首頁、文章頁
+3. **手機版不要用 `--window-size=390,...`**：headless Chrome 有最小視窗寬度，截出來會像是內容被切掉（實際踩過的假象）。改用 Playwright 的裝置模擬，搭配本機 Chrome，不用另外下載瀏覽器：
+   ```python
+   # uv run --with playwright python check.py
+   from playwright.sync_api import sync_playwright
+   with sync_playwright() as p:
+       b = p.chromium.launch(channel="chrome")
+       pg = b.new_context(**p.devices["iPhone 13"]).new_page()
+       pg.goto(URL, wait_until="networkidle")
+       assert pg.evaluate("document.documentElement.scrollWidth <= innerWidth")  # 沒有水平溢出
+       pg.screenshot(path="mobile.png")
+   ```
 
 ## 建站步驟
 
