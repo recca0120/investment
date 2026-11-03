@@ -2,6 +2,8 @@
 
 股市新手的投資學習筆記，以及投資輔助系統的開發 repo。
 
+📖 網站：https://recca0120.github.io/investment/
+
 > ⚠️ 本 repo 內容為個人學習筆記，不構成任何投資建議。
 
 ## 目錄
@@ -25,8 +27,8 @@
 ## Roadmap
 
 - [x] 決定網站框架：Astro Starlight（見 [0002](docs/decisions/0002-site-framework.md)）
-- [ ] 研究新版 Astro／Starlight 並寫成 skill
-- [ ] 建立 Starlight 網站並部署到 GitHub Pages
+- [x] 研究新版 Astro／Starlight 並寫成 skill
+- [x] 建立 Starlight 網站並部署到 GitHub Pages
 - [ ] 選定個人入門方案
 - [ ] 系統：定期定額回測器
 - [ ] 系統：持股追蹤

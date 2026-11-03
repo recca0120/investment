@@ -49,8 +49,9 @@ investment/
 2. 依 `references/config.md` 建立 `astro.config.mjs`、`site/content.config.ts`、`tsconfig.json`、`package.json` scripts
 3. 把 `assets/rehype-md-links.mjs` 複製到 `site/plugins/`
 4. 每篇 `docs/**/*.md` 加上 frontmatter `title`（見下方「內容規則」）
-5. `npx astro build` 確認沒有錯誤，`npx astro dev` 本機檢查
-6. 依 `references/deploy-github-pages.md` 加 workflow，並在 repo 設定 Pages source = GitHub Actions
+5. 建立 `public/favicon.svg`
+6. `npm run build && python3 scripts/check-site-links.py` 確認沒有錯誤與壞連結，`npm run dev` 本機檢查
+7. 依 `references/deploy-github-pages.md` 加 workflow，並在 repo 設定 Pages source = GitHub Actions
 
 ## 內容規則（寫 docs/ 時要遵守）
 
@@ -63,6 +64,7 @@ investment/
   ```
 - **不要再寫 `# 標題`**：Starlight 會把 `title` 渲染成 H1，內文再寫一次會出現兩個標題；內文從 `##` 開始
 - **檔名以 `_` 開頭的不會被載入**（loader pattern 是 `**/[^_]*.{md,mdx}`），可以拿來放草稿
+- **`README.md` 不會被載入**（pattern 加了 `'!**/README.md'`），它們是給 GitHub 瀏覽資料夾用的索引
 - **相對連結照常寫 `.md`**，例如 `[入門](../knowledge/01-getting-started.md)`：GitHub 上可以點，網站上由 `rehype-md-links` 轉成 `/investment/knowledge/01-getting-started/`。沒有這個 plugin 的話，Starlight 會原樣輸出 `.md` 連結，網站上會 404
 - **網址 slug 會轉成小寫**，檔名建議一律用小寫 kebab-case
 - 要用元件時才把副檔名改成 `.mdx`；純文章維持 `.md`
@@ -79,6 +81,7 @@ investment/
 | `:::tip` 被輸出成普通 `<div>`、標題沒有錨點連結 | Starlight 的 Markdown 轉換只套用在 `src/content/docs` 底下的檔案 | 在 `starlight({ markdown: { processedDirs: ['./docs'] } })` 加上內容目錄 |
 | 改了設定，輸出結果卻沒變 | content layer 會快取渲染結果 | `rm -rf .astro node_modules/.astro dist` 後再 build |
 | `The collection "i18n" does not exist` 警告 | 沒有定義 i18n collection | 無害，可忽略；需要自訂 UI 翻譯時再加 |
+| 每頁都 404 `/investment/favicon.svg` | Starlight 預設引用 `public/favicon.svg`，但手動建站時沒有這個檔 | 建立 `public/favicon.svg`（`public/` 在專案根目錄，不受 `srcDir` 影響） |
 | `src/fetch.ts` 行為怪異 | Astro 7 把它保留給 advanced routing | 不要用這個檔名 |
 
 ## 什麼時候讀哪份參考
