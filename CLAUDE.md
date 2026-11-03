@@ -47,6 +47,9 @@
   - Astro 專案在 repo 根目錄（`package.json`、`astro.config.mjs`），原始碼在 `site/`，靜態檔在 `public/`
   - 本機：`npm run dev`；檢查：`npm run build && python3 scripts/check-site-links.py`
   - push 到 main 後由 `.github/workflows/site.yml` 自動部署；PR 只建置與檢查連結
+  - 視覺設計見 `docs/decisions/0004-site-design.md`；配色只改 `site/styles/theme.css` 的變數，不要在元件裡寫死顏色
+  - 改網站外觀時用 `frontend-design` skill，並實際截圖檢查日間、夜間、手機（方法見 astro-starlight skill）
+  - 首頁存摺資料：`uv run python scripts/export_passbook.py` 重新產生 `site/data/passbook.json`
 
 ## Issue 規則
 

@@ -1,0 +1,103 @@
+---
+// 首頁：知識文章的建議閱讀順序（檔名本身就是順序，所以用編號）
+import { getCollection } from 'astro:content';
+
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+const docs = await getCollection('docs');
+const knowledge = docs.filter((d) => d.id.startsWith('knowledge/')).sort((a, b) => a.id.localeCompare(b.id));
+const decisions = docs.filter((d) => d.id.startsWith('decisions/')).sort((a, b) => a.id.localeCompare(b.id));
+// 討論紀錄：新的在前（檔名以日期開頭）
+const logs = docs.filter((d) => d.id.startsWith('log/')).sort((a, b) => b.id.localeCompare(a.id));
+---
+
+<section class="reading not-content" aria-labelledby="reading-title">
+  <h2 id="reading-title">建議閱讀順序</h2>
+  <ol>
+    {
+      knowledge.map((d) => (
+        <li>
+          <a href={`${base}/${d.id}/`}>{d.data.title}</a>
+          {d.data.description && <p>{d.data.description}</p>}
+        </li>
+      ))
+    }
+  </ol>
+  <h2>做過的決定</h2>
+  <ul class="decisions">
+    {
+      decisions.map((d) => (
+        <li>
+          <a href={`${base}/${d.id}/`}>{d.data.title}</a>
+        </li>
+      ))
+    }
+  </ul>
+  <h2>討論紀錄</h2>
+  <ul class="decisions">
+    {
+      logs.map((d) => (
+        <li>
+          <a href={`${base}/${d.id}/`}>{d.data.title}</a>
+        </li>
+      ))
+    }
+  </ul>
+</section>
+
+<style>
+  .reading h2 {
+    font-size: var(--sl-text-h3);
+    font-weight: 900;
+    line-height: 1.35;
+    color: var(--sl-color-white);
+    margin: 3rem 0 0;
+  }
+  ol {
+    list-style: none;
+    counter-reset: step;
+    padding: 0;
+    margin: 1rem 0 0;
+    border-top: 2px solid var(--sl-color-white);
+  }
+  ol li {
+    counter-increment: step;
+    display: grid;
+    grid-template-columns: 2.5rem 1fr;
+    column-gap: 0.75rem;
+    padding: 0.85rem 0;
+    margin: 0;
+    border-bottom: 1px solid var(--pb-rule);
+  }
+  ol li::before {
+    content: counter(step, decimal-leading-zero);
+    grid-row: span 2;
+    font-variant-numeric: tabular-nums;
+    color: var(--sl-color-gray-3);
+    padding-top: 0.1rem;
+  }
+  ol a,
+  .decisions a {
+    font-weight: 700;
+    color: var(--sl-color-white);
+    text-decoration: none;
+  }
+  ol a:hover,
+  .decisions a:hover {
+    text-decoration: underline;
+    text-decoration-color: var(--sl-color-accent);
+    text-underline-offset: 0.25em;
+  }
+  ol p {
+    grid-column: 2;
+    margin: 0.2rem 0 0;
+    color: var(--sl-color-gray-3);
+    font-size: var(--sl-text-sm);
+  }
+  .decisions {
+    padding-left: 1.2rem;
+    margin-top: 0.75rem;
+  }
+  .decisions li {
+    margin: 0.4rem 0;
+  }
+</style>
