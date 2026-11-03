@@ -32,7 +32,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
-      - uses: astral-sh/setup-uv@v10
+      - uses: astral-sh/setup-uv@v10.3.3  # 這個 action 沒有 v10 主版本 tag，必須寫完整版本
         with:
           python-version: '3.12'
           enable-cache: true
