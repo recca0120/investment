@@ -39,7 +39,10 @@
   - 檔名 `NNNN-決策標題.md`，內容：背景、選項、決定、理由
   - 對應的 decision issue 關閉時要寫一份
 - `private/`：**真實持股、金額、帳戶資訊**，已在 `.gitignore`，絕不 commit
-- `src/`、`tests/`：系統程式碼（尚未建立，等第一個開發 issue 開始時再建）
+- `src/invest/`、`tests/`：Python 系統（uv 管理）
+  - `uv run streamlit run src/invest/app.py`：回測器；`uv run pytest`：測試；`uv run pytest -m contract`：連網契約測試
+  - 依賴組裝在 `src/invest/container.py`；資料快取在 `data/cache/`（不進 git）
+  - FinMind token（選用）放 `.env` 的 `FINMIND_TOKEN`，不 commit
 - 網站：Astro Starlight（見 `docs/decisions/0002-site-framework.md`），https://recca0120.github.io/investment/
   - Astro 專案在 repo 根目錄（`package.json`、`astro.config.mjs`），原始碼在 `site/`，靜態檔在 `public/`
   - 本機：`npm run dev`；檢查：`npm run build && python3 scripts/check-site-links.py`
@@ -95,7 +98,7 @@
 
 ## 系統開發規則（之後會補充）
 
-- 語言：Python，套件管理用 `uv`
+- 語言：Python 3.12，套件管理用 `uv`；CI：`.github/workflows/python.yml`
 - 開發流程依 `atdd` skill（repo 版）：第一個驗收測試先寫並用 check_red.py 確認紅燈；PR 前用 check_criteria.py 確認每條驗收條件都有測試
 - 資料來源：FinMind（台股自己用原始價＋股利＋分割計算還原價；美股用 Adj_Close），yfinance 只做交叉驗證（見 `docs/decisions/0003-data-source.md`）
 
