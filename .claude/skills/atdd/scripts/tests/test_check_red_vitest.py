@@ -117,3 +117,21 @@ def test_測試有輸出時_system_out_不影響判斷(tmp_path):
     r = check_red(tmp_path, junit_case(out))
     assert r.returncode == 1
     assert "通過" in r.stdout
+
+
+def test_同檔案中沒指定的測試被略過不影響判斷(tmp_path):
+    # 實際案例：用 -t 只跑一個測試時，Vitest 把同檔案的其他測試記成 skipped
+    junit = junit_case(failure("AssertionError", "x")).replace(
+        "</testsuite>",
+        '<testcase classname="tests/site/sidebar.test.ts" name="側欄 &gt; [#15-2] 別的測試" time="0"><skipped/></testcase></testsuite>',
+    )
+    r = check_red(tmp_path, junit)
+    assert r.returncode == 0, r.stdout + r.stderr
+    assert "別的測試" not in r.stdout
+
+
+def test_指定的測試名稱不存在時不算紅燈(tmp_path):
+    junit = junit_case("<skipped/>", name="側欄 &gt; 名稱打錯的測試")
+    r = check_red(tmp_path, junit)
+    assert r.returncode == 1
+    assert "沒有執行到" in r.stdout

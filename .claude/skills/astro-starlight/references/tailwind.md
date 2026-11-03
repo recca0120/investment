@@ -58,6 +58,8 @@ export default defineConfig({
 |---|---|---|
 | MDX 裡 `<p class="text-lg">` 沒效果，文字還是預設大小 | 開頭標籤後換行的話，MDX 把內文當成 Markdown 段落，在裡面**再包一層 `<p>`**，class 套在外層的空 `<p>` 上。原本用 `.home-intro p` 這種後代選擇器時剛好兩層都套到，沒發現 | 內文和 `<p>` 寫在同一行；或把樣式放在外層 `<div>` |
 | `-rotate-8` 加上動畫後角度變兩倍或消失 | Tailwind v4 的 `rotate-*`、`scale-*`、`translate-*` 用獨立的 CSS 屬性（`rotate:`、`scale:`），keyframes 若動 `transform` 會疊加上去 | keyframes 只動 `scale`、`opacity`，角度交給 utility |
+| 中文句子在奇怪的地方斷行（「撲／滿」） | 中文每個字之間都可以斷行，`text-balance` 也救不了 | 把每個子句包成 `inline-block`，只會在子句之間換行 |
+| SVG 裡用 CSS 動畫移動 `<g>`，位置跑掉 | CSS 的 `transform` 會蓋掉 SVG 的 `transform` 屬性 | 動畫的元素不要用 `transform` 屬性定位，直接寫 `cx`／`cy` |
 | 2.4rem 換成 utility 後有些微差異 | spacing 以 0.25rem 為單位（`h-9.5` ＝ 2.375rem） | 差 1px 就近取（token-first），不要寫 `h-[2.4rem]` |
 
 ## 驗證

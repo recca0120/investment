@@ -4,12 +4,13 @@ import { expect, test } from 'vitest';
 import passbook from '../../../site/data/passbook.json';
 import { openPage } from '../support/dist';
 
-test('首頁的存摺用真實回測結果，閱讀順序的連結帶有網站 base', () => {
+test('首頁的撲滿用真實回測結果，閱讀順序的連結帶有網站 base', () => {
   const { screen } = openPage('');
 
-  const figure = within(screen.getByRole('figure', { name: new RegExp(`${passbook.symbol} 定期定額存摺`) }));
+  const figure = within(screen.getByRole('figure', { name: new RegExp(`${passbook.symbol} 定期定額撲滿`) }));
   const final = passbook.final.toLocaleString('zh-TW');
   expect(figure.getAllByRole('row').at(-1)).toHaveTextContent(final);
+  expect(figure.getByText(/現在變成/).closest('p')).toHaveTextContent(`現在變成 ${final} 元`);
   expect(figure.getByRole('link', { name: '看完整回測' })).toHaveAttribute('href', '/investment/knowledge/07-dca-backtest-2016-2026/');
 
   const reading = within(screen.getByRole('region', { name: '建議閱讀順序' }));

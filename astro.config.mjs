@@ -31,7 +31,7 @@ export default defineConfig({
           tag: 'link',
           attrs: {
             rel: 'stylesheet',
-            href: 'https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;700;900&display=swap',
+            href: 'https://fonts.googleapis.com/css2?family=Chiron+GoRound+TC:wght@400;700;900&display=swap',
           },
         },
       ],

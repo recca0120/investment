@@ -13,12 +13,14 @@
 
 /* inline：utility 直接輸出 var(--pb-*)，切換日夜模式時跟著變 */
 @theme inline {
-  --color-paper: var(--pb-paper);
-  --color-paper-raised: var(--pb-paper-raised);
-  --color-rule: var(--pb-rule);
-  --color-ink: var(--pb-ink);
-  --color-seal: var(--pb-seal);
-  --color-seal-ink: var(--pb-seal-ink);
+  --color-sky: var(--c-sky);
+  --color-cloud: var(--c-cloud);
+  --color-rule: var(--c-rule);
+  --color-ink: var(--c-ink);
+  --color-coin: var(--c-coin);
+  --color-coin-ink: var(--c-coin-ink);
+  --color-pig: var(--c-pig);
+  --color-pig-ink: var(--c-pig-ink);
   --color-heading: var(--sl-color-white); /* Starlight 的 white 是「最強的文字色」，日間其實是深色 */
   --color-soft: var(--sl-color-gray-2);
   --color-muted: var(--sl-color-gray-3);
@@ -35,27 +37,35 @@
   --text-h3: var(--sl-text-h3);
   --text-h3--line-height: 1.35;
 
-  --shadow-seal: inset 0 0 0 2px var(--pb-seal-ink), inset 0 0 0 4px var(--pb-seal);
+  /* 金幣的邊：內圈一道深一點的金色 */
+  --shadow-coin: inset 0 0 0 2px var(--c-coin), inset 0 0 0 3px var(--c-coin-ink);
 }
 
 @theme {
-  --font-sans: 'Noto Sans TC', 'PingFang TC', 'Microsoft JhengHei', system-ui, sans-serif;
+  --font-sans: 'Chiron GoRound TC', 'Noto Sans TC', 'PingFang TC', 'Microsoft JhengHei', system-ui, sans-serif;
 
   --text-display: clamp(2.4rem, 5vw, 3.6rem);
   --text-display--line-height: 1.15;
   --container-intro: 28em;
   --breakpoint-xs: 30rem;
 
-  /* 首頁印章：蓋下去的動作。只動 scale／opacity，旋轉角度由 -rotate-8 決定 */
-  --animate-stamp: stamp 420ms cubic-bezier(0.2, 0.9, 0.3, 1.2) 600ms both;
-  @keyframes stamp {
-    from {
-      scale: 1.6;
+  /* 首頁撲滿：硬幣從上方掉進投幣孔。每枚硬幣用 style 設定 animation-delay，依序落下 */
+  --animate-coin-drop: coin-drop 900ms cubic-bezier(0.5, 0, 0.75, 0) both;
+  @keyframes coin-drop {
+    0% {
+      transform: translateY(-50px);
       opacity: 0;
     }
-    to {
-      scale: 1;
-      opacity: 0.92;
+    30% {
+      opacity: 1;
+    }
+    70% {
+      transform: translateY(0);
+      opacity: 1;
+    }
+    100% {
+      transform: translateY(14px);
+      opacity: 0;
     }
   }
 }
