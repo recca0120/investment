@@ -48,7 +48,8 @@
   - 本機：`npm run dev`；測試：`npm run test:site`（build ＋ 測試）或 `npm test`（只跑測試，要先 build）
   - 網站測試在 `tests/site/`（Vitest ＋ Testing Library ＋ msw-fetch-mock），寫法見 `atdd` skill；需要 Node 22.12 以上
   - push 到 main 後由 `.github/workflows/site.yml` 自動部署；PR 只建置與檢查連結
-  - 視覺設計見 `docs/decisions/0004-site-design.md`；配色只改 `site/styles/theme.css` 的變數，不要在元件裡寫死顏色
+  - 視覺設計見 `docs/decisions/0004-site-design.md`；樣式用 Tailwind v4（`@astrojs/starlight-tailwind`）
+  - 配色原始值只改 `site/styles/theme.css`，語意 token 在 `site/styles/global.css`；元件和 `.mdx` 只用 utility class，不寫死顏色（有測試檢查）
   - 改網站外觀時用 `frontend-design` skill，並實際截圖檢查日間、夜間、手機（方法見 astro-starlight skill）
   - 首頁存摺資料：`uv run python scripts/export_passbook.py` 重新產生 `site/data/passbook.json`
 

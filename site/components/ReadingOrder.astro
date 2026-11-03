@@ -20,96 +20,46 @@ const knowledge = docs.filter((d) => d.id.startsWith('knowledge/')).sort((a, b) 
 const decisions = docs.filter((d) => d.id.startsWith('decisions/')).sort((a, b) => a.id.localeCompare(b.id));
 // 討論紀錄：新的在前（檔名以日期開頭）
 const logs = docs.filter((d) => d.id.startsWith('log/')).sort((a, b) => b.id.localeCompare(a.id));
+
+const heading = 'mt-12 mb-0 text-h3 font-black text-heading';
+const link = 'font-bold text-heading no-underline hover:underline hover:decoration-mark hover:underline-offset-4';
 ---
 
 <section class="reading not-content" aria-labelledby="reading-title">
-  <h2 id="reading-title">建議閱讀順序</h2>
-  <ol>
+  <h2 id="reading-title" class={heading}>建議閱讀順序</h2>
+  <ol class="mt-4 list-none border-t-2 border-heading p-0">
     {
-      knowledge.map((d) => (
-        <li>
-          <a href={`${base}/${d.id}/`}>{d.title}</a>
-          {d.description && <p>{d.description}</p>}
+      knowledge.map((d, i) => (
+        <li class="m-0 flex gap-3 border-b border-rule py-3.5">
+          <span class="w-10 shrink-0 pt-0.5 text-muted tabular-nums" aria-hidden="true">
+            {String(i + 1).padStart(2, '0')}
+          </span>
+          <div>
+            <a class={link} href={`${base}/${d.id}/`}>{d.title}</a>
+            {d.description && <p class="mt-1 mb-0 text-sm text-muted">{d.description}</p>}
+          </div>
         </li>
       ))
     }
   </ol>
-  <h2>做過的決定</h2>
-  <ul class="decisions">
+  <h2 class={heading}>做過的決定</h2>
+  <ul class="mt-3 pl-5">
     {
       decisions.map((d) => (
-        <li>
-          <a href={`${base}/${d.id}/`}>{d.title}</a>
+        <li class="my-1.5">
+          <a class={link} href={`${base}/${d.id}/`}>{d.title}</a>
         </li>
       ))
     }
   </ul>
-  <h2>討論紀錄</h2>
-  <ul class="decisions">
+  <h2 class={heading}>討論紀錄</h2>
+  <ul class="mt-3 pl-5">
     {
       logs.map((d) => (
-        <li>
-          <a href={`${base}/${d.id}/`}>{d.title}</a>
+        <li class="my-1.5">
+          <a class={link} href={`${base}/${d.id}/`}>{d.title}</a>
         </li>
       ))
     }
   </ul>
 </section>
-
-<style>
-  .reading h2 {
-    font-size: var(--sl-text-h3);
-    font-weight: 900;
-    line-height: 1.35;
-    color: var(--sl-color-white);
-    margin: 3rem 0 0;
-  }
-  ol {
-    list-style: none;
-    counter-reset: step;
-    padding: 0;
-    margin: 1rem 0 0;
-    border-top: 2px solid var(--sl-color-white);
-  }
-  ol li {
-    counter-increment: step;
-    display: grid;
-    grid-template-columns: 2.5rem 1fr;
-    column-gap: 0.75rem;
-    padding: 0.85rem 0;
-    margin: 0;
-    border-bottom: 1px solid var(--pb-rule);
-  }
-  ol li::before {
-    content: counter(step, decimal-leading-zero);
-    grid-row: span 2;
-    font-variant-numeric: tabular-nums;
-    color: var(--sl-color-gray-3);
-    padding-top: 0.1rem;
-  }
-  ol a,
-  .decisions a {
-    font-weight: 700;
-    color: var(--sl-color-white);
-    text-decoration: none;
-  }
-  ol a:hover,
-  .decisions a:hover {
-    text-decoration: underline;
-    text-decoration-color: var(--sl-color-accent);
-    text-underline-offset: 0.25em;
-  }
-  ol p {
-    grid-column: 2;
-    margin: 0.2rem 0 0;
-    color: var(--sl-color-gray-3);
-    font-size: var(--sl-text-sm);
-  }
-  .decisions {
-    padding-left: 1.2rem;
-    margin-top: 0.75rem;
-  }
-  .decisions li {
-    margin: 0.4rem 0;
-  }
-</style>

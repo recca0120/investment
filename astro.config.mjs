@@ -1,6 +1,7 @@
 // @ts-check
 import { defineConfig } from 'astro/config';
 import starlight from '@astrojs/starlight';
+import tailwindcss from '@tailwindcss/vite';
 import { unified } from '@astrojs/markdown-remark';
 import rehypeMdLinks from './site/plugins/rehype-md-links.mjs';
 import rehypeNumCells from './site/plugins/rehype-num-cells.mjs';
@@ -11,6 +12,7 @@ export default defineConfig({
   site: 'https://recca0120.github.io',
   base,
   srcDir: './site',
+  vite: { plugins: [tailwindcss()] },
   markdown: {
     // Astro 7 預設用 Sätteri；要用 rehype plugin 必須切回 unified
     processor: unified({
@@ -21,7 +23,7 @@ export default defineConfig({
     starlight({
       title: '投資學習筆記',
       description: '股市新手的投資學習筆記',
-      customCss: ['./site/styles/theme.css'],
+      customCss: ['./site/styles/global.css'], // Tailwind ＋ 配色 token；配色原始值在 theme.css
       head: [
         { tag: 'link', attrs: { rel: 'preconnect', href: 'https://fonts.googleapis.com' } },
         { tag: 'link', attrs: { rel: 'preconnect', href: 'https://fonts.gstatic.com', crossorigin: true } },
