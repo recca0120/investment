@@ -24,7 +24,9 @@
 
 ## Roadmap
 
-- [ ] 決定網站框架，把 `docs/` 發佈成網站（GitHub Pages）
+- [x] 決定網站框架：Astro Starlight（見 [0002](docs/decisions/0002-site-framework.md)）
+- [ ] 研究新版 Astro／Starlight 並寫成 skill
+- [ ] 建立 Starlight 網站並部署到 GitHub Pages
 - [ ] 選定個人入門方案
 - [ ] 系統：定期定額回測器
 - [ ] 系統：持股追蹤

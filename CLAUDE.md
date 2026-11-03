@@ -35,6 +35,7 @@
   - 對應的 decision issue 關閉時要寫一份
 - `private/`：**真實持股、金額、帳戶資訊**，已在 `.gitignore`，絕不 commit
 - `src/`、`tests/`：系統程式碼（尚未建立，等第一個開發 issue 開始時再建）
+- 網站：Astro Starlight，先走「網站與系統分開」架構（見 `docs/decisions/0002-site-framework.md`），網站專案目錄待建立網站時決定
 
 ## Issue 規則
 
