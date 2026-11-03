@@ -3,14 +3,9 @@ from datetime import date
 import streamlit as st
 
 from invest.backtest import run_dca
+from invest.container import get_container
 
-
-def default_price_source():
-    raise RuntimeError("真實資料來源尚未實作")  # 之後接 FinMind / yfinance
-
-
-# 測試時由 session_state 注入假的來源；正式執行時用真實來源
-prices = st.session_state.get("price_source") or default_price_source()
+prices = get_container().prices
 
 st.title("定期定額回測器")
 symbol = st.text_input("代號", value="0050", key="symbol")

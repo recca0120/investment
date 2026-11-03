@@ -1,0 +1,30 @@
+[project]
+name = "invest"
+version = "0.1.0"
+description = "ATDD 範例：定期定額回測器"
+requires-python = ">=3.12"
+dependencies = [
+    "pandas>=3.1.0",
+    "streamlit>=1.66.1",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[dependency-groups]
+dev = [
+    "hypothesis>=6.170.14",
+    "pytest>=9.2.0",
+    "pytest-socket>=0.8.1",
+    "time-machine>=3.6.0",
+]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]
+addopts = "--disable-socket --allow-unix-socket"
+markers = [
+  "criteria(id): 對應 issue 的驗收條件編號，例如 #5-1",
+  "contract: 需要連網、驗證真實資料來源（預設不跑）",
+]

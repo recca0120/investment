@@ -14,6 +14,7 @@ PRICES = FakePriceSource({
 })
 
 
+@pytest.mark.criteria("#5-1")
 def test_每月投入固定金額_期末計算總投入與市值():
     # Given 0050 三個月價格 100 → 50 → 100，每月投入 1,000 元
     # When 回測 2026-01 ~ 2026-03
@@ -26,6 +27,7 @@ def test_每月投入固定金額_期末計算總投入與市值():
     assert result.return_rate == pytest.approx(4000 / 3000 - 1)
 
 
+@pytest.mark.criteria("#5-2")
 def test_回測期間顯示最大跌幅():
     # Given 同上：第 2 個月市值 10 × 50 = 500，對比當時投入 1,000 的市值最高點 1,000
     result = run_dca(PRICES, "0050", monthly_amount=1000, start=date(2026, 1, 1), end=date(2026, 3, 31))

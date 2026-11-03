@@ -1,0 +1,123 @@
+"""驗收測試：new_feature.py（產生骨架與測試範本）、check_criteria.py（驗收條件都有測試）"""
+import subprocess
+import sys
+import textwrap
+from pathlib import Path
+
+SCRIPTS = Path(__file__).parents[1]
+
+ISSUE_BODY = textwrap.dedent("""\
+    ## 目的
+    親眼看到定期定額的報酬與波動。
+
+    ## 驗收條件
+    - [ ] 給定標的、每月金額、起訖日期，計算總投入與期末市值
+    - [x] 顯示最大跌幅（MDD）
+    - [ ] 查不到代號時回報錯誤
+
+    ## 依賴
+    - [ ] 資料來源研究 issue
+""")
+
+
+def run(script: str, *args: str, cwd: Path) -> subprocess.CompletedProcess:
+    return subprocess.run([sys.executable, str(SCRIPTS / script), *args], cwd=cwd, capture_output=True, text=True)
+
+
+def issue_file(tmp_path: Path) -> str:
+    f = tmp_path / "issue5.md"
+    f.write_text(ISSUE_BODY)
+    return str(f)
+
+
+# ---------- new_feature.py ----------
+
+def test_new_feature_產生會丟_NotImplementedError_的骨架與每條驗收條件的測試範本(tmp_path):
+    r = run("new_feature.py", "backtest", "--entry", "run_dca", "--issue", "5",
+            "--body-file", issue_file(tmp_path), cwd=tmp_path)
+    assert r.returncode == 0, r.stdout + r.stderr
+
+    module = (tmp_path / "src/invest/backtest.py").read_text()
+    assert "def run_dca(" in module
+    assert "raise NotImplementedError" in module
+
+    test = (tmp_path / "tests/acceptance/test_backtest.py").read_text()
+    assert "from invest.backtest import run_dca" in test
+    # 只取「驗收條件」段落，依賴段落的 checkbox 不算
+    for n, text in enumerate(["計算總投入與期末市值", "顯示最大跌幅", "查不到代號時回報錯誤"], start=1):
+        assert f'@pytest.mark.criteria("#5-{n}")' in test
+        assert text in test
+    assert "資料來源研究" not in test
+    assert test.count("TODO: 尚未撰寫") == 3
+
+
+def test_new_feature_沒有_issue_時產生單一測試範本(tmp_path):
+    r = run("new_feature.py", "holdings", "--entry", "load_holdings", cwd=tmp_path)
+    assert r.returncode == 0, r.stdout + r.stderr
+    test = (tmp_path / "tests/acceptance/test_holdings.py").read_text()
+    assert test.count("def test_") == 1
+    assert "TODO: 尚未撰寫" in test
+
+
+def test_new_feature_不會覆蓋既有檔案(tmp_path):
+    target = tmp_path / "src/invest/backtest.py"
+    target.parent.mkdir(parents=True)
+    target.write_text("# 既有程式\n")
+    r = run("new_feature.py", "backtest", "--entry", "run_dca", cwd=tmp_path)
+    assert r.returncode == 1
+    assert target.read_text() == "# 既有程式\n"
+    assert "已存在" in r.stdout
+
+
+# ---------- check_criteria.py ----------
+
+def write_test(tmp_path: Path, body: str) -> None:
+    p = tmp_path / "tests/acceptance/test_backtest.py"
+    p.parent.mkdir(parents=True, exist_ok=True)
+    p.write_text(textwrap.dedent(body))
+
+
+def test_check_criteria_每條驗收條件都有測試時通過(tmp_path):
+    write_test(tmp_path, """
+        import pytest
+
+        @pytest.mark.criteria("#5-1")
+        def test_計算總投入():
+            assert True
+
+        @pytest.mark.criteria("#5-2")
+        @pytest.mark.criteria("#5-3")
+        def test_跌幅與錯誤():
+            assert True
+    """)
+    r = run("check_criteria.py", "5", "--body-file", issue_file(tmp_path), cwd=tmp_path)
+    assert r.returncode == 0, r.stdout + r.stderr
+    assert "3/3" in r.stdout
+
+
+def test_check_criteria_列出缺少測試與還是範本的驗收條件(tmp_path):
+    write_test(tmp_path, """
+        import pytest
+
+        @pytest.mark.criteria("#5-1")
+        def test_計算總投入():
+            assert True
+
+        @pytest.mark.criteria("#5-2")
+        def test_最大跌幅():
+            pytest.fail("TODO: 尚未撰寫此驗收條件的測試")
+    """)
+    r = run("check_criteria.py", "5", "--body-file", issue_file(tmp_path), cwd=tmp_path)
+    assert r.returncode == 1
+    lines = r.stdout
+    assert "1/3" in lines
+    assert "#5-2" in lines and "範本" in lines
+    assert "#5-3" in lines and "查不到代號時回報錯誤" in lines
+
+
+def test_check_criteria_issue_沒有驗收條件時提醒(tmp_path):
+    f = tmp_path / "empty.md"
+    f.write_text("## 目的\n沒有驗收條件\n")
+    r = run("check_criteria.py", "9", "--body-file", str(f), cwd=tmp_path)
+    assert r.returncode == 1
+    assert "沒有找到驗收條件" in r.stdout

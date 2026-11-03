@@ -95,7 +95,7 @@
 
 - 位置：`.claude/skills/`（跟著 repo 版控，只在本專案生效）
 - `astro-starlight`：Astro 7 ＋ Starlight 建站、設定、部署；動到網站相關檔案前先讀
-- `atdd`：Python 系統的 ATDD 流程與 pytest／Streamlit AppTest 寫法；寫任何程式前先讀
+- `atdd`：第一個驗收測試先寫（設計 API）＋確認紅燈、每條驗收條件都要有測試；附 3 個檢查 script（new_feature／check_red／check_criteria）；寫任何程式前先讀
 - 共用 skill `atdd-principles`（`~/.claude/skills/`）是通用原則；和 repo 版衝突時以 repo 版為準
 - 新增或修改 skill 時用內建的 `skill-creator`；技術類 skill 要先上網查最新版並實測驗證
 

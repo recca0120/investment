@@ -28,9 +28,12 @@ testpaths = ["tests"]
 pythonpath = ["."]          # 讓測試可以 `from tests.fakes.prices import ...`
 addopts = "--disable-socket --allow-unix-socket"
 markers = [
+  "criteria(id): 對應 issue 的驗收條件編號，例如 #5-1",
   "contract: 需要連網、驗證真實資料來源（預設不跑）",
 ]
 ```
+
+- `criteria` marker 讓 `check_criteria.py` 能找到每條驗收條件對應的測試；沒有註冊的話 pytest 會發出 `PytestUnknownMarkWarning`
 
 - 少了 `pythonpath = ["."]` 時，`from tests.fakes...` 會出現 `ModuleNotFoundError: No module named 'tests'`（pytest 9 實測）
 - `--allow-unix-socket`：Streamlit／asyncio 內部會用到 unix socket，不擋它
@@ -52,13 +55,14 @@ def test_finmind_查得到0050的月資料(): ...
 ```
 src/invest/
   backtest.py           ← use case（公開入口）＋ Protocol
-  app.py                ← Streamlit 畫面
+  container.py          ← composition root（組裝真實依賴）
+  app.py                ← Streamlit 畫面（透過 get_container() 取得依賴）
   sources/              ← 真實資料來源（FinMind、yfinance…）
 tests/
   __init__.py
   fakes/                ← 假物件（FakePriceSource…）
   acceptance/           ← 驗收測試（use case 層）
-  ui/                   ← 驗收測試（AppTest 畫面層）
+  ui/                   ← 驗收測試（AppTest 畫面層）；conftest.py 用 override() 注入 Fake
   unit/                 ← 按需補的單元／性質測試
   contract/             ← 真實來源的契約測試（需要連網）
 ```

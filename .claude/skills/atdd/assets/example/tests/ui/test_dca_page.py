@@ -4,18 +4,12 @@ from pathlib import Path
 
 from streamlit.testing.v1 import AppTest
 
-from tests.fakes.prices import FakePriceSource
-
 APP = str(Path(__file__).parents[2] / "src/invest/app.py")
-PRICES = FakePriceSource({
-    "0050": {date(2026, 1, 2): 100.0, date(2026, 2, 2): 50.0, date(2026, 3, 2): 100.0},
-})
 
 
 def open_page() -> AppTest:
-    at = AppTest.from_file(APP)
-    at.session_state["price_source"] = PRICES
-    return at.run()
+    # 假的依賴由 conftest.py 的 fake_container fixture 注入
+    return AppTest.from_file(APP).run()
 
 
 def test_輸入條件後按回測_畫面顯示總投入_市值_最大跌幅():

@@ -2,25 +2,34 @@
 
 `AppTest` 會在測試的 process 裡直接執行 Streamlit script，不需要開瀏覽器，也不需要啟動伺服器，一個測試大約只花幾十毫秒。
 
-## 讓畫面可以被測試：注入資料來源
+## 注入假的依賴：透過 container
 
-畫面不要直接 new 真實的資料來源，改成先看 `session_state` 裡有沒有注入的來源：
+畫面從 composition root 取得依賴（說明見 `dependency-injection.md`）：
 
 ```python
 # src/invest/app.py
-prices = st.session_state.get("price_source") or default_price_source()
+from invest.container import get_container
+
+prices = get_container().prices
 ```
 
-測試在執行前塞入 Fake：
+UI 測試用 autouse fixture 換掉 container：
 
 ```python
-from streamlit.testing.v1 import AppTest
-
-def open_page() -> AppTest:
-    at = AppTest.from_file("src/invest/app.py")
-    at.session_state["price_source"] = FakePriceSource({...})
-    return at.run()
+# tests/ui/conftest.py
+@pytest.fixture(autouse=True)
+def fake_container():
+    with override(Container(prices=PRICES)) as c:
+        yield c
 ```
+
+```python
+# tests/ui/test_dca_page.py
+def open_page() -> AppTest:
+    return AppTest.from_file(APP).run()
+```
+
+`AppTest` 和測試在同一個 process 執行，所以 `override()` 設定的值，畫面讀得到。沒有 override 時，畫面會走 `build_container()` 的真實路徑（已實測確認）。
 
 ## 每個輸入元件都要給 `key`
 
@@ -64,4 +73,4 @@ assert not at.exception                  # 畫面上沒有出現未處理的例�
 | `st.dataframe` | `at.dataframe` | `.value`（DataFrame） |
 | 未處理例外 | `at.exception` | 空的代表沒有例外 |
 
-完整的可執行範例：`assets/example/tests/ui/test_dca_page.py`。
+完整的可執行範例：`assets/example/tests/ui/`。
