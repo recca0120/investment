@@ -65,9 +65,11 @@ export default defineConfig({
       },
       sidebar: [
         // Starlight 0.39+：autogenerate 必須包在 items 裡
-        { label: '投資知識', items: [{ autogenerate: { directory: 'knowledge' } }] },
-        { label: '決策紀錄', items: [{ autogenerate: { directory: 'decisions' } }] },
-        { label: '討論紀錄', items: [{ autogenerate: { directory: 'log' } }] },
+        // 內容不在 src/content/docs 時，directory 要寫「相對專案根目錄的路徑」（docs/knowledge），
+        // 因為 Starlight 只會去掉寫死的 <srcDir>/content/docs/ 前綴再比對；寫 'knowledge' 側欄會是空的
+        { label: '投資知識', items: [{ autogenerate: { directory: 'docs/knowledge' } }] },
+        { label: '決策紀錄', items: [{ autogenerate: { directory: 'docs/decisions' } }] },
+        { label: '討論紀錄', items: [{ autogenerate: { directory: 'docs/log' } }] },
       ],
     }),
   ],

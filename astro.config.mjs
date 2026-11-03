@@ -34,9 +34,9 @@ export default defineConfig({
       },
       sidebar: [
         // Starlight 0.39+：autogenerate 必須包在 items 裡
-        { label: '投資知識', items: [{ autogenerate: { directory: 'knowledge' } }] },
-        { label: '決策紀錄', items: [{ autogenerate: { directory: 'decisions' } }] },
-        { label: '討論紀錄', items: [{ autogenerate: { directory: 'log' } }] },
+        { label: '投資知識', items: [{ autogenerate: { directory: 'docs/knowledge' } }] },
+        { label: '決策紀錄', items: [{ autogenerate: { directory: 'docs/decisions' } }] },
+        { label: '討論紀錄', items: [{ autogenerate: { directory: 'docs/log' } }] },
       ],
     }),
   ],
