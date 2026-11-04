@@ -189,6 +189,21 @@ def test_check_criteria_Vitest_each_的參數裡有函式呼叫也認得(tmp_pat
     assert "3/3" in r.stdout
 
 
+def test_check_criteria_一個測試對應多條驗收條件(tmp_path):
+    # 實際案例（#60）：全站測試 test('[#58-3][#60-2] …') 同時驗證兩條，只認第一個會回報 #60-2 沒有測試
+    ts = tmp_path / "tests/site/site-wide.test.ts"
+    ts.parent.mkdir(parents=True)
+    ts.write_text(textwrap.dedent("""\
+        import { expect, test } from 'vitest';
+        test('[#5-1] 計算總投入', () => expect(1).toBe(1));
+        test.each([1])('[#4-3][#5-2] %s 表格', (n) => expect(n).toBe(1));
+        test('[#5-3] [#9-1] 有空白也認得', () => expect(1).toBe(1));
+    """))
+    r = run("check_criteria.py", "5", "--body-file", issue_file(tmp_path), cwd=tmp_path)
+    assert r.returncode == 0, r.stdout + r.stderr
+    assert "3/3" in r.stdout
+
+
 def test_check_criteria_可以掃描多個測試目錄(tmp_path):
     write_test(tmp_path, """
         import pytest
