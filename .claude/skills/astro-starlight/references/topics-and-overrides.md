@@ -31,7 +31,11 @@ starlight({
 
 ## 外掛的 bug：有 base 時「上一篇／下一篇」會跨區
 
-外掛在每區第一篇／最後一篇拿掉 prev／next，但它拿含 base 的 href（`investment/knowledge/…`）和不含 base 的頁面 id 比對，**網站有 base 時永遠對不上**，最後一篇知識的「下一篇」會連到決策 0001。用 Starlight 的 route middleware 自己補：
+外掛在每區第一篇／最後一篇拿掉 prev／next，但它拿含 base 的 href（`investment/knowledge/…`）和不含 base 的頁面 id 比對，**網站有 base 時永遠對不上**，最後一篇知識的「下一篇」會連到下一區。
+
+2026-11-04 查證過（本 repo issue #40）：同一份設定只改 base——`/` 正常、`/investment` 跨區；上游沒有人回報、最新原始碼沒改、外掛測試只在沒有 base 的網址下跑。**升級外掛時**：先拿掉 `routeMiddleware` build 一次，看每區最後一篇還有沒有「下一篇」，判斷上游修好了沒。
+
+用 Starlight 的 route middleware 自己補：
 
 ```ts
 // site/route-middleware.ts
