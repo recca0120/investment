@@ -2,31 +2,25 @@
  * 網站樣式入口（astro.config.mjs 的 customCss）
  * - Tailwind v4 ＋ @astrojs/starlight-tailwind：只載入 theme 與 utilities，不載入 preflight（Starlight 有自己的 reset）
  * - 圖層順序：base < starlight < theme < components < utilities；沒有放進圖層的規則最優先
- * - 配色的原始值在 theme.css（日間／夜間各一組），這裡把它們包成語意 token，元件只用 token
+ * - 顏色、字體、圓角：只改 site/design/tokens.ts。build／dev 時編譯成 generated/tokens.css（不進 git），
+ *   同時產生 Starlight、Tailwind、daisyUI 三組變數
+ * - 這裡只放 token 以外的 Tailwind 設定：字級、版寬、斷點、動畫
  */
 @layer base, starlight, theme, components, utilities;
 
 @import '@astrojs/starlight-tailwind';
 @import 'tailwindcss/theme.css' layer(theme);
 @import 'tailwindcss/utilities.css' layer(utilities);
-@import './theme.css';
+@import './generated/tokens.css';
+@import './starlight.css';
 
-/* inline：utility 直接輸出 var(--pb-*)，切換日夜模式時跟著變 */
+/* daisyUI：只用元件，不用它的 reset（Starlight 有自己的）和內建主題；主題由 tokens 產生 */
+@plugin 'daisyui' {
+  themes: false;
+  exclude: reset, rootcolor, rootscrollgutter, rootscrolllock, scrollbar;
+}
+
 @theme inline {
-  --color-sky: var(--c-sky);
-  --color-cloud: var(--c-cloud);
-  --color-rule: var(--c-rule);
-  --color-ink: var(--c-ink);
-  --color-coin: var(--c-coin);
-  --color-coin-ink: var(--c-coin-ink);
-  --color-pig: var(--c-pig);
-  --color-pig-ink: var(--c-pig-ink);
-  --color-heading: var(--sl-color-white); /* Starlight 的 white 是「最強的文字色」，日間其實是深色 */
-  --color-soft: var(--sl-color-gray-2);
-  --color-muted: var(--sl-color-gray-3);
-  --color-link: var(--sl-color-text-accent);
-  --color-mark: var(--sl-color-accent);
-
   /* 字級沿用 Starlight 的尺度，全站只有一套；行高繼承內文 */
   --text-xs: var(--sl-text-xs);
   --text-xs--line-height: inherit;
@@ -42,8 +36,6 @@
 }
 
 @theme {
-  --font-sans: 'Chiron GoRound TC', 'Noto Sans TC', 'PingFang TC', 'Microsoft JhengHei', system-ui, sans-serif;
-
   --text-display: clamp(2.4rem, 5vw, 3.6rem);
   --text-display--line-height: 1.15;
   --container-intro: 28em;

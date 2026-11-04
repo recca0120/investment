@@ -1,0 +1,68 @@
+/*
+ * Starlight 頁面的樣式調整（由 global.css 載入）
+ * 顏色一律用 var(--c-*) 或 var(--sl-color-*)，原始值在 site/design/tokens.ts
+ */
+
+/* Starlight 頁面的樣式調整：放在 components 圖層，蓋過 starlight 圖層，utility class 仍然可以覆寫 */
+@layer components {
+  /* 字體：中文內文略放大行高，標題用粗黑體 */
+  :root {
+    --sl-line-height: 1.8;
+    --sl-line-height-headings: 1.35;
+  }
+  .sl-markdown-content :is(h1, h2, h3),
+  h1#_top {
+    font-weight: 900;
+    letter-spacing: 0;
+  }
+
+  /* 表格：數字等寬、右對齊（.num 由 rehype-num-cells 加上） */
+  .sl-markdown-content table:not(:where(.not-content *)) {
+    font-variant-numeric: tabular-nums;
+    border-collapse: collapse;
+  }
+  .sl-markdown-content :is(th, td):not(:where(.not-content *)) {
+    border: 0;
+    border-bottom: 1px solid var(--c-rule);
+    padding: 0.55em 0.9em;
+  }
+  .sl-markdown-content th:not(:where(.not-content *)) {
+    border-bottom: 2px solid var(--sl-color-white);
+    color: var(--sl-color-white);
+    font-weight: 700;
+    background: transparent;
+  }
+  .sl-markdown-content tr:nth-child(2n):not(:where(.not-content *)) {
+    background: transparent;
+  }
+  .sl-markdown-content :is(td, th).num:not(:where(.not-content *)) {
+    text-align: right;
+    white-space: nowrap;
+  }
+
+  /* 引言（每篇開頭的日期與免責說明）：像存摺上的附註 */
+  .sl-markdown-content blockquote {
+    border-inline-start: 4px solid var(--c-coin);
+    border-radius: 0 0.75rem 0.75rem 0;
+    background: var(--c-cloud);
+    padding: 0.6rem 1rem;
+    color: var(--sl-color-gray-3);
+    font-size: var(--sl-text-sm);
+  }
+
+  /* 側欄目前頁面：圓角的淡色底，像貼了一張便條 */
+  .sidebar-content a[aria-current='page'] {
+    background: var(--sl-color-accent-low);
+    color: var(--sl-color-white);
+    font-weight: 700;
+    border-radius: 0.6rem;
+  }
+  .sidebar-content a {
+    border-radius: 0.6rem;
+  }
+
+  /* 首頁：splash 版面會自動顯示頁面標題，首頁自己有大標題，隱藏重複的那一個 */
+  main:has(.home-hero) .content-panel:has(h1#_top) {
+    display: none;
+  }
+}

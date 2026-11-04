@@ -23,7 +23,7 @@ import { Aside, Tabs, TabItem, Card, CardGrid, Steps, Badge, LinkCard } from '@a
 
 ## 放在 Markdown 裡的自訂元件要加 `not-content`
 
-MDX 裡的元件會被包在 `.sl-markdown-content` 裡，Starlight（以及 `site/styles/theme.css`）的文章樣式會套用到元件內的 `table`、`h2`、`a`，造成雙重框線、格線錯位、連結變色。實際發生在首頁存摺元件上。
+MDX 裡的元件會被包在 `.sl-markdown-content` 裡，Starlight（以及 `site/styles/starlight.css`）的文章樣式會套用到元件內的 `table`、`h2`、`a`，造成雙重框線、格線錯位、連結變色。實際發生在首頁存摺元件上。
 
 - 元件最外層加 `class="not-content"`
 - 自訂的文章樣式寫成 `.sl-markdown-content table:not(:where(.not-content *))`，排除這些元件

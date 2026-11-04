@@ -5,6 +5,7 @@ import tailwindcss from '@tailwindcss/vite';
 import { unified } from '@astrojs/markdown-remark';
 import rehypeMdLinks from './site/plugins/rehype-md-links.mjs';
 import rehypeNumCells from './site/plugins/rehype-num-cells.mjs';
+import designTokens from './site/design/integration.ts';
 
 const base = '/investment'; // GitHub Pages 專案站：/<repo 名稱>
 
@@ -20,10 +21,11 @@ export default defineConfig({
     }),
   },
   integrations: [
+    designTokens(), // site/design/tokens.ts → site/styles/generated/tokens.css
     starlight({
       title: '投資學習筆記',
       description: '股市新手的投資學習筆記',
-      customCss: ['./site/styles/global.css'], // Tailwind ＋ 配色 token；配色原始值在 theme.css
+      customCss: ['./site/styles/global.css'], // Tailwind ＋ daisyUI；顏色原始值在 site/design/tokens.ts
       head: [
         { tag: 'link', attrs: { rel: 'preconnect', href: 'https://fonts.googleapis.com' } },
         { tag: 'link', attrs: { rel: 'preconnect', href: 'https://fonts.gstatic.com', crossorigin: true } },
