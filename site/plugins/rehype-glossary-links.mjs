@@ -59,6 +59,7 @@ function card(id, t) {
   ].filter(Boolean), { id, popover: 'auto', role: 'dialog', ariaLabel: `名詞：${t.term}` });
 }
 
+const toText = (n) => (n.type === 'text' ? n.value : (n.children ?? []).map(toText).join(''));
 const escape = (s) => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 const pattern = (term) => {
   const body = escape(term).replace(/\s+/g, '\\s*');
@@ -79,8 +80,11 @@ export default function rehypeGlossaryLinks({ terms, glossaryDir, base, contentD
 
     const used = new Set();
     const cards = [];
+    // 「## 資料來源」之後會被 rehype-collapse-sources 收進摺疊區：名詞連結放在那裡會看不到（#60）
+    const sourcesAt = tree.children.findIndex((n) => n.type === 'element' && n.tagName === 'h2' && toText(n).trim() === '資料來源');
     visitParents(tree, 'text', (node, ancestors) => {
       if (ancestors.some((a) => a.type === 'element' && SKIP_TAGS.has(a.tagName))) return;
+      if (sourcesAt !== -1 && tree.children.indexOf(ancestors[1] ?? node) > sourcesAt) return;
       // 手機上依列排的表格，表頭會藏起來（每格前面已經有欄名）：名詞不能第一次出現在這裡，否則手機上點不到（#58）
       if (ancestors.some((a, i) => a.tagName === 'thead' && ancestors[i - 1]?.properties?.className?.includes?.('stack-table'))) return;
       const remaining = all.filter((t) => !used.has(t.term));

@@ -11,9 +11,12 @@ const PAGES = [
     .filter((f) => !f.endsWith('README.md'))
     .map((f) => f.replace('../../../docs/', '').replace(/\.mdx?$/, '').toLowerCase() + '/'),
 ];
+// 四種寬度：Starlight 在 50rem（800px）出現側欄、72rem（1152px）出現目錄，中間的寬度內容欄最窄（#60）
 const SIZES = [
-  ['電腦', DESKTOP],
-  ['手機', MOBILE],
+  ['電腦 1400', DESKTOP],
+  ['電腦 1180', { width: 1180, height: 900 }],
+  ['平板 820', { width: 820, height: 1000 }],
+  ['手機 375', MOBILE],
 ] as const;
 
 type Frame = Awaited<ReturnType<typeof openFrame>>;
@@ -36,6 +39,27 @@ function hiddenGlossaryLinks({ doc }: Frame) {
     if (!ok) bad.push(a.textContent!);
   }
   view.scrollTo(0, 0);
+  return bad;
+}
+
+/** 點每一個名詞，打開的小卡要看得到（有寬高）、完整在畫面內、而且是那個名詞的（#60：小卡被收進摺疊區時是 0×0） */
+async function invisibleCards({ doc }: Frame) {
+  const view = doc.defaultView!;
+  const bad: string[] = [];
+  for (const a of doc.querySelectorAll<HTMLElement>('a.glossary-link[data-card]')) {
+    const panel = a.closest<HTMLElement>('[role="tabpanel"]');
+    if (panel?.hidden) continue;
+    a.scrollIntoView({ block: 'center' });
+    a.click();
+    await new Promise((r) => setTimeout(r, 30));
+    const card = doc.querySelector<HTMLElement>('.glossary-card:popover-open');
+    const r = card?.getBoundingClientRect();
+    if (!card || card.id !== a.dataset.card) bad.push(`${a.textContent}：沒有打開自己的小卡`);
+    else if (r!.width < 100 || r!.height < 40) bad.push(`${a.textContent}：小卡看不到（${Math.round(r!.width)}×${Math.round(r!.height)}）`);
+    else if (r!.left < -1 || r!.top < -1 || r!.right > view.innerWidth + 1 || r!.bottom > view.innerHeight + 1)
+      bad.push(`${a.textContent}：小卡超出畫面（${Math.round(r!.left)},${Math.round(r!.top)}～${Math.round(r!.right)},${Math.round(r!.bottom)}）`);
+    card?.hidePopover();
+  }
   return bad;
 }
 
@@ -65,6 +89,15 @@ describe.each(PAGES)('/%s', (path) => {
     }
   });
 
+  test.each(SIZES)('[#60-1] %s：點每一個名詞，小卡看得到、完整在畫面內', async (_, size) => {
+    const page = await openFrame(path, { size });
+    try {
+      expect((await invisibleCards(page)).join('\n'), '小卡有問題的名詞').toBe('');
+    } finally {
+      page.close();
+    }
+  });
+
   test.each(SIZES)('[#58-2] %s：每個名詞連結都看得到、點得到', async (_, size) => {
     const page = await openFrame(path, { size });
     try {
@@ -74,7 +107,7 @@ describe.each(PAGES)('/%s', (path) => {
     }
   });
 
-  test.each(SIZES)('[#58-3] %s：表格不用左右滑、沒有東西超出內容欄、格子沒被擠扁；依列排的表每一格看得到欄名', async (_, size) => {
+  test.each(SIZES)('[#58-3][#60-2] %s：表格不用左右滑、沒有東西超出內容欄、格子沒被擠扁；依列排的表每一格看得到欄名', async (_, size) => {
     const page = await openFrame(path, { size });
     try {
       const content = page.doc.querySelector('.sl-markdown-content');

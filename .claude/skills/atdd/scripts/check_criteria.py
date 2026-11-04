@@ -35,9 +35,10 @@ def criteria_ids(decorator: ast.expr) -> list[str]:
 
 
 # test('[#15-1] …')、it.only("[#15-1] …")、test.todo(`[#15-1] …`)、test.each(rows)('[#15-1] …')
+# 一個測試可以同時對應多條驗收條件：test('[#58-3][#60-2] …')
 # .each(…) 的參數可能有巢狀括號（test.each(files())、rows.filter((r) => r.ok)），最多支援三層
 _PARENS = r"\((?:[^()]|\((?:[^()]|\([^()]*\))*\))*\)"
-VITEST_CASE = re.compile(r"(?<![\w.])(?:test|it)((?:\.\w+(?:" + _PARENS + r")?)*)\(\s*(['\"`])\[(#\d+-\d+)\]\s*([^'\"`]*)")
+VITEST_CASE = re.compile(r"(?<![\w.])(?:test|it)((?:\.\w+(?:" + _PARENS + r")?)*)\(\s*(['\"`])((?:\[#\d+-\d+\]\s*)+)([^'\"`]*)")
 VITEST_FILES = ("*.test.ts", "*.test.tsx", "*.test.js", "*.test.mjs", "*.spec.ts", "*.spec.js")
 
 
@@ -48,7 +49,8 @@ def scan_vitest(path: Path, found: dict[str, list[tuple[str, bool]]]) -> None:
         # 測試內容：到下一個測試開頭為止（近似值，足以判斷是否還是範本）
         body = source[m.end(): matches[i + 1].start() if i + 1 < len(matches) else len(source)]
         is_template = ".todo" in m.group(1) or TEMPLATE_MARK in body
-        found.setdefault(m.group(3), []).append((f"{path}::{m.group(4).strip()}", is_template))
+        for cid in re.findall(r"#\d+-\d+", m.group(3)):
+            found.setdefault(cid, []).append((f"{path}::{m.group(4).strip()}", is_template))
 
 
 def scan_tests(tests_dir: Path) -> dict[str, list[tuple[str, bool]]]:

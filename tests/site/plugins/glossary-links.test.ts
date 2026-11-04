@@ -164,3 +164,20 @@ test('[#58-2] 手機上會藏起來的表頭（stack-table）不放名詞連結�
   expect(document.querySelector('thead a')).toBeNull();
   expect(document.querySelector('tbody a.glossary-link')?.textContent).toBe('ETF');
 });
+
+test('[#60-1] 「資料來源」之後的文字不放名詞連結（會被收合，連結看不到），改連內文', async () => {
+  const terms = [{ term: 'ETF', href: '/g/#etf', oneLine: '一籃子股票' }];
+  const out = String(
+    await unified().use(rehypeParse, { fragment: true })
+      .use(rehypeGlossaryLinks, { terms, contentDir: './docs' }).use(rehypeStringify)
+      .process(new VFile({ value: '<h2>資料來源</h2><ul><li>ETF 介紹</li></ul><h2>之後</h2>', path: 'docs/knowledge/x.md' })),
+  );
+  expect(out).not.toContain('glossary-link');
+  const out2 = String(
+    await unified().use(rehypeParse, { fragment: true })
+      .use(rehypeGlossaryLinks, { terms, contentDir: './docs' }).use(rehypeStringify)
+      .process(new VFile({ value: '<p>ETF 很好</p><h2>資料來源</h2><ul><li>ETF 介紹</li></ul>', path: 'docs/knowledge/x.md' })),
+  );
+  expect(out2.match(/glossary-link/g)).toHaveLength(1);
+  expect(out2.indexOf('glossary-link')).toBeLessThan(out2.indexOf('資料來源'));
+});
