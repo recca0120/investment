@@ -1,0 +1,218 @@
+[
+  {
+    "input": {
+      "symbol": "0050",
+      "monthly": 5000,
+      "start": "2016-01-01",
+      "end": "2026-10-31",
+      "dividends": true,
+      "twd": true,
+      "tax": true
+    },
+    "expected": {
+      "totalInvested": 650000.0,
+      "finalValue": 3074573.824474492,
+      "annualized": 0.26739968770070355,
+      "maxDrawdown": 0.33956941576582045,
+      "days": 2631,
+      "worst": {
+        "date": "2020-03-19",
+        "invested": 255000.0,
+        "value": 249538.87926245705,
+        "recovered": "2020-03-20"
+      }
+    }
+  },
+  {
+    "input": {
+      "symbol": "0050",
+      "monthly": 5000,
+      "start": "2016-01-01",
+      "end": "2026-10-31",
+      "dividends": false,
+      "twd": true,
+      "tax": true
+    },
+    "expected": {
+      "totalInvested": 650000.0,
+      "finalValue": 2526283.5814540763,
+      "annualized": 0.23445454326719373,
+      "maxDrawdown": 0.3638157894736842,
+      "days": 2631,
+      "worst": {
+        "date": "2020-03-19",
+        "invested": 255000.0,
+        "value": 227177.68829520678,
+        "recovered": "2020-03-26"
+      }
+    }
+  },
+  {
+    "input": {
+      "symbol": "0050",
+      "monthly": 3000,
+      "start": "2021-12-01",
+      "end": "2026-10-31",
+      "dividends": true,
+      "twd": true,
+      "tax": true
+    },
+    "expected": {
+      "totalInvested": 177000.0,
+      "finalValue": 491360.75158978347,
+      "annualized": 0.43122702749084485,
+      "maxDrawdown": 0.33956941576582045,
+      "days": 1185,
+      "worst": {
+        "date": "2022-10-25",
+        "invested": 33000.0,
+        "value": 25577.70212542408,
+        "recovered": "2023-01-30"
+      }
+    }
+  },
+  {
+    "input": {
+      "symbol": "0050",
+      "monthly": 3000,
+      "start": "2007-10-01",
+      "end": "2012-12-31",
+      "dividends": true,
+      "twd": true,
+      "tax": true
+    },
+    "expected": {
+      "totalInvested": 189000.0,
+      "finalValue": 219829.43347544395,
+      "annualized": 0.05708144348403821,
+      "maxDrawdown": 0.5575254697990006,
+      "days": 1313,
+      "worst": {
+        "date": "2008-11-20",
+        "invested": 42000.0,
+        "value": 23385.07688941735,
+        "recovered": "2009-05-05"
+      }
+    }
+  },
+  {
+    "input": {
+      "symbol": "006208",
+      "monthly": 1000,
+      "start": "2020-01-01",
+      "end": "2024-12-31",
+      "dividends": true,
+      "twd": true,
+      "tax": true
+    },
+    "expected": {
+      "totalInvested": 60000.0,
+      "finalValue": 104052.77586896378,
+      "annualized": 0.22181335343764041,
+      "maxDrawdown": 0.33813228897245073,
+      "days": 1216,
+      "worst": {
+        "date": "2022-10-25",
+        "invested": 34000.0,
+        "value": 30089.3074868284,
+        "recovered": "2022-11-11"
+      }
+    }
+  },
+  {
+    "input": {
+      "symbol": "VT",
+      "monthly": 5000,
+      "start": "2016-01-01",
+      "end": "2026-10-31",
+      "dividends": true,
+      "twd": true,
+      "tax": true
+    },
+    "expected": {
+      "totalInvested": 650000.0,
+      "finalValue": 1354733.436272189,
+      "annualized": 0.12922297729315735,
+      "maxDrawdown": 0.3365236795112877,
+      "days": 2723,
+      "worst": {
+        "date": "2020-03-23",
+        "invested": 255000.0,
+        "value": 206494.47253234877,
+        "recovered": "2020-04-14"
+      }
+    }
+  },
+  {
+    "input": {
+      "symbol": "VT",
+      "monthly": 5000,
+      "start": "2016-01-01",
+      "end": "2026-10-31",
+      "dividends": true,
+      "twd": false,
+      "tax": false
+    },
+    "expected": {
+      "totalInvested": 650000.0,
+      "finalValue": 1331749.9445282177,
+      "annualized": 0.12629985742522132,
+      "maxDrawdown": 0.3423756678997122,
+      "days": 2723,
+      "worst": {
+        "date": "2020-03-23",
+        "invested": 255000.0,
+        "value": 214926.8262960526,
+        "recovered": "2020-04-08"
+      }
+    }
+  },
+  {
+    "input": {
+      "symbol": "VT",
+      "monthly": 5000,
+      "start": "2016-01-01",
+      "end": "2026-10-31",
+      "dividends": false,
+      "twd": true,
+      "tax": false
+    },
+    "expected": {
+      "totalInvested": 650000.0,
+      "finalValue": 1240088.324222287,
+      "annualized": 0.11408623001819451,
+      "maxDrawdown": 0.3383435031198375,
+      "days": 2723,
+      "worst": {
+        "date": "2020-03-23",
+        "invested": 255000.0,
+        "value": 198692.8340949162,
+        "recovered": "2020-05-18"
+      }
+    }
+  },
+  {
+    "input": {
+      "symbol": "BND",
+      "monthly": 2000,
+      "start": "2018-06-01",
+      "end": "2023-06-30",
+      "dividends": true,
+      "twd": true,
+      "tax": true
+    },
+    "expected": {
+      "totalInvested": 122000.0,
+      "finalValue": 118882.46844575087,
+      "annualized": -0.010032509177502258,
+      "maxDrawdown": 0.15156427850599918,
+      "days": 1279,
+      "worst": {
+        "date": "2022-06-14",
+        "invested": 98000.0,
+        "value": 89246.16581128023,
+        "recovered": null
+      }
+    }
+  }
+]
