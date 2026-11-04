@@ -35,7 +35,7 @@
   - 新增或修改後跑 `npm run test:site`（build ＋ 網站測試，會檢查側欄和站內連結）
 - `docs/glossary/`：**新手名詞解釋**，分 6 類各一頁；每個名詞是一個 `###` 標題，固定寫「一句話、用途、例子、新手注意」
   - 知識文章裡第一次出現的名詞會自動連過去，點了打開名詞小卡（取「一句話」「新手注意」，#50）；`site/plugins/rehype-glossary-links.mjs`，名詞標題就是錨點，不要隨便改名
-  - 文章用到新名詞時，順手補進名詞解釋
+  - 寫或改文章前後用 `glossary` skill 的工具核對名詞：`node .claude/skills/glossary/scripts/terms.mjs list`（寫前列出名詞）、`check <文章>`（寫完核對：會連成小卡的名詞、別名、漏掉的名詞、沒資訊的標題）；別名表在 `docs/glossary/aliases.json`
 - `docs/log/`：**每次討論的紀錄**（原始脈絡）
   - 檔名 `YYYY-MM-DD-主題.md`，同一天多次討論加後綴
   - 記錄：使用者問了什麼、結論、待辦、產生了哪些 issue
@@ -121,6 +121,7 @@
 - 位置：`.claude/skills/`（跟著 repo 版控，只在本專案生效）
 - `astro-starlight`：Astro 7 ＋ Starlight 建站、設定、部署；動到網站相關檔案前先讀
 - `zod`：zod 4 與網站／Python 共用資料格式（zod → JSON Schema → Pydantic）；碰到兩邊交換的資料（新增欄位、新資料檔、匯出腳本、`npm run schemas`）前先讀；附 parity_check（檢查兩邊判斷是否一致）與 verify-zod（升級 zod 後驗證）
+- `glossary`：名詞解釋與寫文章時的名詞核對；附 `scripts/terms.mjs`（list／check／check --all，和網站用同一套連結規則）
 - `site-design`：網站設計流程與規則（不拿設計問題問使用者、先研究再做樣稿、token、daisyUI、閱讀研究）；附 `scripts/shoot.py`（日間／夜間／手機截圖）
 - `atdd`：第一個驗收測試先寫（設計 API）＋確認紅燈、每條驗收條件都要有測試；pytest 與 Vitest 都適用；附 3 個檢查 script（new_feature／check_red／check_criteria）；寫任何程式（含網站）前先讀
 - 共用 skill `atdd-principles`（`~/.claude/skills/`）是通用原則；和 repo 版衝突時以 repo 版為準
