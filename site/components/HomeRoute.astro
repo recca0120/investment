@@ -1,0 +1,66 @@
+---
+// 首頁：新手路線（#22-11）。從知識文章自動產生，分組邏輯和側欄共用（site/lib/stations.ts），新增文章自動多一站
+// docs、base 可以用 props 傳入（Vitest 裡 getCollection() 讀不到資料、BASE_URL 固定是 '/'）
+import { loadDocs, sectionDocs, type DocInfo } from '../lib/docs';
+import { groupStations } from '../lib/stations';
+
+interface Props {
+  docs?: DocInfo[];
+  base?: string;
+}
+const docs = Astro.props.docs ?? (await loadDocs());
+const base = (Astro.props.base ?? import.meta.env.BASE_URL).replace(/\/$/, '');
+const stations = groupStations(sectionDocs(docs, 'knowledge').map((d) => ({ ...d, label: d.title })));
+const href = (d: DocInfo) => `${base}/${d.id}/`;
+---
+
+<section class="not-content mt-14" aria-labelledby="home-route-title">
+  <div class="flex flex-wrap items-baseline justify-between gap-x-4">
+    <h2 id="home-route-title" class="m-0 text-h3 font-black text-heading">新手路線</h2>
+    <p class="m-0 text-sm text-muted">共 {stations.length} 站，照順序讀</p>
+  </div>
+  <ol class="mt-4 grid list-none gap-3 p-0 sm:grid-cols-2 lg:grid-cols-3">
+    {
+      stations.map((station, i) => (
+        <li class="card card-border m-0 border-rule bg-cloud">
+          <div class="card-body flex-row items-start gap-3 p-4">
+            <span
+              class="grid size-9 shrink-0 place-items-center rounded-full bg-coin text-sm font-black text-coin-ink shadow-coin"
+              aria-hidden="true"
+            >
+              {i + 1}
+            </span>
+            <div class="min-w-0">
+              {station.pages.length === 1 ? (
+                <a href={href(station.pages[0])} class="font-bold text-ink no-underline hover:text-link hover:underline">
+                  <span class="sr-only">{i + 1} </span>
+                  {station.label}
+                </a>
+              ) : (
+                <>
+                  <a href={href(station.pages[0])} class="font-bold text-ink no-underline hover:text-link hover:underline">
+                    <span class="sr-only">{i + 1} </span>
+                    {station.label}
+                  </a>
+                  <ul class="m-0 mt-1 flex list-none flex-wrap gap-x-3 p-0 text-sm">
+                    {station.pages.map((p) => (
+                      <li class="m-0">
+                        <a href={href(p)} class="text-link">
+                          {p.pageLabel}
+                        </a>
+                      </li>
+                    ))}
+                  </ul>
+                </>
+              )}
+              {station.pages[0].description && station.pages.length === 1 && (
+                <p class="mt-1 mb-0 text-sm text-muted">{station.pages[0].description}</p>
+              )}
+            </div>
+          </div>
+        </li>
+      ))
+    }
+  </ol>
+  <a href={href(stations[0].pages[0])} class="btn btn-primary mt-4 rounded-full no-underline">從第 1 站開始</a>
+</section>

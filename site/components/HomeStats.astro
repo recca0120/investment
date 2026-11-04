@@ -1,0 +1,35 @@
+---
+// 首頁：回測的關鍵數字（#22）。數字來自 scripts/export_passbook.py 產生的 site/data/passbook.json，不寫死
+import passbook from '../data/passbook.json';
+
+interface Props {
+  data?: typeof passbook;
+}
+const { data = passbook } = Astro.props;
+const pct = (v: number) => `${(v * 100).toFixed(1)}%`;
+const wan = (v: number) => `${Math.round(v / 10000).toLocaleString('zh-TW')} 萬`;
+---
+
+<section class="not-content mt-14" aria-labelledby="home-stats-title">
+  <h2 id="home-stats-title" class="m-0 text-h3 font-black text-heading">回測的關鍵數字</h2>
+  <p class="mt-1 mb-0 text-sm text-muted">
+    {data.symbol}，{data.start.slice(0, 7)}～{data.end.slice(0, 7)} 每月定期定額 {data.monthly.toLocaleString('zh-TW')} 元，股利再投入。歷史報酬不代表未來。
+  </p>
+  <div class="stats stats-vertical mt-4 w-full border border-rule bg-cloud md:stats-horizontal">
+    <div class="stat">
+      <div class="stat-title text-muted">年化報酬</div>
+      <div class="stat-value text-ink">{pct(data.annualized)}</div>
+      <div class="stat-desc text-muted">平均每年賺多少（考慮複利）</div>
+    </div>
+    <div class="stat">
+      <div class="stat-title text-muted">期間最大跌幅</div>
+      <div class="stat-value text-ink">{pct(data.maxDrawdown)}</div>
+      <div class="stat-desc text-muted">帳上曾經從高點少掉的比例</div>
+    </div>
+    <div class="stat">
+      <div class="stat-title text-muted">放進去 → 現在</div>
+      <div class="stat-value text-ink">{wan(data.invested)} → {wan(data.final)}</div>
+      <div class="stat-desc text-muted">{data.months} 個月</div>
+    </div>
+  </div>
+</section>

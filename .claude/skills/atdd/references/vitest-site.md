@@ -98,7 +98,7 @@ const base = (Astro.props.base ?? import.meta.env.BASE_URL).replace(/\/$/, '');
 ```
 
 ```ts
-const screen = await render(ReadingOrder, { props: { docs, base: '/investment/' } });
+const screen = await render(HomeRoute, { props: { docs, base: '/investment/' } });
 ```
 
 - 測試資料手寫小樣本，預期值能直接對照；真實資料是否接上，由驗收測試（讀 dist）確認

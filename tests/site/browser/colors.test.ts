@@ -28,7 +28,7 @@ describe.each(['light', 'dark'] as const)('%s 模式', (theme) => {
         引言: article.style('.sl-markdown-content blockquote').color,
         連結: article.style('.sl-markdown-content li > a').color,
         側欄: article.style('.sidebar-content a:not([aria-current])').color,
-        首頁說明: home.style('.reading li p').color,
+        首頁說明: home.style('[aria-labelledby="home-route-title"] li p').color,
       };
       for (const [name, color] of Object.entries(pairs)) {
         expect(contrast(color, bg), `${name} ${color} 對 ${bg}`).toBeGreaterThanOrEqual(4.5);
@@ -45,6 +45,41 @@ describe.each(['light', 'dark'] as const)('%s 模式', (theme) => {
       expect(page.style('body').fontFamily).toMatch(/^"Chiron GoRound TC"/);
       expect(page.style('body').backgroundColor).toBe(SKY[theme]);
       expect(page.doc.fonts.check('16px "Chiron GoRound TC"', '撲滿')).toBe(true);
+    } finally {
+      page.close();
+    }
+  });
+});
+
+/** 從元素往上找第一個有底色的祖先，當作文字的底色 */
+function backgroundOf(el: Element): string {
+  const view = el.ownerDocument.defaultView!;
+  for (let node: Element | null = el; node; node = node.parentElement) {
+    const bg = view.getComputedStyle(node).backgroundColor;
+    if (bg && !/rgba\(.*,\s*0\)$|transparent/.test(bg)) return bg;
+  }
+  return view.getComputedStyle(el.ownerDocument.body).backgroundColor;
+}
+
+describe.each(['light', 'dark'] as const)('%s 模式', (theme) => {
+  test('[#22-7] 首頁新加的區塊（關鍵數字、新手路線、分區、最近更新）文字對比至少 4.5:1', async () => {
+    const page = await openFrame('', { theme });
+    try {
+      const regions = ['回測的關鍵數字', '新手路線', '網站分區', '最近更新'].map((name) => {
+        const heading = [...page.doc.querySelectorAll('h2')].find((h) => h.textContent!.trim() === name);
+        expect(heading, `找不到「${name}」`).toBeDefined();
+        return page.doc.querySelector(`[aria-labelledby="${heading!.id}"]`)!;
+      });
+      const view = page.doc.defaultView!;
+      const low = regions.flatMap((region) =>
+        [...region.querySelectorAll('*')]
+          .filter((el) => [...el.childNodes].some((n) => n.nodeType === 3 && n.textContent!.trim()))
+          .filter((el) => !el.closest('[aria-hidden="true"], .sr-only'))
+          .map((el) => ({ el, ratio: contrast(view.getComputedStyle(el).color, backgroundOf(el)) }))
+          .filter(({ ratio }) => ratio < 4.5)
+          .map(({ el, ratio }) => `「${el.textContent!.trim().slice(0, 12)}」${ratio}`),
+      );
+      expect(low).toEqual([]);
     } finally {
       page.close();
     }
