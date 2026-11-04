@@ -1,6 +1,10 @@
 ---
 title: 股價資料來源評估
 description: 證交所、FinMind、yfinance 的實測比較，以及回測系統採用的資料來源
+summary:
+  - 台股用 FinMind 的原始價、股利、分割，自己算還原價
+  - 美股用 FinMind 的 Adj_Close
+  - yfinance 只做交叉驗證，證交所只用來抽查
 sidebar:
   order: 7 # 新手路線第 7 站（決策 0006）
 ---
