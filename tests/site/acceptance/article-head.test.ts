@@ -72,3 +72,38 @@ test('[#22-3] 文章 07 的回測結果用分頁切換：含息／只看價格�
     expect(panel!.querySelector('table'), `${tab.textContent} 的面板裡要有結果表`).not.toBeNull();
   }
 });
+
+describe('文章 08 拆成兩頁', () => {
+  const PAGES = [
+    { path: 'knowledge/08-us-stock-channels-tax/', label: '① 選管道' },
+    { path: 'knowledge/08-us-stock-tax/', label: '② 稅務' },
+  ];
+
+  test.each(PAGES)('[#22-9] $label 頁：頂部有「① 選管道」「② 稅務」兩個頁籤互相連結，目前這頁有標示', ({ path, label }) => {
+    const { screen } = openPage(path);
+    const tabs = within(screen.getByRole('navigation', { name: '這篇的分頁' })).getAllByRole('link');
+    expect(tabs.map((t) => t.textContent!.trim())).toEqual(PAGES.map((p) => p.label));
+    expect(tabs.map((t) => t.getAttribute('href'))).toEqual(PAGES.map((p) => `/investment/${p.path}`));
+    for (const tab of tabs) {
+      if (tab.textContent!.trim() === label) expect(tab).toHaveAttribute('aria-current', 'page');
+      else expect(tab).not.toHaveAttribute('aria-current');
+    }
+  });
+
+  test('[#22-9] 原本的網址仍然打得開，就是「① 選管道」', () => {
+    const { screen } = openPage('knowledge/08-us-stock-channels-tax/');
+    const current = within(screen.getByRole('navigation', { name: '這篇的分頁' })).getByRole('link', { current: 'page' });
+    expect(current.textContent!.trim()).toBe('① 選管道');
+  });
+
+  test('[#22-10] 「① 選管道」有「我該用哪一種管道？」流程圖，用文字做、讀得到四種管道', () => {
+    const { screen } = openPage('knowledge/08-us-stock-channels-tax/');
+    const figure = screen.getByRole('figure', { name: '我該用哪一種管道？' });
+    expect(figure.querySelector('img, canvas'), '流程圖不能是圖片').toBeNull();
+    for (const channel of ['複委託', '海外券商', '愛爾蘭註冊 ETF', '台股上市的海外指數 ETF']) {
+      expect(figure.textContent, channel).toContain(channel);
+    }
+    // 每個選項都是問題底下的清單，螢幕閱讀器可以依序讀
+    expect(within(figure).getAllByRole('list').length).toBeGreaterThanOrEqual(2);
+  });
+});

@@ -16,7 +16,10 @@ export function publishedDocs(section: SectionDir) {
     .map((e) => {
       const slug = e.name.replace(/\.mdx?$/, '');
       const source = readFileSync(`docs/${section}/${e.name}`, 'utf8');
-      return { slug, path: `${section}/${slug}/`, title: source.match(/^title:\s*(.+)$/m)![1].trim() };
+      const title = source.match(/^title:\s*(.+)$/m)![1].trim();
+      // 拆成好幾頁的文章，側欄顯示的是頁籤名稱（frontmatter 的 part.label，例如「① 選管道」）
+      const partLabel = source.match(/^part:\n(?:\s+.+\n)*?\s+label:\s*(.+)$/m)?.[1].trim();
+      return { slug, path: `${section}/${slug}/`, title, sidebarLabel: partLabel ?? title };
     })
     .sort((a, b) => a.slug.localeCompare(b.slug));
 }

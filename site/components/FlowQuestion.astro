@@ -1,0 +1,43 @@
+---
+// 流程圖的一個問題與它的選項（遞迴）：選項底下是結論（daisyUI card）或下一個問題
+// 用巢狀清單讓螢幕閱讀器依序讀；畫面上用左邊線條表示分支
+export interface Answer {
+  /** 選項，例如「不想」 */
+  when: string;
+  /** 結論：管道名稱與一句說明 */
+  result?: { name: string; note: string };
+  /** 或是下一個問題 */
+  next?: Question;
+}
+export interface Question {
+  ask: string;
+  answers: Answer[];
+}
+
+const { question } = Astro.props as { question: Question };
+---
+
+<div>
+  <p class="m-0 inline-block rounded-field bg-neutral px-4 py-2 font-black text-neutral-content">{question.ask}</p>
+  <ul class="m-0 mt-3 list-none space-y-4 border-l-2 border-rule pl-4">
+    {
+      question.answers.map((answer) => (
+        <li class="m-0">
+          <p class="m-0 mb-2 text-sm font-bold text-muted">
+            <span aria-hidden="true">↳ </span>
+            {answer.when}
+          </p>
+          {answer.result && (
+            <div class="card card-border card-sm border-rule bg-base-100">
+              <div class="card-body gap-1">
+                <p class="m-0 text-base font-black text-ink">{answer.result.name}</p>
+                <p class="m-0 text-sm text-soft">{answer.result.note}</p>
+              </div>
+            </div>
+          )}
+          {answer.next && <Astro.self question={answer.next} />}
+        </li>
+      ))
+    }
+  </ul>
+</div>

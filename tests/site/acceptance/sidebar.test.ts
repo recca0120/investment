@@ -15,12 +15,12 @@ describe('側欄', () => {
     const nav = sidebar(openPage(current.path).screen);
 
     for (const doc of docs) {
-      expect(nav.getByRole('link', { name: new RegExp(doc.title) }), doc.path).toHaveAttribute(
+      expect(nav.getByRole('link', { name: new RegExp(doc.sidebarLabel) }), doc.path).toHaveAttribute(
         'href',
         `/investment/${doc.path}`,
       );
     }
-    expect(nav.getByRole('link', { name: new RegExp(current.title) })).toHaveAttribute('aria-current', 'page');
+    expect(nav.getByRole('link', { name: new RegExp(current.sidebarLabel) })).toHaveAttribute('aria-current', 'page');
   });
 });
 
