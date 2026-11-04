@@ -16,6 +16,21 @@
     letter-spacing: 0;
   }
 
+  /* 內文一行約 38 字（#52，決策 0006；W3C clreq：橫排不宜超過 48 字）。
+     只限制段落、清單、引言；表格、分頁、圖解維持內文欄的寬度（45rem），放得下更多欄。
+     用 em：引言字比較小，一行的字數一樣。清單有縮排，所以 ul／ol 多給縮排的寬度 */
+  .sl-markdown-content p:not(:where(table *, li *, blockquote *, .not-content *)) {
+    max-inline-size: 38em;
+  }
+  /* 引言有左線和留白：寬度算在內容上（content-box），裡面的字才是 38 字 */
+  .sl-markdown-content blockquote:not(:where(.not-content *)) {
+    box-sizing: content-box;
+    max-inline-size: 38em;
+  }
+  .sl-markdown-content :is(ul, ol):not(:where(table *, li *, .not-content *)) {
+    max-inline-size: calc(38em + 1.5rem);
+  }
+
   /* 表格：數字等寬、右對齊（.num 由 rehype-num-cells 加上） */
   .sl-markdown-content table:not(:where(.not-content *)) {
     font-variant-numeric: tabular-nums;
