@@ -1,0 +1,66 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$ref": "#/$defs/PriceSeries",
+  "$defs": {
+    "PriceSeries": {
+      "type": "object",
+      "properties": {
+        "symbol": {
+          "type": "string",
+          "minLength": 1,
+          "description": "代號，例如 0050、VT"
+        },
+        "currency": {
+          "type": "string",
+          "enum": [
+            "TWD",
+            "USD"
+          ],
+          "description": "幣別：台股 TWD、美股 USD"
+        },
+        "dates": {
+          "minItems": 1,
+          "type": "array",
+          "items": {
+            "type": "string",
+            "format": "date",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))$",
+            "description": "日期（YYYY-MM-DD）"
+          },
+          "description": "交易日（由舊到新）"
+        },
+        "close": {
+          "type": "array",
+          "items": {
+            "type": "number"
+          },
+          "description": "只調整股票分割的收盤價"
+        },
+        "total": {
+          "type": "array",
+          "items": {
+            "type": "number"
+          },
+          "description": "含息還原價（股利再投入）"
+        },
+        "totalTaxed": {
+          "description": "美股：股利扣 30% 預扣稅後的含息價",
+          "type": "array",
+          "items": {
+            "type": "number"
+          }
+        }
+      },
+      "required": [
+        "symbol",
+        "currency",
+        "dates",
+        "close",
+        "total"
+      ],
+      "additionalProperties": false,
+      "title": "PriceSeries",
+      "description": "一檔的價格資料（public/data/prices/<代號>.json）"
+    }
+  }
+}

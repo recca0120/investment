@@ -7,7 +7,11 @@ from __future__ import annotations
 
 from datetime import date
 
+from pydantic import BaseModel
+
 from invest.backtest import US_DIVIDEND_TAX, after_dividend_tax
+from invest.schemas.fx_series import FxSeries
+from invest.schemas.price_series import PriceSeries
 from invest.prices import FxRate, FxSource, PricePoint, PriceSource, UnknownSymbolError, currency
 
 
@@ -24,17 +28,17 @@ def export_series(prices: PriceSource, symbol: str, start: date, end: date) -> d
     }
     if out["currency"] == "USD":
         out["totalTaxed"] = [round(v, 4) for v in after_dividend_tax(points, US_DIVIDEND_TAX)]
-    return out
+    return validated(PriceSeries, out)
 
 
 def export_fx(fx: FxSource, start: date, end: date) -> dict:
     """美元匯率：toUsd 是買美元的價格（銀行即期賣出），toTwd 是換回新台幣的價格（即期買入）。"""
     rates = fx.usd_twd(start, end)
-    return {
+    return validated(FxSeries, {
         "dates": [r.date.isoformat() for r in rates],
         "toUsd": [r.to_usd for r in rates],
         "toTwd": [r.to_twd for r in rates],
-    }
+    })
 
 
 class JsonPriceSource:
@@ -60,3 +64,13 @@ class JsonFxSource:
 
     def usd_twd(self, start: date, end: date) -> list[FxRate]:
         return [r for r in self._rates if start <= r.date <= end]
+
+
+def validated(model: type[BaseModel], data: dict | list) -> dict | list:
+    """寫出 JSON 前用共用格式驗證（#44）；格式不符丟出 ValidationError。
+
+    回傳 Pydantic 正規化後的 JSON 形式（日期轉成 YYYY-MM-DD 字串）。
+    用 exclude_unset：沒給的選填欄位（例如台股的 totalTaxed）不輸出，但明確給 null 的欄位
+    （例如還沒回本的 recovered）要保留；用 exclude_none 會把它也拿掉，網頁的驗證就會失敗
+    """
+    return model.model_validate(data).model_dump(mode="json", exclude_unset=True)

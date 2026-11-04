@@ -14,7 +14,9 @@ from pathlib import Path
 
 from invest.backtest import US_DIVIDEND_TAX, compare_dca, worst_paper_loss
 from invest.container import build_container
-from invest.export import JsonFxSource, JsonPriceSource, export_fx, export_series
+from invest.export import JsonFxSource, JsonPriceSource, export_fx, export_series, validated
+from invest.schemas.backtest_golden import BacktestGolden
+from invest.schemas.price_index import PriceIndex
 
 # 名詞解釋「常見代號」裡 FinMind 有的（VWRA 在倫敦掛牌，FinMind 沒有）
 SYMBOLS = ["0050", "006208", "0056", "00878", "00679B", "VT", "VTI", "VXUS", "BND"]
@@ -48,7 +50,7 @@ fx = export_fx(container.fx, START, END)
 index = {"symbols": [
     {"symbol": s, "currency": v["currency"], "first": v["dates"][0], "last": v["dates"][-1]} for s, v in series.items()
 ]}
-(OUT / "index.json").write_text(json.dumps(index, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+(OUT / "index.json").write_text(json.dumps(validated(PriceIndex, index), ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
 
 # 標準答案：Python 讀回剛寫出的 JSON 計算（和瀏覽器吃同一份資料）
 prices, rates = JsonPriceSource(series), JsonFxSource(fx)
@@ -76,5 +78,5 @@ for sc in SCENARIOS:
         },
     })
 GOLDEN.parent.mkdir(parents=True, exist_ok=True)
-GOLDEN.write_text(json.dumps(golden, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+GOLDEN.write_text(json.dumps(validated(BacktestGolden, golden), ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
 print(f"標準答案：{len(golden)} 組 → {GOLDEN}")

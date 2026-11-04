@@ -5,6 +5,7 @@ description = "股市新手的投資輔助系統"
 requires-python = ">=3.12"
 dependencies = [
     "pandas>=3.1.0",
+    "pydantic>=2.14.2",
     "streamlit>=1.66.1",
 ]
 
@@ -26,6 +27,7 @@ markers = [
 
 [dependency-groups]
 dev = [
+    "datamodel-code-generator>=0.88.0",
     "hypothesis>=6.170.14",
     "pytest>=9.2.0",
     "pytest-socket>=0.8.1",

@@ -1,17 +1,7 @@
 /** 網站回測器的計算（#41，決策 0008）。Python（src/invest/backtest.py）是標準答案 */
-export interface PriceSeries {
-  symbol: string;
-  currency: 'TWD' | 'USD';
-  dates: string[];
-  close: number[];
-  total: number[];
-  totalTaxed?: number[];
-}
-export interface FxSeries {
-  dates: string[];
-  toUsd: number[];
-  toTwd: number[];
-}
+// 資料格式（PriceSeries、FxSeries）只定義在 schemas.ts（zod），Python 的 Pydantic 模型由它產生（#44，決策 0009）
+import type { FxSeries, PriceSeries } from './schemas';
+export type { FxSeries, PriceSeries };
 export interface DcaOptions {
   monthly: number;
   start: string;

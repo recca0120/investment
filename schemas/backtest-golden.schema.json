@@ -1,0 +1,137 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$ref": "#/$defs/BacktestGolden",
+  "$defs": {
+    "BacktestGolden": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "input": {
+            "type": "object",
+            "properties": {
+              "symbol": {
+                "type": "string",
+                "minLength": 1
+              },
+              "monthly": {
+                "type": "number",
+                "exclusiveMinimum": 0
+              },
+              "start": {
+                "type": "string",
+                "format": "date",
+                "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))$",
+                "description": "日期（YYYY-MM-DD）"
+              },
+              "end": {
+                "type": "string",
+                "format": "date",
+                "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))$",
+                "description": "日期（YYYY-MM-DD）"
+              },
+              "dividends": {
+                "type": "boolean"
+              },
+              "twd": {
+                "type": "boolean"
+              },
+              "tax": {
+                "type": "boolean"
+              }
+            },
+            "required": [
+              "symbol",
+              "monthly",
+              "start",
+              "end",
+              "dividends",
+              "twd",
+              "tax"
+            ],
+            "additionalProperties": false,
+            "title": "GoldenInput"
+          },
+          "expected": {
+            "type": "object",
+            "properties": {
+              "totalInvested": {
+                "type": "number"
+              },
+              "finalValue": {
+                "type": "number"
+              },
+              "annualized": {
+                "type": "number"
+              },
+              "maxDrawdown": {
+                "type": "number"
+              },
+              "days": {
+                "type": "integer",
+                "exclusiveMinimum": 0,
+                "maximum": 9007199254740991
+              },
+              "worst": {
+                "type": "object",
+                "properties": {
+                  "date": {
+                    "type": "string",
+                    "format": "date",
+                    "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))$",
+                    "description": "日期（YYYY-MM-DD）"
+                  },
+                  "invested": {
+                    "type": "number"
+                  },
+                  "value": {
+                    "type": "number"
+                  },
+                  "recovered": {
+                    "anyOf": [
+                      {
+                        "type": "string",
+                        "format": "date",
+                        "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))$",
+                        "description": "日期（YYYY-MM-DD）"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  }
+                },
+                "required": [
+                  "date",
+                  "invested",
+                  "value",
+                  "recovered"
+                ],
+                "additionalProperties": false,
+                "title": "GoldenWorst"
+              }
+            },
+            "required": [
+              "totalInvested",
+              "finalValue",
+              "annualized",
+              "maxDrawdown",
+              "days",
+              "worst"
+            ],
+            "additionalProperties": false,
+            "title": "GoldenExpected"
+          }
+        },
+        "required": [
+          "input",
+          "expected"
+        ],
+        "additionalProperties": false,
+        "title": "GoldenCase"
+      },
+      "title": "BacktestGolden",
+      "description": "網站回測器的標準答案（Python 算的）"
+    }
+  }
+}

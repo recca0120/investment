@@ -62,7 +62,8 @@ const legend = 'text-sm font-bold text-ink';
 
 <script>
   import * as Plot from '@observablehq/plot';
-  import { runDca, worstPaperLoss, type DcaResult, type FxSeries, type PriceSeries } from '../lib/backtest';
+  import { runDca, worstPaperLoss, type DcaResult } from '../lib/backtest';
+  import { parseFxSeries, parsePriceSeries } from '../lib/schemas';
 
   const money = (v: number) => Math.round(v).toLocaleString('zh-TW');
   const pct = (v: number) => `${(v * 100).toFixed(1)}%`;
@@ -73,11 +74,12 @@ const legend = 'text-sm font-bold text-ink';
     const out = root.querySelector<HTMLElement>('[data-backtest-result]')!;
     const symbol = form.elements.namedItem('symbol') as HTMLSelectElement;
     const cache = new Map<string, Promise<unknown>>();
-    const load = <T,>(name: string) => {
+    // 下載後先用共用格式（zod）驗證，格式不對就顯示錯誤，不拿壞資料計算（#44）
+    const load = <T,>(name: string, parse: (v: unknown) => T) => {
       if (!cache.has(name)) cache.set(name, fetch(`${base}/data/prices/${name}.json`).then((r) => {
         if (!r.ok) throw new Error(`下載 ${name} 的價格資料失敗（${r.status}）`);
         return r.json();
-      }));
+      }).then(parse));
       return cache.get(name) as Promise<T>;
     };
 
@@ -152,8 +154,8 @@ const legend = 'text-sm font-bold text-ink';
       const value = (name: string) => form.elements.namedItem(name) as HTMLInputElement;
       try {
         const [series, fx] = await Promise.all([
-          load<PriceSeries>(option.value),
-          usd && value('twd').checked ? load<FxSeries>('USDTWD') : Promise.resolve(undefined),
+          load(option.value, parsePriceSeries),
+          usd && value('twd').checked ? load('USDTWD', parseFxSeries) : Promise.resolve(undefined),
         ]);
         render(
           runDca(series, {
