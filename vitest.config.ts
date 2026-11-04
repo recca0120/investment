@@ -35,6 +35,14 @@ export default getViteConfig({
               setReducedMotion: async (ctx, reduce: boolean) => {
                 await ctx.page.emulateMedia({ reducedMotion: reduce ? 'reduce' : 'no-preference' });
               },
+              // 真的鍵盤與滑鼠事件（popover 的 Esc 關閉、點外面關閉只對真實操作有反應，程式模擬的事件不算）
+              // 座標是整個測試頁面的座標：iframe 裡的元素要加上 iframe 的位置
+              pressKey: async (ctx, key: string) => {
+                await ctx.page.keyboard.press(key);
+              },
+              mouseClick: async (ctx, x: number, y: number) => {
+                await ctx.page.mouse.click(x, y);
+              },
             },
           },
         },

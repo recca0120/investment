@@ -44,6 +44,8 @@ export interface Palette {
   onAccent: Hex;
   /** 行內程式碼的底色 */
   code: Hex;
+  /** 陰影與遮罩用的深色（日夜間都是深色；用 color-mix 調透明度，例如名詞小卡的陰影） */
+  shade: Hex;
   /** 狀態色（daisyUI 的 badge、alert 會用到） */
   info: Hex;
   onInfo: Hex;
@@ -90,6 +92,7 @@ export const tokens: Tokens = {
       textAccent: '#1f64a8',
       onAccent: '#f8fbfe',
       code: '#dce8f4',
+      shade: '#0b1220',
       info: '#cfe3f7',
       onInfo: '#123a63',
       success: '#d3efdd',
@@ -123,6 +126,7 @@ export const tokens: Tokens = {
       textAccent: '#a9d0f6',
       onAccent: '#121b26',
       code: '#2b3a4d',
+      shade: '#000000',
       info: '#1c3550',
       onInfo: '#c8e1fa',
       success: '#17392a',

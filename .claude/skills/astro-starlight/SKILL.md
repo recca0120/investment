@@ -103,7 +103,7 @@ investment/
 | `docsLoader()` 讀不到 `docs/` | `docsLoader()` 的路徑寫死在 `src/content/docs` | 改用 `glob({ pattern, base: './docs' })` ＋ `docsSchema()` |
 | **側欄分組是空的**，但 build 成功、頁面也都在 | autogenerate 用 `entry.filePath` 去掉寫死的 `<srcDir>/content/docs/` 前綴後比對目錄；內容在 `docs/` 時前綴去不掉 | `directory` 寫 `'docs/knowledge'`（相對專案根目錄），不要寫 `'knowledge'`。`tests/site/acceptance/sidebar.test.ts` 會檢查每篇文章都在側欄 |
 | `:::tip` 被輸出成普通 `<div>`、標題沒有錨點連結 | Starlight 的 Markdown 轉換只套用在 `src/content/docs` 底下的檔案 | 在 `starlight({ markdown: { processedDirs: ['./docs'] } })` 加上內容目錄 |
-| 改了設定，輸出結果卻沒變 | content layer 會快取渲染結果 | `rm -rf .astro node_modules/.astro dist` 後再 build |
+| **只改了 rehype／remark 外掛的程式，文章輸出卻沒變**（改 `astro.config.mjs` 反而會生效） | content layer 用「文章內容＋設定」判斷要不要重新渲染，外掛內部的程式改了它不知道，直接沿用快取（#50 實際踩過：本機測試讀到舊的 dist） | `rm -rf node_modules/.astro .astro/data-store.json` 後再 build；CI 每次全新 build 不受影響 |
 | `The collection "i18n" does not exist` 警告 | 沒有定義 i18n collection | 無害，可忽略；需要自訂 UI 翻譯時再加 |
 | 每頁都 404 `/investment/favicon.svg` | Starlight 預設引用 `public/favicon.svg`，但手動建站時沒有這個檔 | 建立 `public/favicon.svg`（`public/` 在專案根目錄，不受 `srcDir` 影響） |
 | `src/fetch.ts` 行為怪異 | Astro 7 把它保留給 advanced routing | 不要用這個檔名 |

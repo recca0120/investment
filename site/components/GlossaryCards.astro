@@ -1,0 +1,23 @@
+---
+// 名詞小卡（#50）：點文章裡的名詞，在名詞旁邊打開小卡（手機從底部升起），不離開文章
+// 依據：Wikipedia 頁面預覽的 A/B 測試；看一下就關的內容用浮動小卡，不用側邊滑出（見 issue #50）
+// 小卡由 rehype-glossary-links 產生（popover="auto"：點外面、按 Esc 會自動關）
+// 不支援 popover 的瀏覽器：照常當連結，跳到名詞解釋頁
+---
+
+<script>
+  if ('showPopover' in HTMLElement.prototype) {
+    let anchored: HTMLElement | null = null;
+    document.addEventListener('click', (event) => {
+      const link = (event.target as Element).closest<HTMLAnchorElement>('a.glossary-link[data-card]');
+      if (!link) return;
+      const card = document.getElementById(link.dataset.card!);
+      if (!card) return;
+      event.preventDefault();
+      anchored?.style.removeProperty('anchor-name');
+      link.style.setProperty('anchor-name', '--glossary-term');
+      anchored = link;
+      card.showPopover();
+    });
+  }
+</script>

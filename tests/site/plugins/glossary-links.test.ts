@@ -107,3 +107,44 @@ test('[#24-4] 名詞清單只取名詞解釋的 ### 標題（## 資料來源不�
     { term: 'ETF', href: '/investment/glossary/01-products/#etf-1' }, // 同一頁重複的標題，Starlight 會加 -1
   ]);
 });
+
+test('[#50-1] 名詞清單讀出「一句話」「新手注意」（去掉 Markdown 的粗體與連結），名詞連結附上對應的小卡', async () => {
+  const { mkdtempSync, writeFileSync } = await import('node:fs');
+  const { tmpdir } = await import('node:os');
+  const { join } = await import('node:path');
+  const { loadGlossaryTerms } = await import('../../../site/plugins/rehype-glossary-links.mjs');
+  const dir = mkdtempSync(join(tmpdir(), 'glossary-'));
+  writeFileSync(join(dir, '01-a.md'), [
+    '### ETF', '', '**一句話**：把一籃子股票包成一檔，見[指數](02-b.md#指數)。', '',
+    '- **用途**：分散', '- **新手注意**：**類別**不是某一檔。', '', '### 沒有一句話', '', '- **用途**：x',
+  ].join('\n'));
+  const terms = loadGlossaryTerms(dir, '/investment');
+  expect(terms[0]).toEqual({
+    term: 'ETF', href: '/investment/glossary/01-a/#etf', oneLine: '把一籃子股票包成一檔，見指數。', note: '類別不是某一檔。',
+  });
+
+  const out = String(
+    await unified().use(rehypeParse, { fragment: true })
+      .use(rehypeGlossaryLinks, { terms, contentDir: './docs' }).use(rehypeStringify)
+      .process(new VFile({ value: '<p>ETF 和沒有一句話</p>', path: 'docs/knowledge/x.md' })),
+  );
+  const { document } = new Window();
+  document.body.innerHTML = out;
+  const link = document.querySelector('a.glossary-link')!;
+  const card = document.getElementById(link.getAttribute('data-card')!)!;
+  expect(card.getAttribute('popover')).toBe('auto');
+  expect(card.getAttribute('role')).toBe('dialog');
+  // 樣式靠這些 class（starlight.css 的 .glossary-card…），改名會讓小卡失去樣式
+  expect(card.className).toBe('glossary-card');
+  expect([...card.children].map((el) => el.className)).toEqual([
+    'glossary-card-close', 'glossary-card-term', 'glossary-card-one', 'glossary-card-note', 'glossary-card-more',
+  ]);
+  expect(card.querySelector('button')!.textContent).toBe('✕');
+  expect(card.querySelector('.glossary-card-term')!.textContent).toBe('ETF');
+  expect(card.getAttribute('aria-label')).toBe('名詞：ETF');
+  expect(card.textContent).toContain('把一籃子股票包成一檔，見指數。');
+  expect(card.textContent).toContain('新手注意：類別不是某一檔。');
+  expect(card.querySelector('button')!.getAttribute('popovertarget')).toBe(card.id);
+  // 沒有一句話的名詞：只連結、不做小卡
+  expect(document.querySelectorAll('[popover]')).toHaveLength(1);
+});
