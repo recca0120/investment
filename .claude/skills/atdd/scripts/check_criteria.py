@@ -35,7 +35,9 @@ def criteria_ids(decorator: ast.expr) -> list[str]:
 
 
 # test('[#15-1] …')、it.only("[#15-1] …")、test.todo(`[#15-1] …`)、test.each(rows)('[#15-1] …')
-VITEST_CASE = re.compile(r"(?<![\w.])(?:test|it)((?:\.\w+(?:\([^()]*\))?)*)\(\s*(['\"`])\[(#\d+-\d+)\]\s*([^'\"`]*)")
+# .each(…) 的參數可能有巢狀括號（test.each(files())、rows.filter((r) => r.ok)），最多支援三層
+_PARENS = r"\((?:[^()]|\((?:[^()]|\([^()]*\))*\))*\)"
+VITEST_CASE = re.compile(r"(?<![\w.])(?:test|it)((?:\.\w+(?:" + _PARENS + r")?)*)\(\s*(['\"`])\[(#\d+-\d+)\]\s*([^'\"`]*)")
 VITEST_FILES = ("*.test.ts", "*.test.tsx", "*.test.js", "*.test.mjs", "*.spec.ts", "*.spec.js")
 
 

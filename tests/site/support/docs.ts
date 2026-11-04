@@ -3,6 +3,7 @@ import { readFileSync, readdirSync } from 'node:fs';
 
 export const SECTIONS = [
   { dir: 'knowledge', label: '投資知識' },
+  { dir: 'glossary', label: '名詞解釋' },
   { dir: 'decisions', label: '決策紀錄' },
   { dir: 'log', label: '討論紀錄' },
 ] as const;
