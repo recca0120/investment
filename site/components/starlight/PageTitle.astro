@@ -1,12 +1,36 @@
 ---
-// Starlight PageTitle 覆寫（#22，決策 0006）：標題下方先放「重點」（frontmatter 的 summary，最多 3 點）
-// 多數人先掃再決定要不要讀，所以結論放最前面
+// Starlight PageTitle 覆寫（#22，決策 0006）
+// - 一篇拆成好幾頁時（frontmatter 的 part），標題下方放這幾頁的頁籤（例如「① 選管道」「② 稅務」）
+// - 再放「重點」（frontmatter 的 summary，最多 3 點）：多數人先掃再決定要不要讀，所以結論放最前面
+import { getCollection } from 'astro:content';
 import Default from '@astrojs/starlight/components/PageTitle.astro';
 
-const { summary } = Astro.locals.starlightRoute.entry.data;
+const { entry } = Astro.locals.starlightRoute;
+const { summary, part } = entry.data;
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+const parts = part
+  ? (await getCollection('docs', (d) => d.data.part?.group === part.group)).sort(
+      (a, b) => (a.data.sidebar.order ?? 0) - (b.data.sidebar.order ?? 0),
+    )
+  : [];
 ---
 
 <Default />
+{
+  parts.length > 1 && (
+    <nav aria-label="這篇的分頁" class="tabs tabs-border mt-4 flex-nowrap">
+      {parts.map((p) => (
+        <a
+          href={`${base}/${p.id}/`}
+          aria-current={p.id === entry.id ? 'page' : undefined}
+          class="tab h-10 px-4 text-base font-bold whitespace-nowrap text-muted no-underline hover:text-ink aria-[current=page]:text-ink"
+        >
+          {p.data.part!.label}
+        </a>
+      ))}
+    </nav>
+  )
+}
 {
   summary && (
     <section

@@ -1,0 +1,48 @@
+---
+// 「我該用哪一種管道？」流程圖（#22-10）：判斷邏輯和文章 08 原本的「先看結論」表相同
+// daisyUI 沒有流程圖元件，排列自己寫；結論用 daisyUI 的 card（見 FlowQuestion.astro）
+import FlowQuestion, { type Question } from './FlowQuestion.astro';
+
+const flow: Question = {
+  ask: '想碰外幣或海外帳戶嗎？',
+  answers: [
+    {
+      when: '不想',
+      result: { name: '台股上市的海外指數 ETF', note: '用台股帳戶直接買，不用碰外幣；費用率比美國原型 ETF 高' },
+    },
+    {
+      when: '可以',
+      next: {
+        ask: '每個月投入多少？',
+        answers: [
+          {
+            when: '小額（幾千到一兩萬）',
+            result: {
+              name: '複委託定期定額',
+              note: '透過台灣券商下單，多數支援定期定額，每筆手續費可低到 1 元台幣或 0.1 美元',
+            },
+          },
+          {
+            when: '金額較大、長期持有',
+            next: {
+              ask: '在意股利稅和美國遺產稅嗎？',
+              answers: [
+                { when: '不太在意', result: { name: '海外券商', note: '手續費最低；要自己國際電匯、處理繼承手續' } },
+                {
+                  when: '在意',
+                  result: { name: '愛爾蘭註冊 ETF', note: '例如 VWRA、CSPX，股利只被扣 15%；要用支援倫敦市場的券商' },
+                },
+              ],
+            },
+          },
+        ],
+      },
+    },
+  ],
+};
+---
+
+<figure aria-labelledby="channel-flow-title" class="not-content my-8 rounded-box border border-rule bg-cloud p-5 sm:p-6">
+  <figcaption id="channel-flow-title" class="mb-4 text-lg font-black text-ink">我該用哪一種管道？</figcaption>
+  <FlowQuestion question={flow} />
+</figure>

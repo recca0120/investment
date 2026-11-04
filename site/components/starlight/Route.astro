@@ -1,37 +1,71 @@
 ---
-// 「投資知識」的側欄（Starlight 外層已經是 <nav aria-label="主要">）：新手路線（#22，決策 0006）。用 daisyUI 的 steps 畫成一條線，每站是一枚硬幣
-// 已經走過與目前這一站是金幣，後面的站是空心；順序由每篇文章 frontmatter 的 sidebar.order 決定
+// 「投資知識」的側欄（Starlight 外層已經是 <nav aria-label="主要">）：新手路線（#22，決策 0006）
+// - 用 daisyUI 的 steps 畫成一條線，每站是一枚硬幣；走過與目前這一站是金幣，後面的站是空心
+// - 順序由每篇文章 frontmatter 的 sidebar.order 決定
+// - 一篇拆成好幾頁（frontmatter 的 part）時，同一組併成一站，站名底下列出各頁
+import { getCollection } from 'astro:content';
 import type { StarlightRouteData } from '@astrojs/starlight/route-data';
 
 type Entry = StarlightRouteData['sidebar'][number];
-const flatten = (entries: Entry[]): Extract<Entry, { type: 'link' }>[] =>
-  entries.flatMap((e) => (e.type === 'link' ? [e] : flatten(e.entries)));
+type Link = Extract<Entry, { type: 'link' }>;
+const flatten = (entries: Entry[]): Link[] => entries.flatMap((e) => (e.type === 'link' ? [e] : flatten(e.entries)));
 
-const stations = flatten(Astro.locals.starlightRoute.sidebar);
-const here = stations.findIndex((s) => s.isCurrent);
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+const partOf = new Map((await getCollection('docs')).map((d) => [`${base}/${d.id}/`, d.data.part]));
+
+type Station = { label: string; links: { link: Link; label: string }[] };
+const stations: Station[] = [];
+for (const link of flatten(Astro.locals.starlightRoute.sidebar)) {
+  const part = partOf.get(link.href);
+  const last = stations.at(-1);
+  if (part && last?.label === part.group) last.links.push({ link, label: part.label });
+  else if (part) stations.push({ label: part.group, links: [{ link, label: part.label }] });
+  else stations.push({ label: link.label, links: [{ link, label: link.label }] });
+}
+const here = stations.findIndex((s) => s.links.some(({ link }) => link.isCurrent));
+
+const linkClass = (link: Link, i: number) => [
+  'rounded-field -my-1 block px-2 py-1 leading-snug no-underline',
+  link.isCurrent ? 'bg-accent-low font-bold text-ink' : 'text-soft hover:text-ink',
+  i > here && here >= 0 && 'text-muted',
+];
 ---
 
 <div>
   <p class="mt-0 mb-2 text-sm font-bold text-muted">新手路線{here >= 0 && `：第 ${here + 1} / ${stations.length} 站`}</p>
   <ul aria-label="新手路線" class="steps steps-vertical m-0 w-full p-0">
     {
-      stations.map((s, i) => (
+      stations.map((station, i) => (
         <li class:list={['step min-h-14 justify-items-start text-left', i <= here && 'step-accent']}>
           <span class="step-icon text-sm font-black" aria-hidden="true">
             {i + 1}
           </span>
-          <a
-            href={s.href}
-            aria-current={s.isCurrent ? 'page' : undefined}
-            class:list={[
-              'rounded-field -my-1 block px-2 py-1 leading-snug no-underline',
-              s.isCurrent ? 'bg-accent-low font-bold text-ink' : 'text-soft hover:text-ink',
-              i > here && here >= 0 && 'text-muted',
-            ]}
-          >
-            <span class="sr-only">{i + 1} </span>
-            {s.label}
-          </a>
+          {station.links.length === 1 ? (
+            <a
+              href={station.links[0].link.href}
+              aria-current={station.links[0].link.isCurrent ? 'page' : undefined}
+              class:list={linkClass(station.links[0].link, i)}
+            >
+              <span class="sr-only">{i + 1} </span>
+              {station.label}
+            </a>
+          ) : (
+            <div class="py-1">
+              <span class="px-2 leading-snug text-soft">
+                <span class="sr-only">{i + 1} </span>
+                {station.label}
+              </span>
+              <ul class="m-0 mt-1 list-none p-0 pl-2 text-sm">
+                {station.links.map(({ link, label }) => (
+                  <li class="m-0">
+                    <a href={link.href} aria-current={link.isCurrent ? 'page' : undefined} class:list={linkClass(link, i)}>
+                      {label}
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
         </li>
       ))
     }
