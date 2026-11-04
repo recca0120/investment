@@ -27,9 +27,10 @@
 4. [入門方案（依個性選擇）](docs/knowledge/04-starter-plans.md)
 5. [開始行動：開戶到第一次扣款](docs/knowledge/09-getting-started-actions.md)
 6. [定期定額回測：0050、006208、VT（2016～2026）](docs/knowledge/07-dca-backtest-2016-2026.mdx)
-7. 美股投資管道與稅務：[① 選管道](docs/knowledge/08-us-stock-channels-tax.mdx)、[② 稅務](docs/knowledge/08-us-stock-tax.md)
-8. [股價資料來源評估](docs/knowledge/06-data-sources.md)
-9. [投資輔助系統規劃](docs/knowledge/05-system-design.md)
+7. [運氣不好時會怎樣：剛好在大跌前開始定期定額](docs/knowledge/10-bad-luck-scenarios.md)
+8. 美股投資管道與稅務：[① 選管道](docs/knowledge/08-us-stock-channels-tax.mdx)、[② 稅務](docs/knowledge/08-us-stock-tax.md)
+9. [股價資料來源評估](docs/knowledge/06-data-sources.md)
+10. [投資輔助系統規劃](docs/knowledge/05-system-design.md)
 
 ## 投資輔助系統
 
