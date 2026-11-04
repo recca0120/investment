@@ -41,3 +41,10 @@ title: 2026-11-04 網站版面、設計 token、名詞解釋
 - 結論：錢分成彈性金與長期金；先走方案 D 練習 3 個月，再決定是否轉 C。見[決策 0007](../decisions/0007-starter-plan.md)
 - 第 2 階段：整理成[開始行動：開戶到第一次扣款](../knowledge/09-getting-started-actions.md)，放在新手路線第 5 站
 - Claude 不是持牌顧問：只提供判斷框架與後果，方案由使用者選
+
+## 傍晚：盤點 GitHub、完成網站改版
+
+- 盤點發現沒追蹤到的事：README 連到已改名的文章 07（GitHub 上 404）、決策索引只到 0004、文章 05 過時、Roadmap 的系統功能沒開 issue → [#29](https://github.com/recca0120/investment/issues/29) 修正，並加測試檢查 GitHub 上的相對連結；系統功能開成 #30（ETF 比較器）、#31（再平衡提醒）、#32（成本與稅試算），放 Backlog
+- #22 完成：文章 08 拆成[① 選管道](../knowledge/08-us-stock-channels-tax.mdx)與[② 稅務](../knowledge/08-us-stock-tax.md)、加流程圖；首頁加回測關鍵數字、新手路線、網站分區、最近更新
+- 發現並修正：首頁閱讀順序照檔名排，加入「開始行動」後和側欄不一致 → 首頁與側欄共用同一份分組邏輯
+- 待使用者同意：回報 starlight-sidebar-topics 在有 base 時「下一篇」跨區的 bug
