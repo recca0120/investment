@@ -65,6 +65,7 @@ export default defineConfig({
           [
             { id: 'knowledge', label: '投資知識', link: '/knowledge/01-getting-started/', items: [{ autogenerate: { directory: 'docs/knowledge' } }] },
             { id: 'glossary', label: '名詞解釋', link: '/glossary/01-accounts-trading/', items: [{ autogenerate: { directory: 'docs/glossary' } }] },
+            { id: 'tools', label: '工具', link: '/tools/backtest/', items: [{ autogenerate: { directory: 'docs/tools' } }] },
             { id: 'decisions', label: '決策紀錄', link: '/decisions/0001-repo-structure/', items: [{ autogenerate: { directory: 'docs/decisions' } }] },
             { id: 'log', label: '討論紀錄', link: '/log/2026-11-03-kickoff/', items: [{ autogenerate: { directory: 'docs/log' } }] },
           ],

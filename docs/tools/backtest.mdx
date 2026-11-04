@@ -1,0 +1,29 @@
+---
+title: 回測器
+description: 在網站上直接跑定期定額回測：選代號、每月金額、期間，看年化報酬、最大跌幅、報酬率走勢與帳上最慘的時候
+---
+
+import Backtester from '@site/components/Backtester.astro';
+
+> 2026-11-04 上線（issue #41）。價格資料來自 FinMind，由本 repo 的程式預先整理；歷史報酬不代表未來表現，不構成投資建議。
+
+選代號、填每月投入金額和期間，按「開始回測」。每月第一個交易日買進，一直不賣。
+
+<Backtester />
+
+## 怎麼看結果
+
+- **年化報酬**：平均每年賺多少（考慮每一筆投入的時間點），見[名詞解釋](../glossary/04-return-risk.md#年化報酬)
+- **最大跌幅**：持有期間價格從高點跌下來的最大幅度
+- **報酬率走勢**：虛線是 0%，掉到線下就是帳上虧損；圓點是帳上最慘的時候。運氣不好時會怎樣，見[這篇](../knowledge/10-bad-luck-scenarios.md)
+
+## 限制
+
+- 只能選事先整理好的代號；要查其他代號，用本機的回測器（`uv run streamlit run src/invest/app.py`）
+- 沒有算手續費，假設可以買小數股
+- 資料不是即時的：價格整理到上方日期欄位的最後一天，之後會定期更新
+
+## 資料來源
+
+- [FinMind 台股、美股歷史價格與股利資料](https://finmind.github.io/)
+- 計算方式和本機的 Python 回測器相同，兩邊對過標準答案（見[決策 0008](../decisions/0008-browser-backtester.md)）

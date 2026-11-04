@@ -1,0 +1,177 @@
+---
+// 網站上的回測器（#41，決策 0008）
+// - 價格資料：scripts/export_prices.py 產生的 public/data/prices/*.json（股利、分割、預扣稅都已經在 Python 算好）
+// - 計算：site/lib/backtest.ts（和 Python 回測器對過標準答案）
+// - 圖：Observable Plot（SVG）；顏色讀設計 token 的 CSS 變數
+// 表單用 daisyUI 的 select／input／checkbox，結果用 daisyUI 的 table
+import index from '../../public/data/prices/index.json';
+
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+const first = index.symbols[0];
+const field = 'flex flex-col gap-1';
+const legend = 'text-sm font-bold text-ink';
+---
+
+<div data-backtester data-base={base} class="not-content my-6">
+  <form class="grid gap-4 rounded-box border border-rule bg-cloud p-5 sm:grid-cols-2" data-backtest-form>
+    <label class={field}>
+      <span class={legend}>代號</span>
+      <select name="symbol" class="select w-full">
+        {
+          index.symbols.map((s) => (
+            <option value={s.symbol} data-currency={s.currency} data-first={s.first} data-last={s.last}>
+              {s.symbol}（{s.currency === 'USD' ? '美股' : '台股'}，{s.first.slice(0, 4)} 年起）
+            </option>
+          ))
+        }
+      </select>
+    </label>
+    <label class={field}>
+      <span class={legend}>每月投入（新台幣）</span>
+      <input name="monthly" type="number" min="100" step="100" value="5000" class="input w-full" />
+    </label>
+    <label class={field}>
+      <span class={legend}>開始日期</span>
+      <input name="start" type="date" value="2016-01-01" min={first.first} max={first.last} class="input w-full" />
+    </label>
+    <label class={field}>
+      <span class={legend}>結束日期</span>
+      <input name="end" type="date" value={first.last} min={first.first} max={first.last} class="input w-full" />
+    </label>
+    <div class="flex flex-col gap-2 sm:col-span-2">
+      <label class="flex items-center gap-2 text-ink">
+        <input name="dividends" type="checkbox" checked class="checkbox checkbox-sm" />
+        含息（股利再投入）
+      </label>
+      <label class="flex items-center gap-2 text-ink" data-usd-only>
+        <input name="twd" type="checkbox" checked class="checkbox checkbox-sm" />
+        美股換算新台幣（每月投入的是新台幣，以當日匯率換美元）
+      </label>
+      <label class="flex items-center gap-2 text-ink" data-usd-only>
+        <input name="tax" type="checkbox" checked class="checkbox checkbox-sm" />
+        美股股利扣 30% 預扣稅
+      </label>
+    </div>
+    <div class="sm:col-span-2">
+      <button type="submit" class="btn btn-primary rounded-full">開始回測</button>
+    </div>
+  </form>
+
+  <div data-backtest-result aria-live="polite" class="mt-6"></div>
+</div>
+
+<script>
+  import * as Plot from '@observablehq/plot';
+  import { runDca, worstPaperLoss, type DcaResult, type FxSeries, type PriceSeries } from '../lib/backtest';
+
+  const money = (v: number) => Math.round(v).toLocaleString('zh-TW');
+  const pct = (v: number) => `${(v * 100).toFixed(1)}%`;
+
+  for (const root of document.querySelectorAll<HTMLElement>('[data-backtester]')) {
+    const base = root.dataset.base ?? '';
+    const form = root.querySelector<HTMLFormElement>('[data-backtest-form]')!;
+    const out = root.querySelector<HTMLElement>('[data-backtest-result]')!;
+    const symbol = form.elements.namedItem('symbol') as HTMLSelectElement;
+    const cache = new Map<string, Promise<unknown>>();
+    const load = <T,>(name: string) => {
+      if (!cache.has(name)) cache.set(name, fetch(`${base}/data/prices/${name}.json`).then((r) => {
+        if (!r.ok) throw new Error(`下載 ${name} 的價格資料失敗（${r.status}）`);
+        return r.json();
+      }));
+      return cache.get(name) as Promise<T>;
+    };
+
+    // 選美股時才顯示匯率與預扣稅選項；日期範圍跟著代號的資料期間
+    const syncSymbol = () => {
+      const option = symbol.selectedOptions[0];
+      const usd = option.dataset.currency === 'USD';
+      // 用 Tailwind 的 hidden class：hidden 屬性會被 label 上的 flex 蓋過，藏不起來
+      root.querySelectorAll<HTMLElement>('[data-usd-only]').forEach((el) => el.classList.toggle('hidden', !usd));
+      for (const name of ['start', 'end']) {
+        const input = form.elements.namedItem(name) as HTMLInputElement;
+        input.min = option.dataset.first!;
+        input.max = option.dataset.last!;
+      }
+    };
+    symbol.addEventListener('change', syncSymbol);
+    syncSymbol();
+
+    const tokens = getComputedStyle(document.documentElement);
+    const color = (name: string) => tokens.getPropertyValue(name).trim();
+
+    function render(r: DcaResult) {
+      const w = worstPaperLoss(r);
+      const lossText =
+        w.value >= w.invested
+          ? `${r.symbol}：沒有虧損過（市值一直在累計投入以上）`
+          : `${r.symbol}：最慘 ${w.date}，投入 ${money(w.invested)}，市值 ${money(w.value)}，` +
+            `少 ${money(w.invested - w.value)} 元（${pct(w.value / w.invested - 1)}），` +
+            (w.recovered ? `${w.recovered} 回到本金` : '到結束時還沒回本');
+
+      const data = r.history.filter((h) => h.invested > 0).map((h) => ({ date: new Date(h.date), ret: h.value / h.invested - 1 }));
+      const worstPoint = w.value < w.invested ? [{ date: new Date(w.date), ret: w.value / w.invested - 1 }] : [];
+      const chart = Plot.plot({
+        width: Math.max(320, out.clientWidth),
+        height: 280,
+        marginLeft: 48,
+        style: { background: 'transparent', color: color('--c-gray-3') || 'currentColor', fontSize: '12px' },
+        x: { type: 'utc', label: null },
+        y: { tickFormat: (v: number) => `${Math.round(v * 100)}%`, label: '報酬率', grid: true },
+        marks: [
+          Plot.ruleY([0], { stroke: color('--c-ink'), strokeDasharray: '4 4' }),
+          Plot.lineY(data, { x: 'date', y: 'ret', stroke: color('--c-text-accent') }),
+          Plot.dot(worstPoint, { x: 'date', y: 'ret', r: 6, fill: color('--c-coin'), stroke: color('--c-coin-ink') }),
+        ],
+      });
+
+      out.replaceChildren();
+      out.insertAdjacentHTML(
+        'beforeend',
+        `<div class="overflow-x-auto rounded-box border border-rule bg-cloud">
+          <table class="table">
+            <thead><tr class="text-muted"><th>代號</th><th>總投入</th><th>期末市值</th><th>總報酬</th><th>年化報酬</th><th>最大跌幅</th></tr></thead>
+            <tbody><tr class="text-ink"><td></td><td></td><td></td><td></td><td></td><td></td></tr></tbody>
+          </table>
+        </div>
+        <figure class="mt-6 rounded-box border border-rule bg-cloud p-4">
+          <figcaption class="mb-2 font-black text-ink">報酬率走勢（市值 ÷ 累計投入 − 1）</figcaption>
+        </figure>
+        <p class="mt-4 mb-0 text-ink"><b>帳上最慘的時候</b>（市值減累計投入最低的那一天）：<span data-worst></span></p>
+        <p class="mt-2 mb-0 text-sm text-muted">虛線是 0%，掉到線下就是帳上虧損；圓點是帳上最慘的時候。沒有算手續費，假設可以買小數股。歷史報酬不代表未來，不構成投資建議。</p>`,
+      );
+      const cells = [r.symbol, money(r.totalInvested), money(r.finalValue), pct(r.finalValue / r.totalInvested - 1), pct(r.annualized), pct(r.maxDrawdown)];
+      out.querySelectorAll('tbody td').forEach((td, i) => (td.textContent = cells[i]));
+      out.querySelector('figure')!.append(chart);
+      out.querySelector('[data-worst]')!.textContent = lossText;
+    }
+
+    form.addEventListener('submit', async (event) => {
+      event.preventDefault();
+      const option = symbol.selectedOptions[0];
+      const usd = option.dataset.currency === 'USD';
+      const value = (name: string) => form.elements.namedItem(name) as HTMLInputElement;
+      try {
+        const [series, fx] = await Promise.all([
+          load<PriceSeries>(option.value),
+          usd && value('twd').checked ? load<FxSeries>('USDTWD') : Promise.resolve(undefined),
+        ]);
+        render(
+          runDca(series, {
+            monthly: Number(value('monthly').value),
+            start: value('start').value,
+            end: value('end').value,
+            dividends: value('dividends').checked,
+            tax: usd && value('tax').checked,
+            fx,
+          }),
+        );
+      } catch (error) {
+        out.replaceChildren();
+        const p = document.createElement('p');
+        p.className = 'alert alert-error';
+        p.textContent = (error as Error).message;
+        out.append(p);
+      }
+    });
+  }
+</script>

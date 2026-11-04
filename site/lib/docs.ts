@@ -11,6 +11,7 @@ import type { Part } from './stations';
 export const SECTIONS = [
   { dir: 'knowledge', label: '投資知識', description: '新手路線：從開戶到回測結果，一站一站讀' },
   { dir: 'glossary', label: '名詞解釋', description: 'ETF、殖利率、複委託……看不懂的名詞分 6 類查' },
+  { dir: 'tools', label: '工具', description: '在網站上直接跑定期定額回測，不用安裝任何東西' },
   { dir: 'decisions', label: '決策紀錄', description: '做過的決定和理由，包括自己選的入門方案' },
   { dir: 'log', label: '討論紀錄', description: '每次討論問了什麼、結論、待辦' },
 ] as const;

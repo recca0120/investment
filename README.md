@@ -34,6 +34,8 @@
 
 ## 投資輔助系統
 
+網站上可以直接用的[回測器](https://recca0120.github.io/investment/tools/backtest/)（瀏覽器計算，見[決策 0008](docs/decisions/0008-browser-backtester.md)）；要查其他代號或做進一步分析，用本機的 Python 版：
+
 ```bash
 uv sync                                  # 安裝相依套件
 uv run streamlit run src/invest/app.py   # 啟動定期定額回測器
@@ -47,7 +49,7 @@ uv run pytest -m contract                # 執行契約測試（連網，驗證 
 - [x] 研究新版 Astro／Starlight 並寫成 skill
 - [x] 建立 Starlight 網站並部署到 GitHub Pages
 - [x] 選定個人入門方案：先練習 3 個月（見 [0007](docs/decisions/0007-starter-plan.md)）
-- [x] 系統：定期定額回測器
+- [x] 系統：定期定額回測器（本機 Streamlit，以及網站上的瀏覽器版）
 - [ ] 系統：持股追蹤（[#6](https://github.com/recca0120/investment/issues/6)，開戶有第一筆紀錄後開始）
 - [ ] 系統：ETF／個股比較器（[#30](https://github.com/recca0120/investment/issues/30)）
 - [ ] 系統：再平衡提醒（[#31](https://github.com/recca0120/investment/issues/31)）
