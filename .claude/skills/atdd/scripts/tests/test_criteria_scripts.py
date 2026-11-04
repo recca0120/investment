@@ -172,6 +172,23 @@ def test_check_criteria_Vitest_測試內容還是範本時不算數(tmp_path):
     assert "#5-1" in r.stdout and "範本" in r.stdout
 
 
+def test_check_criteria_Vitest_each_的參數裡有函式呼叫也認得(tmp_path):
+    # 實際案例（#24）：test.each(files())(…) 的巢狀括號讓正規表示式對不上，測試明明有卻回報沒有
+    ts = tmp_path / "tests/site/glossary.test.ts"
+    ts.parent.mkdir(parents=True)
+    ts.write_text(textwrap.dedent("""\
+        import { expect, test } from 'vitest';
+        const files = () => ['a.md', 'b.md'];
+        test('[#5-1] 計算總投入', () => expect(1).toBe(1));
+        test.each(files())('[#5-2] %s 有四項', (f) => expect(f).toBeTruthy());
+        describe.each([['x', 1]])('%s', () => {});
+        test.each(rows.filter((r) => r.ok))('[#5-3] %s', (r) => expect(r).toBeTruthy());
+    """))
+    r = run("check_criteria.py", "5", "--body-file", issue_file(tmp_path), cwd=tmp_path)
+    assert r.returncode == 0, r.stdout + r.stderr
+    assert "3/3" in r.stdout
+
+
 def test_check_criteria_可以掃描多個測試目錄(tmp_path):
     write_test(tmp_path, """
         import pytest

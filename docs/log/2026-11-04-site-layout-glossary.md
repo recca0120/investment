@@ -1,0 +1,34 @@
+---
+title: 2026-11-04 網站版面、設計 token、名詞解釋
+---
+
+## 使用者的問題
+
+1. 網站版面要重新設計、該用分頁就用分頁、可以用相容 Tailwind 的元件庫；不確定的先討論
+2. 「應該上網研究人類怎麼閱讀比較舒服，而不是問我，因為我不懂設計」，可以先給幾個 HTML 樣稿
+3. A／B／C 樣稿不知道哪個好，請 Claude 先決定
+4. 為什麼不用 daisyUI？（樣稿 B、C 大多是自己寫的 CSS）
+5. 應該先定義一個 theme 檔案、用編譯的方式產生 CSS，走程式化 design
+6. 每篇文章的資料來源要不要另開頁面？
+7. 以新手來說，是不是要先做名詞解釋（ETF、VT、債券…），分門別類說明？
+8. 如果問題和一開始定的目標違背，要提出來討論（要記下來）
+
+## 結論
+
+- 閱讀研究：中文一行 17～40 字（W3C clreq）、多數人先掃標題（NN/g）、分頁只用在同一件事的不同面向
+- 版面採樣稿 B（新手路線）＋ C（圖解），留在 Starlight，加 daisyUI 5 與 starlight-sidebar-topics：見 [0006 網站版面](../decisions/0006-site-layout-route.md)
+- 顏色、字體、圓角只寫在 `site/design/tokens.ts`，build 時編譯成 Starlight、Tailwind、daisyUI 三組變數；測試直接用 token 算對比
+- 資料來源不另開頁面（查證時要在同一頁），改成網站上預設收合（#22 之後的 PR）
+- 名詞解釋和專案目標一致（文章 05 原本就規劃「名詞表」），但會打斷 #22，決定先做名詞：分 6 類、每個名詞固定四項（一句話、用途、例子、新手注意），知識文章裡第一次出現的名詞自動連過去
+- 設計細節由 Claude 研究後決定、用樣稿給使用者看；需求和目標衝突時先提出討論
+
+## 產生的 issue
+
+- [#22 網站版面重新設計](https://github.com/recca0120/investment/issues/22)：第 1 個 PR（#23）已合併：設計 token、三個分區、新手路線側欄、寬表格；之後：重點摘要、分頁、拆頁、流程圖、首頁、資料來源收合
+- [#24 新手名詞解釋](https://github.com/recca0120/investment/issues/24)
+
+## 過程中發現的問題
+
+- starlight-sidebar-topics 0.9 在網站有 base 時，判斷不出每區的最後一篇，「下一篇」會跨區；用 route middleware 補
+- daisyUI 的 reset 在最低的 CSS 圖層，其實蓋不過 Starlight 內文樣式（原本以為會，實測後修正說明）
+- 驗收條件的編號要寫在 test 名稱上，寫在 describe 上 check_criteria 認不出來

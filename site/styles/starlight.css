@@ -75,6 +75,19 @@
     border-radius: 0.6rem;
   }
 
+  /* 名詞連結（#24）：一篇文章可能有二三十個，維持文字原色、只加點狀底線，滑過才變連結色 */
+  .sl-markdown-content a.glossary-link {
+    color: inherit;
+    text-decoration-line: underline;
+    text-decoration-style: dotted;
+    text-decoration-color: var(--sl-color-gray-4);
+    text-underline-offset: 0.25em;
+  }
+  .sl-markdown-content a.glossary-link:hover {
+    color: var(--sl-color-text-accent);
+    text-decoration-color: currentColor;
+  }
+
   /* 網站分區（#22）：50rem 以上放在頂部列的第二列，頂部列加高 */
   @media (min-width: 50rem) {
     :root:has(header [data-topic-tabs]) {

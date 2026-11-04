@@ -5,6 +5,7 @@ import tailwindcss from '@tailwindcss/vite';
 import { unified } from '@astrojs/markdown-remark';
 import rehypeMdLinks from './site/plugins/rehype-md-links.mjs';
 import rehypeNumCells from './site/plugins/rehype-num-cells.mjs';
+import rehypeGlossaryLinks from './site/plugins/rehype-glossary-links.mjs';
 import designTokens from './site/design/integration.ts';
 import starlightSidebarTopics from 'starlight-sidebar-topics';
 
@@ -18,7 +19,12 @@ export default defineConfig({
   markdown: {
     // Astro 7 預設用 Sätteri；要用 rehype plugin 必須切回 unified
     processor: unified({
-      rehypePlugins: [[rehypeMdLinks, { contentDir: './docs', base }], rehypeNumCells],
+      rehypePlugins: [
+        [rehypeMdLinks, { contentDir: './docs', base }],
+        rehypeNumCells,
+        // 知識文章裡的名詞第一次出現時連到名詞解釋（#24）
+        [rehypeGlossaryLinks, { glossaryDir: './docs/glossary', contentDir: './docs', base }],
+      ],
     }),
   },
   integrations: [
@@ -56,6 +62,7 @@ export default defineConfig({
         starlightSidebarTopics(
           [
             { id: 'knowledge', label: '投資知識', link: '/knowledge/01-getting-started/', items: [{ autogenerate: { directory: 'docs/knowledge' } }] },
+            { id: 'glossary', label: '名詞解釋', link: '/glossary/01-accounts-trading/', items: [{ autogenerate: { directory: 'docs/glossary' } }] },
             { id: 'decisions', label: '決策紀錄', link: '/decisions/0001-repo-structure/', items: [{ autogenerate: { directory: 'docs/decisions' } }] },
             { id: 'log', label: '討論紀錄', link: '/log/2026-11-03-kickoff/', items: [{ autogenerate: { directory: 'docs/log' } }] },
           ],

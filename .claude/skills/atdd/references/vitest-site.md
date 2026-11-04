@@ -36,7 +36,10 @@ tests/site/
 test('[#15-1] 文章頁的側欄列出每一篇文章', () => { … });
 test.each(pages)('[#15-7] $name 沒有水平捲動', async ({ path }) => { … });
 test.todo('[#15-3] …');   // 還沒寫，不算數
+test.each(files())('[#24-2] %s：…', …);   // .each 的參數可以有函式呼叫（最多三層括號）
 ```
+
+- **編號要寫在 `test`／`it` 的名稱上，寫在 `describe` 上不算**（#22 實際犯過：`describe('[#22-4] …')` 裡的測試沒有編號，check_criteria 回報沒有測試）
 
 `check_red.py` 的目標寫 `檔案::完整名稱`，describe 和 test 名稱用 ` > ` 連接（和報告顯示的一樣）：
 

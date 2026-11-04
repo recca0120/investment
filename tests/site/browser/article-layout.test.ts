@@ -13,8 +13,8 @@ function tableWith(doc: Document, ...headers: string[]) {
   return table!;
 }
 
-describe('[#22-4] 文章 08「四種管道比較」表格', () => {
-  test('桌機 1400px：每一格至少放得下 4 個中文字', async () => {
+describe('文章 08「四種管道比較」表格', () => {
+  test('[#22-4] 桌機 1400px：每一格至少放得下 4 個中文字', async () => {
     const page = await openFrame(ARTICLE_08, { size: DESKTOP });
     try {
       const view = page.doc.defaultView!;
@@ -33,7 +33,7 @@ describe('[#22-4] 文章 08「四種管道比較」表格', () => {
     }
   });
 
-  test('手機 375px：表格自己可以左右滑，頁面不會水平捲動', async () => {
+  test('[#22-4] 手機 375px：表格自己可以左右滑，頁面不會水平捲動', async () => {
     const page = await openFrame(ARTICLE_08, { size: MOBILE });
     try {
       const table = tableWith(page.doc, '複委託', '海外券商');
