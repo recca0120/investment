@@ -64,3 +64,22 @@ def test_明確給null的欄位要保留_沒給的選填欄位不輸出():
     assert validated(BacktestGolden, [case])[0]["expected"]["worst"]["recovered"] is None
     tw = {"symbol": "0050", "currency": "TWD", "dates": ["2025-01-02"], "close": [1.0], "total": [1.0]}
     assert "totalTaxed" not in validated(PriceSeries, tw)
+
+
+@pytest.mark.criteria("#46-1")
+def test_多餘的欄位_Python也拒絕():
+    good = {"symbol": "VT", "currency": "USD", "dates": ["2025-01-02"], "close": [100.0], "total": [100.0]}
+    with pytest.raises(ValidationError):
+        validated(PriceSeries, {**good, "volume": [1]})
+
+
+@pytest.mark.criteria("#46-2")
+def test_NaN或無限大_寫出JSON前就報錯(tmp_path):
+    from invest.export import write_json
+
+    write_json(tmp_path / "ok.json", {"close": [1.0]})
+    assert (tmp_path / "ok.json").read_text(encoding="utf-8") == '{"close":[1.0]}'
+    for bad in (float("nan"), float("inf")):
+        with pytest.raises(ValueError):
+            write_json(tmp_path / "bad.json", {"close": [bad]})
+        assert not (tmp_path / "bad.json").exists(), "壞資料不能寫出檔案"

@@ -34,3 +34,11 @@ describe('[#44-3] 網頁讀資料時驗證格式', () => {
     expect(() => parsePriceSeries(missing)).toThrow(/total/);
   });
 });
+
+describe('網頁和 Python 判斷一致', () => {
+  test('[#46-1] 多餘的欄位：網頁也要拒絕（產生的 Pydantic 模型是 extra=forbid）', () => {
+    const good = { symbol: 'VT', currency: 'USD', dates: ['2025-01-02'], close: [100], total: [100] };
+    expect(() => parsePriceSeries({ ...good, volume: [1] })).toThrow(/volume|Unrecognized/);
+    expect(() => parseFxSeries({ dates: ['2025-01-02'], toUsd: [30], toTwd: [30], note: 'x' })).toThrow(/note|Unrecognized/);
+  });
+});

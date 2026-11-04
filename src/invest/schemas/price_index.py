@@ -17,7 +17,7 @@ class Currency(StrEnum):
     USD = 'USD'
 
 
-class Symbol(BaseModel):
+class PriceIndexEntry(BaseModel):
     model_config = ConfigDict(
         extra='forbid',
     )
@@ -44,7 +44,7 @@ class PriceIndex(BaseModel):
     model_config = ConfigDict(
         extra='forbid',
     )
-    symbols: list[Symbol]
+    symbols: list[PriceIndexEntry]
 
 
 class Model(RootModel[PriceIndex]):

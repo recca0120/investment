@@ -6,6 +6,9 @@
  *   2. scripts/generate_models.py  → src/invest/schemas/*.py（Pydantic，datamodel-code-generator）
  * 沒有重新產生的話，tests/site/lib/schemas.test.ts 與 tests/acceptance/test_schemas.py 會失敗
  *
+ * 物件一律用 z.strictObject：JSON Schema 會是 additionalProperties: false、Pydantic 會拒絕多餘欄位，
+ * 用 z.object 的話網頁會默默丟掉多餘欄位、照樣通過，兩邊判斷不同（#46）
+ *
  * 只用 JSON Schema 表達得出來的規則（型別、列舉、日期格式、必填）；
  * 「陣列長度要一樣」這類規則轉不過去，不寫在這裡
  */
@@ -16,7 +19,7 @@ const Currency = z.enum(['TWD', 'USD']).describe('幣別：台股 TWD、美股 U
 const numbers = z.array(z.number());
 
 export const PriceSeriesSchema = z
-  .object({
+  .strictObject({
     symbol: z.string().min(1).describe('代號，例如 0050、VT'),
     currency: Currency,
     dates: z.array(isoDate).min(1).describe('交易日（由舊到新）'),
@@ -27,7 +30,7 @@ export const PriceSeriesSchema = z
   .meta({ id: 'PriceSeries', title: 'PriceSeries', description: '一檔的價格資料（public/data/prices/<代號>.json）' });
 
 export const FxSeriesSchema = z
-  .object({
+  .strictObject({
     dates: z.array(isoDate).min(1),
     toUsd: numbers.describe('買美元的價格（銀行即期賣出）'),
     toTwd: numbers.describe('換回新台幣的價格（銀行即期買入）'),
@@ -35,10 +38,10 @@ export const FxSeriesSchema = z
   .meta({ id: 'FxSeries', title: 'FxSeries', description: '美元兌新台幣匯率（public/data/prices/USDTWD.json）' });
 
 export const PriceIndexSchema = z
-  .object({
+  .strictObject({
     symbols: z.array(
       z
-        .object({ symbol: z.string().min(1), currency: Currency, first: isoDate, last: isoDate })
+        .strictObject({ symbol: z.string().min(1), currency: Currency, first: isoDate, last: isoDate })
         .meta({ title: 'PriceIndexEntry' }),
     ),
   })
@@ -47,9 +50,9 @@ export const PriceIndexSchema = z
 export const GoldenSchema = z
   .array(
     z
-      .object({
+      .strictObject({
         input: z
-          .object({
+          .strictObject({
             symbol: z.string().min(1),
             monthly: z.number().positive(),
             start: isoDate,
@@ -60,14 +63,14 @@ export const GoldenSchema = z
           })
           .meta({ title: 'GoldenInput' }),
         expected: z
-          .object({
+          .strictObject({
             totalInvested: z.number(),
             finalValue: z.number(),
             annualized: z.number(),
             maxDrawdown: z.number(),
             days: z.int().positive(),
             worst: z
-              .object({ date: isoDate, invested: z.number(), value: z.number(), recovered: isoDate.nullable() })
+              .strictObject({ date: isoDate, invested: z.number(), value: z.number(), recovered: isoDate.nullable() })
               .meta({ title: 'GoldenWorst' }),
           })
           .meta({ title: 'GoldenExpected' }),

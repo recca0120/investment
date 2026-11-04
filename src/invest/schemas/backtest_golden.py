@@ -15,7 +15,7 @@ from pydantic import (
 )
 
 
-class Input(BaseModel):
+class GoldenInput(BaseModel):
     model_config = ConfigDict(
         extra='forbid',
     )
@@ -34,7 +34,7 @@ class Input(BaseModel):
     tax: bool
 
 
-class Worst(BaseModel):
+class GoldenWorst(BaseModel):
     model_config = ConfigDict(
         extra='forbid',
     )
@@ -47,7 +47,7 @@ class Worst(BaseModel):
     recovered: date_aliased | None
 
 
-class Expected(BaseModel):
+class GoldenExpected(BaseModel):
     model_config = ConfigDict(
         extra='forbid',
     )
@@ -56,23 +56,23 @@ class Expected(BaseModel):
     annualized: float
     maxDrawdown: float
     days: conint(le=9007199254740991, gt=0)
-    worst: Worst = Field(..., title='GoldenWorst')
+    worst: GoldenWorst = Field(..., title='GoldenWorst')
 
 
-class BacktestGoldenItem(BaseModel):
+class GoldenCase(BaseModel):
     model_config = ConfigDict(
         extra='forbid',
     )
-    input: Input = Field(..., title='GoldenInput')
-    expected: Expected = Field(..., title='GoldenExpected')
+    input: GoldenInput = Field(..., title='GoldenInput')
+    expected: GoldenExpected = Field(..., title='GoldenExpected')
 
 
-class BacktestGolden(RootModel[list[BacktestGoldenItem]]):
+class BacktestGolden(RootModel[list[GoldenCase]]):
     """
     網站回測器的標準答案（Python 算的）
     """
 
-    root: list[BacktestGoldenItem] = Field(..., title='BacktestGolden')
+    root: list[GoldenCase] = Field(..., title='BacktestGolden')
     """
     網站回測器的標準答案（Python 算的）
     """

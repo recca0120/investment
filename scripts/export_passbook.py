@@ -4,12 +4,12 @@
 用法：uv run python scripts/export_passbook.py
 需要連網（FinMind），結果會快取在 data/cache/。資料更新時手動重跑並 commit。
 """
-import json
 from datetime import date
 from pathlib import Path
 
 from invest.backtest import run_dca
 from invest.container import build_container
+from invest.export import write_json
 
 SYMBOL, AMOUNT, START, END = "0050", 5000, date(2016, 1, 1), date(2026, 10, 31)
 
@@ -33,5 +33,5 @@ out = {
     "rows": rows,
 }
 path = Path("site/data/passbook.json")
-path.write_text(json.dumps(out, ensure_ascii=False, indent=2) + "\n")
+write_json(path, out, indent=2)  # 不允許 NaN（#46）
 print(f"{path}: {len(rows)} 列，期末 {out['final']:,}，年化 {out['annualized']:.1%}")

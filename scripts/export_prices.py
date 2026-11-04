@@ -8,13 +8,12 @@
 - public/data/prices/<代號>.json、USDTWD.json、index.json（代號清單）：網站回測器讀的資料
 - tests/site/fixtures/backtest-golden.json：Python 讀回同一份 JSON 算出的標準答案，TypeScript 的計算必須一致
 """
-import json
 from datetime import date
 from pathlib import Path
 
 from invest.backtest import US_DIVIDEND_TAX, compare_dca, worst_paper_loss
 from invest.container import build_container
-from invest.export import JsonFxSource, JsonPriceSource, export_fx, export_series, validated
+from invest.export import JsonFxSource, JsonPriceSource, export_fx, export_series, validated, write_json
 from invest.schemas.backtest_golden import BacktestGolden
 from invest.schemas.price_index import PriceIndex
 
@@ -42,15 +41,15 @@ OUT.mkdir(parents=True, exist_ok=True)
 series = {}
 for s in SYMBOLS:
     series[s] = export_series(container.prices, s, START, END)
-    (OUT / f"{s}.json").write_text(json.dumps(series[s], separators=(",", ":")), encoding="utf-8")
+    write_json(OUT / f"{s}.json", series[s])
     print(f"{s}: {len(series[s]['dates'])} 天，{series[s]['dates'][0]} ～ {series[s]['dates'][-1]}")
 fx = export_fx(container.fx, START, END)
-(OUT / "USDTWD.json").write_text(json.dumps(fx, separators=(",", ":")), encoding="utf-8")
+write_json(OUT / "USDTWD.json", fx)
 # 代號清單：網站回測器的下拉選單與日期範圍都讀這份
 index = {"symbols": [
     {"symbol": s, "currency": v["currency"], "first": v["dates"][0], "last": v["dates"][-1]} for s, v in series.items()
 ]}
-(OUT / "index.json").write_text(json.dumps(validated(PriceIndex, index), ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+write_json(OUT / "index.json", validated(PriceIndex, index), indent=2)
 
 # 標準答案：Python 讀回剛寫出的 JSON 計算（和瀏覽器吃同一份資料）
 prices, rates = JsonPriceSource(series), JsonFxSource(fx)
@@ -78,5 +77,5 @@ for sc in SCENARIOS:
         },
     })
 GOLDEN.parent.mkdir(parents=True, exist_ok=True)
-GOLDEN.write_text(json.dumps(validated(BacktestGolden, golden), ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+write_json(GOLDEN, validated(BacktestGolden, golden), indent=2)
 print(f"標準答案：{len(golden)} 組 → {GOLDEN}")
