@@ -1,0 +1,19 @@
+{
+  "skill_name": "glossary",
+  "evals": [
+    {
+      "id": 1,
+      "name": "add-paragraph",
+      "prompt": "在文章 04（docs/knowledge/04-starter-plans.md）的方案 B 底下補一小段，用白話說明為什麼要做股債配置、還有多久要再平衡一次",
+      "expected_output": "用正式名稱「股債比」而不是別名；新段落裡的名詞會有小卡；跑過 terms.mjs check 且結束碼 0",
+      "files": []
+    },
+    {
+      "id": 2,
+      "name": "new-article",
+      "prompt": "幫我寫一篇新的知識文章 docs/knowledge/11-rebalancing.md：再平衡到底要怎麼做、多久做一次，給新手看",
+      "expected_output": "frontmatter 有 title、summary、sidebar.order；標題寫結論；用到但名詞解釋沒有的名詞補進 docs/glossary（四項格式）；terms.mjs check 結束碼 0",
+      "files": []
+    }
+  ]
+}
