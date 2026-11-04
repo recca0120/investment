@@ -48,3 +48,10 @@ title: 2026-11-04 網站版面、設計 token、名詞解釋
 - #22 完成：文章 08 拆成[① 選管道](../knowledge/08-us-stock-channels-tax.mdx)與[② 稅務](../knowledge/08-us-stock-tax.md)、加流程圖；首頁加回測關鍵數字、新手路線、網站分區、最近更新
 - 發現並修正：首頁閱讀順序照檔名排，加入「開始行動」後和側欄不一致 → 首頁與側欄共用同一份分組邏輯
 - 待使用者同意：回報 starlight-sidebar-topics 在有 base 時「下一篇」跨區的 bug
+
+## 晚上：回測
+
+- 使用者問「回測的部份？」→ 用回測器算出運氣不好的情境，寫成[運氣不好時會怎樣](../knowledge/10-bad-luck-scenarios.md)（#36，新手路線第 7 站）；表格由程式產生
+- 使用者指出：「你不是用 ATDD 為什麼還要我回報？」→ 交出去的指令與工具，Claude 先自己跑過、截圖驗證；實際操作回測器時發現走勢圖看不出前期下跌，加了報酬率走勢圖（#38）
+- 分區外掛的問題：使用者要求先查作者 repo 的 issue 與自己的用法 → 只改 base 的對照實驗確認是有 base 時才會發生；決定先不回報，記在 #40
+- 使用者問前端能不能回測、提到網頁版 SQLite → 查了 sql.js、sql.js-httpvfs、sqlite-wasm 等；資料只有幾百 KB，決定用 JSON（[決策 0008](../decisions/0008-browser-backtester.md)）。網站「工具」分區的[回測器](../tools/backtest.mdx)上線（#41），計算和 Python 對過 9 組標準答案
