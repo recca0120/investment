@@ -42,7 +42,9 @@ describe('網站分區', () => {
     const nav = sidebar(screen);
     for (const other of SECTIONS.filter((s) => s.dir !== dir)) {
       for (const doc of publishedDocs(other.dir)) {
-        expect(nav.queryByRole('link', { name: new RegExp(doc.title) }), `${label} 的側欄出現 ${doc.path}`).toBeNull();
+        // 名稱要完全相符（前面可以有路線的站號）：只比對「包含」的話，「0008 網站上的回測器」會被當成工具區的「回測器」
+        const exact = new RegExp(`^(\\d+ )?${doc.sidebarLabel.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}$`);
+        expect(nav.queryByRole('link', { name: exact }), `${label} 的側欄出現 ${doc.path}`).toBeNull();
       }
     }
   });

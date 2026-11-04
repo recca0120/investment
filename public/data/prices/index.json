@@ -1,0 +1,58 @@
+{
+  "symbols": [
+    {
+      "symbol": "0050",
+      "currency": "TWD",
+      "first": "2003-06-30",
+      "last": "2026-11-03"
+    },
+    {
+      "symbol": "006208",
+      "currency": "TWD",
+      "first": "2012-07-17",
+      "last": "2026-11-03"
+    },
+    {
+      "symbol": "0056",
+      "currency": "TWD",
+      "first": "2007-12-26",
+      "last": "2026-11-03"
+    },
+    {
+      "symbol": "00878",
+      "currency": "TWD",
+      "first": "2020-07-20",
+      "last": "2026-11-03"
+    },
+    {
+      "symbol": "00679B",
+      "currency": "TWD",
+      "first": "2017-01-17",
+      "last": "2026-11-03"
+    },
+    {
+      "symbol": "VT",
+      "currency": "USD",
+      "first": "2008-06-26",
+      "last": "2026-11-03"
+    },
+    {
+      "symbol": "VTI",
+      "currency": "USD",
+      "first": "2003-01-02",
+      "last": "2026-11-03"
+    },
+    {
+      "symbol": "VXUS",
+      "currency": "USD",
+      "first": "2011-01-28",
+      "last": "2026-11-03"
+    },
+    {
+      "symbol": "BND",
+      "currency": "USD",
+      "first": "2007-04-10",
+      "last": "2026-11-03"
+    }
+  ]
+}

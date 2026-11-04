@@ -85,3 +85,23 @@ describe.each(['light', 'dark'] as const)('%s 模式', (theme) => {
     }
   });
 });
+
+describe.each(['light', 'dark'] as const)('%s 模式', (theme) => {
+  test('[#41-5] 回測器頁面（表單與說明）文字對比至少 4.5:1', async () => {
+    const page = await openFrame('tools/backtest/', { theme });
+    try {
+      const root = page.doc.querySelector('[data-backtester]');
+      expect(root, '找不到回測器').not.toBeNull();
+      const view = page.doc.defaultView!;
+      const low = [...root!.querySelectorAll('*')]
+        .filter((el) => [...el.childNodes].some((n) => n.nodeType === 3 && n.textContent!.trim()))
+        .filter((el) => !el.closest('[aria-hidden="true"], .sr-only, svg'))
+        .map((el) => ({ el, ratio: contrast(view.getComputedStyle(el).color, backgroundOf(el)) }))
+        .filter(({ ratio }) => ratio < 4.5)
+        .map(({ el, ratio }) => `「${el.textContent!.trim().slice(0, 12)}」${ratio}`);
+      expect(low).toEqual([]);
+    } finally {
+      page.close();
+    }
+  });
+});

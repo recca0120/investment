@@ -5,7 +5,7 @@
 需要連網（FinMind），結果會快取在 data/cache/。資料更新時重跑並 commit。
 
 輸出：
-- public/data/prices/<代號>.json、public/data/prices/USDTWD.json：網站回測器讀的資料
+- public/data/prices/<代號>.json、USDTWD.json、index.json（代號清單）：網站回測器讀的資料
 - tests/site/fixtures/backtest-golden.json：Python 讀回同一份 JSON 算出的標準答案，TypeScript 的計算必須一致
 """
 import json
@@ -44,6 +44,11 @@ for s in SYMBOLS:
     print(f"{s}: {len(series[s]['dates'])} 天，{series[s]['dates'][0]} ～ {series[s]['dates'][-1]}")
 fx = export_fx(container.fx, START, END)
 (OUT / "USDTWD.json").write_text(json.dumps(fx, separators=(",", ":")), encoding="utf-8")
+# 代號清單：網站回測器的下拉選單與日期範圍都讀這份
+index = {"symbols": [
+    {"symbol": s, "currency": v["currency"], "first": v["dates"][0], "last": v["dates"][-1]} for s, v in series.items()
+]}
+(OUT / "index.json").write_text(json.dumps(index, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
 
 # 標準答案：Python 讀回剛寫出的 JSON 計算（和瀏覽器吃同一份資料）
 prices, rates = JsonPriceSource(series), JsonFxSource(fx)
