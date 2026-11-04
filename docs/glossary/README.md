@@ -4,4 +4,5 @@
 
 - 新增名詞：加在對應分類的頁面，網站上的知識文章會自動把這個名詞第一次出現的地方連過來（`site/plugins/rehype-glossary-links.mjs`）
 - 網站上點文章裡的名詞會打開名詞小卡（#50），內容取自「一句話」和「新手注意」，改這兩項小卡會跟著變
+- 寫文章時用 `node .claude/skills/glossary/scripts/terms.mjs check <文章>` 核對名詞（見 `glossary` skill）；同一件事的其他說法寫在 `aliases.json`，文章一律用名詞解釋的正式名稱
 - 名詞標題只寫名詞本身（例如 `### ETF`），標題文字就是網址錨點，改名會讓舊連結失效

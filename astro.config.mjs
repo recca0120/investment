@@ -2,12 +2,8 @@
 import { defineConfig } from 'astro/config';
 import starlight from '@astrojs/starlight';
 import tailwindcss from '@tailwindcss/vite';
+import { rehypePlugins } from './site/plugins/markdown.mjs';
 import { unified } from '@astrojs/markdown-remark';
-import rehypeMdLinks from './site/plugins/rehype-md-links.mjs';
-import rehypeNumCells from './site/plugins/rehype-num-cells.mjs';
-import rehypeStackTables from './site/plugins/rehype-stack-tables.mjs';
-import rehypeGlossaryLinks from './site/plugins/rehype-glossary-links.mjs';
-import rehypeCollapseSources from './site/plugins/rehype-collapse-sources.mjs';
 import designTokens from './site/design/integration.ts';
 import starlightSidebarTopics from 'starlight-sidebar-topics';
 
@@ -21,14 +17,7 @@ export default defineConfig({
   markdown: {
     // Astro 7 預設用 Sätteri；要用 rehype plugin 必須切回 unified
     processor: unified({
-      rehypePlugins: [
-        [rehypeMdLinks, { contentDir: './docs', base }],
-        rehypeNumCells,
-        rehypeStackTables, // 文字表手機上依列排（#54、#58）；要在 rehypeNumCells 之後、名詞連結之前
-        // 知識文章裡的名詞第一次出現時連到名詞解釋（#24）
-        [rehypeGlossaryLinks, { glossaryDir: './docs/glossary', contentDir: './docs', base }],
-        rehypeCollapseSources, // 結尾的「資料來源」收合並標示筆數（#22）
-      ],
+      rehypePlugins: rehypePlugins({ base }), // 清單在 site/plugins/markdown.mjs（名詞檢查工具共用）
     }),
   },
   integrations: [
