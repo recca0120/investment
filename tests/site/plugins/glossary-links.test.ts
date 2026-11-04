@@ -70,3 +70,40 @@ test('[#24-4] 標題、程式碼、已經是連結的文字不連；名詞解釋
     expect((await transform('<p>VT 是 ETF</p>', path)).queryAllByRole('link'), path).toEqual([]);
   }
 });
+
+test('[#24-4] 加連結時原本的文字一個字都不能少', async () => {
+  // 突變測試發現：測試只檢查連結，「保留前後文字」那段改壞（文字消失）也抓不到
+  const html = '<p>VT 是一檔 ETF，VT 的殖利率約 2%，再看一次 ETF。</p><p>沒有名詞的段落。</p>';
+  const screen = await transform(html);
+  const { document } = new Window();
+  document.body.innerHTML = html;
+  expect(screen.getByText(/沒有名詞/).closest('body')!.textContent).toBe(document.body.textContent);
+});
+
+test('[#24-4] 兩個名詞從同一個字開始時取長的；小標題與程式碼區塊不連', async () => {
+  const local = await unified()
+    .use(rehypeParse, { fragment: true })
+    .use(rehypeGlossaryLinks, {
+      terms: [{ term: '高股息', href: '/a' }, { term: '高股息 ETF', href: '/b' }],
+      contentDir: './docs',
+    })
+    .use(rehypeStringify)
+    .process(new VFile({ value: '<h3>高股息</h3><pre>高股息</pre><p>高股息 ETF 配息</p>', path: 'docs/knowledge/x.md' }));
+  expect(String(local)).toBe('<h3>高股息</h3><pre>高股息</pre><p><a href="/b" class="glossary-link">高股息 ETF</a> 配息</p>');
+});
+
+test('[#24-4] 名詞清單只取名詞解釋的 ### 標題（## 資料來源不算、README 不讀），錨點和 Starlight 一樣', async () => {
+  const { mkdtempSync, writeFileSync } = await import('node:fs');
+  const { tmpdir } = await import('node:os');
+  const { join } = await import('node:path');
+  const { loadGlossaryTerms } = await import('../../../site/plugins/rehype-glossary-links.mjs');
+  const dir = mkdtempSync(join(tmpdir(), 'glossary-'));
+  writeFileSync(join(dir, '01-Products.md'), '---\ntitle: x\n---\n\n### ETF\n\n## 資料來源\n\n### 市值型 ETF\n\n### ETF\n');
+  writeFileSync(join(dir, 'README.md'), '### 不該出現\n');
+  writeFileSync(join(dir, 'notes.txt'), '### 也不該出現\n');
+  expect(loadGlossaryTerms(dir, '/investment')).toEqual([
+    { term: 'ETF', href: '/investment/glossary/01-products/#etf' },
+    { term: '市值型 ETF', href: '/investment/glossary/01-products/#市值型-etf' },
+    { term: 'ETF', href: '/investment/glossary/01-products/#etf-1' }, // 同一頁重複的標題，Starlight 會加 -1
+  ]);
+});

@@ -113,7 +113,7 @@
 ## 系統開發規則（之後會補充）
 
 - 語言：Python 3.12，套件管理用 `uv`；CI：`.github/workflows/python.yml`
-- 開發流程依 `atdd` skill（repo 版，Python 系統與網站都適用）：第一個驗收測試先寫並用 check_red.py 確認紅燈；PR 前用 check_criteria.py 確認每條驗收條件都有測試
+- 開發流程依 `atdd` skill（repo 版，Python 系統與網站都適用）：第一個驗收測試先寫並用 check_red.py 確認紅燈；PR 前用 check_criteria.py 確認每條驗收條件都有測試；功能做完要關 issue 前，用突變測試檢查保護力（`uv run --with mutmut==3.8.1 mutmut run`、`npm run test:mutation`，見 atdd skill 的 references/mutation-testing.md）
 - 資料來源：FinMind（台股自己用原始價＋股利＋分割計算還原價；美股用 Adj_Close），yfinance 只做交叉驗證（見 `docs/decisions/0003-data-source.md`）
 
 ## 專案 Skills

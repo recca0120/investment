@@ -42,13 +42,24 @@ def test_匯出美元匯率():
 
 @pytest.mark.criteria("#41-2")
 def test_讀回匯出的JSON_回測結果和原本的資料來源相同():
-    from invest.backtest import run_dca
-    from invest.export import JsonPriceSource
+    # 標準答案是用讀回的 JSON 算的；讀回錯了，標準答案也會跟著錯
+    # 突變測試發現：原本只比對含息的結果，讀錯收盤價、匯率完全沒有測試，所以三種都比對
+    from invest.backtest import compare_dca
+    from invest.export import JsonFxSource, JsonPriceSource
 
-    prices = FakePriceSource({"0050": [(date(2025, 1, 2), 100.0, 100.0), (date(2026, 1, 2), 110.0, 115.5)]})
-    start, end = date(2025, 1, 1), date(2026, 1, 31)
-    roundtrip = JsonPriceSource({"0050": export_series(prices, "0050", start, end)})
+    rows = [(date(2025, 1, 2), 100.0, 98.0), (date(2025, 2, 3), 110.0, 110.0)]
+    prices = FakePriceSource({"0050": rows, "VT": rows})
+    fx = FakeFxSource([FxRate(date(2025, 1, 2), 30.0, 29.9), FxRate(date(2025, 2, 3), 32.0, 31.9)])
+    start, end = date(2025, 1, 2), date(2025, 2, 3)  # 期間的頭尾剛好是交易日：邊界要包含在內
+    json_prices = JsonPriceSource({s: export_series(prices, s, start, end) for s in ("0050", "VT")})
+    json_fx = JsonFxSource(export_fx(fx, start, end))
 
-    a = run_dca(prices, "0050", monthly_amount=1000, start=start, end=end)
-    b = run_dca(roundtrip, "0050", monthly_amount=1000, start=start, end=end)
-    assert (a.total_invested, a.final_value, a.annualized_return) == (b.total_invested, b.final_value, b.annualized_return)
+    for dividends in (True, False):
+        for symbols, use_fx in ((["0050"], False), (["VT"], True)):
+            kwargs = dict(monthly_amount=1000, start=start, end=end, include_dividends=dividends, us_dividend_tax=0.3)
+            [a] = compare_dca(prices, symbols, fx=fx if use_fx else None, **kwargs)
+            [b] = compare_dca(json_prices, symbols, fx=json_fx if use_fx else None, **kwargs)
+            label = f"{symbols[0]} 含息={dividends}"
+            assert len(b.history) == len(a.history) == 2, label
+            assert (b.total_invested, b.final_value, b.annualized_return) == pytest.approx(
+                (a.total_invested, a.final_value, a.annualized_return)), label

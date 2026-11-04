@@ -34,3 +34,11 @@ dev = [
     "time-machine>=3.6.0",
     "yfinance>=1.7.0",
 ]
+
+# 突變測試（檢查測試的保護力，見 .claude/skills/atdd/references/mutation-testing.md）
+# 執行：uv run --with mutmut==3.8.1 mutmut run；結果：mutmut results
+[tool.mutmut]
+paths_to_mutate = ["src/invest/"]
+do_not_mutate = ["src/invest/schemas/*"]
+tests_dir = ["tests/"]
+also_copy = ["scripts/", "schemas/"]
