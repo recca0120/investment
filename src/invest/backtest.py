@@ -53,7 +53,7 @@ def run_dca(
     if not include_dividends:
         price = [p.close for p in points]
     elif dividend_tax:
-        price = _after_dividend_tax(points, dividend_tax)
+        price = after_dividend_tax(points, dividend_tax)
     else:
         price = [p.total_return for p in points]
     to_usd, to_twd = _align_fx(fx, [p.date for p in points]) if fx is not None else ([1.0] * len(points),) * 2
@@ -81,7 +81,10 @@ def run_dca(
     )
 
 
-def _after_dividend_tax(points: list[PricePoint], tax: float) -> list[float]:
+US_DIVIDEND_TAX = 0.3  # 美國對外國人的股利預扣稅（台美沒有生效的租稅協定）
+
+
+def after_dividend_tax(points: list[PricePoint], tax: float) -> list[float]:
     """從收盤價與含息還原價反推每次除息，改成只有 (1 - tax) 的股利再投入。
 
     還原價／收盤價的比值 a 只在除息日改變：a[i-1] / a[i] = 1 - 股利 / 前一日收盤。

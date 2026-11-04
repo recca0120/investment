@@ -57,6 +57,7 @@
   - 顏色、字體、圓角只改 `site/design/tokens.ts`（設計 token），build 時編譯成 Starlight、Tailwind、daisyUI 三組變數（`site/styles/generated/`，不進 git）；元件、`.mdx`、`site/styles/` 都不寫死顏色（有測試檢查，也會檢查文字對比）
   - 元件優先用 daisyUI（卡片、分頁、統計數字…），daisyUI 沒有的才自己寫；版面規則見 `docs/decisions/0006-site-layout-route.md`
   - 改網站外觀時用 `frontend-design` skill，並實際截圖檢查日間、夜間、手機（方法見 astro-starlight skill）
+  - 網站回測器的價格資料：`uv run python scripts/export_prices.py` 產生 `public/data/prices/*.json` 和標準答案 `tests/site/fixtures/backtest-golden.json`；瀏覽器端計算在 `site/lib/backtest.ts`，必須和 Python 的結果一致（見 `docs/decisions/0008-browser-backtester.md`）
   - 文章 10 的情境表：`uv run python scripts/bad_luck_scenarios.py` 用真實資料重算並直接更新文章
   - 首頁撲滿與「回測的關鍵數字」：`uv run python scripts/export_passbook.py` 重新產生 `site/data/passbook.json`；「最近更新」用 git 的修改時間（CI 要 `fetch-depth: 0`）
 
