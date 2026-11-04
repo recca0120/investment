@@ -40,6 +40,7 @@
   --text-display--line-height: 1.15;
   --container-intro: 28em;
   --breakpoint-xs: 30rem;
+  --breakpoint-md: 50rem; /* 對齊 Starlight：50rem 以上才顯示側欄（Tailwind 預設是 48rem） */
 
   /* 首頁撲滿：硬幣從上方掉進投幣孔。每枚硬幣用 style 設定 animation-delay，依序落下 */
   --animate-coin-drop: coin-drop 900ms cubic-bezier(0.5, 0, 0.75, 0) both;

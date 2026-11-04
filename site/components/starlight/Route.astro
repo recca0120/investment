@@ -1,0 +1,39 @@
+---
+// 「投資知識」的側欄（Starlight 外層已經是 <nav aria-label="主要">）：新手路線（#22，決策 0006）。用 daisyUI 的 steps 畫成一條線，每站是一枚硬幣
+// 已經走過與目前這一站是金幣，後面的站是空心；順序由每篇文章 frontmatter 的 sidebar.order 決定
+import type { StarlightRouteData } from '@astrojs/starlight/route-data';
+
+type Entry = StarlightRouteData['sidebar'][number];
+const flatten = (entries: Entry[]): Extract<Entry, { type: 'link' }>[] =>
+  entries.flatMap((e) => (e.type === 'link' ? [e] : flatten(e.entries)));
+
+const stations = flatten(Astro.locals.starlightRoute.sidebar);
+const here = stations.findIndex((s) => s.isCurrent);
+---
+
+<div>
+  <p class="mt-0 mb-2 text-sm font-bold text-muted">新手路線{here >= 0 && `：第 ${here + 1} / ${stations.length} 站`}</p>
+  <ul aria-label="新手路線" class="steps steps-vertical m-0 w-full p-0">
+    {
+      stations.map((s, i) => (
+        <li class:list={['step min-h-14 justify-items-start text-left', i <= here && 'step-accent']}>
+          <span class="step-icon text-sm font-black" aria-hidden="true">
+            {i + 1}
+          </span>
+          <a
+            href={s.href}
+            aria-current={s.isCurrent ? 'page' : undefined}
+            class:list={[
+              'rounded-field -my-1 block px-2 py-1 leading-snug no-underline',
+              s.isCurrent ? 'bg-accent-low font-bold text-ink' : 'text-soft hover:text-ink',
+              i > here && here >= 0 && 'text-muted',
+            ]}
+          >
+            <span class="sr-only">{i + 1} </span>
+            {s.label}
+          </a>
+        </li>
+      ))
+    }
+  </ul>
+</div>

@@ -1,0 +1,61 @@
+// 文章頁版面（#22）：寬表格讀得下去、daisyUI 不影響 Starlight 原本的內文樣式
+import { describe, expect, test } from 'vitest';
+import { DESKTOP, MOBILE, openFrame } from './frame';
+
+const ARTICLE_08 = 'knowledge/08-us-stock-channels-tax/';
+
+/** 找出表頭含有這些文字的表格 */
+function tableWith(doc: Document, ...headers: string[]) {
+  const table = [...doc.querySelectorAll('table')].find((t) =>
+    headers.every((h) => t.querySelector('thead')?.textContent?.includes(h)),
+  );
+  expect(table, `找不到表頭含 ${headers.join('、')} 的表格`).toBeDefined();
+  return table!;
+}
+
+describe('[#22-4] 文章 08「四種管道比較」表格', () => {
+  test('桌機 1400px：每一格至少放得下 4 個中文字', async () => {
+    const page = await openFrame(ARTICLE_08, { size: DESKTOP });
+    try {
+      const view = page.doc.defaultView!;
+      const cells = [...tableWith(page.doc, '複委託', '海外券商').querySelectorAll('tbody td, tbody th')];
+      const narrow = cells
+        .map((cell) => {
+          const s = view.getComputedStyle(cell);
+          const content = cell.clientWidth - parseFloat(s.paddingLeft) - parseFloat(s.paddingRight);
+          return { text: cell.textContent!.trim().slice(0, 8), chars: content / parseFloat(s.fontSize) };
+        })
+        .filter(({ chars }) => chars < 4)
+        .map(({ text, chars }) => `「${text}」只有 ${chars.toFixed(1)} 字寬`);
+      expect(narrow).toEqual([]);
+    } finally {
+      page.close();
+    }
+  });
+
+  test('手機 375px：表格自己可以左右滑，頁面不會水平捲動', async () => {
+    const page = await openFrame(ARTICLE_08, { size: MOBILE });
+    try {
+      const table = tableWith(page.doc, '複委託', '海外券商');
+      const scroller = table.closest<HTMLElement>('[data-table-scroll]') ?? table;
+      expect(page.doc.defaultView!.getComputedStyle(scroller).overflowX).toMatch(/auto|scroll/);
+      expect(scroller.scrollWidth, '表格內容比畫面寬，要能滑動').toBeGreaterThan(scroller.clientWidth);
+      const { scrollWidth, clientWidth } = page.doc.documentElement;
+      expect(scrollWidth, `頁面寬 ${scrollWidth}px 超出畫面 ${clientWidth}px`).toBeLessThanOrEqual(clientWidth);
+    } finally {
+      page.close();
+    }
+  });
+});
+
+test.each(['light', 'dark'] as const)('[#22-12] %s：加入 daisyUI 後，內文的清單、標題、段落樣式不變', async (theme) => {
+  const page = await openFrame('knowledge/01-getting-started/', { theme });
+  try {
+    expect(page.style('.sl-markdown-content > ul > li').listStyleType).toBe('disc');
+    expect(Number(page.style('.sl-markdown-content h2').fontWeight)).toBeGreaterThanOrEqual(700);
+    expect(parseFloat(page.style('.sl-markdown-content h2').fontSize)).toBeGreaterThan(24);
+    expect(parseFloat(page.style('.sl-markdown-content > .sl-heading-wrapper + p').marginTop)).toBeGreaterThan(0);
+  } finally {
+    page.close();
+  }
+});

@@ -1,6 +1,8 @@
 ---
 title: 股價資料來源評估
 description: 證交所、FinMind、yfinance 的實測比較，以及回測系統採用的資料來源
+sidebar:
+  order: 7 # 新手路線第 7 站（決策 0006）
 ---
 
 > 2026-11-03 實測（issue #3）。API 限制與資料集可能變動，使用前請以官方文件為準。

@@ -68,7 +68,7 @@ site/design/integration.ts   Astro integration：astro:config:setup 時寫出 si
 }
 ```
 
-- **一定要排除 `reset`**：它等於 Tailwind preflight（`margin:0`、`h1{font-size:inherit}`、`ul{list-style:none}`），會把 Markdown 內文的清單符號、標題大小洗掉
+- **排除 `reset`**：它等於 Tailwind preflight（`margin:0`、`h1{font-size:inherit}`、`ul{list-style:none}`）。它在 `@layer base`（最低），所以**蓋不過** Starlight 的內文樣式（2026-11-04 實測：打開 reset，文章的清單符號、標題大小都沒變）；但它會作用在 `.not-content` 裡的自訂元件（那裡沒有 Starlight 內文樣式），留著只會多出意外，所以排除
 - `rootcolor` 會設 `:root` 的背景與文字色、`scrollbar`／`rootscroll*` 會改捲軸，和 Starlight 衝突，一起排除
 - build 時 lightningcss 對 daisyUI 的 `@scope (.join)` 報「Invalid empty selector」警告，不影響輸出
 - 2026-11-04 實測：daisyui 5.7.50、Tailwind 4.3.4、Starlight 0.42.8

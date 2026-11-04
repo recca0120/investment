@@ -28,6 +28,7 @@
   - 內容更新時直接改檔，不另開新版本檔
 - `docs/` 底下所有 `.md` 都會發佈到網站，寫作規則：
   - 開頭一定要有 frontmatter `title`（少了網站 build 會失敗），內文從 `##` 開始，不要再寫 `# 標題`
+  - `docs/knowledge/` 的文章要在 frontmatter 寫 `sidebar.order`（新手路線的站號，見 `docs/decisions/0006-site-layout-route.md`）
   - 文件之間用相對路徑連到 `.md`（例如 `../knowledge/01-getting-started.md`），GitHub 和網站都能點
   - `README.md` 不會發佈到網站，只給 GitHub 瀏覽資料夾用
   - 新增或修改後跑 `npm run test:site`（build ＋ 網站測試，會檢查側欄和站內連結）

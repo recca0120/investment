@@ -1,0 +1,26 @@
+---
+// Starlight Sidebar 覆寫（#22）
+// - 手機版：選單最上方放網站分區（桌機的分區在頂部）
+// - 「投資知識」畫成新手路線；其他兩區用 Starlight 原本的側欄
+import Default from '@astrojs/starlight/components/Sidebar.astro';
+import MobileMenuFooter from '@astrojs/starlight/components/MobileMenuFooter.astro';
+import Route from './Route.astro';
+import TopicTabs from './TopicTabs.astro';
+
+const { isPageWithTopic, topics } = Astro.locals.starlightSidebarTopics;
+const isKnowledge = topics.find((t) => t.isCurrent)?.link.includes('/knowledge/') ?? false;
+---
+
+{isPageWithTopic && <TopicTabs class="mb-4 md:hidden" />}
+{
+  isKnowledge ? (
+    <>
+      <Route />
+      <div class="md:hidden">
+        <MobileMenuFooter />
+      </div>
+    </>
+  ) : (
+    <Default />
+  )
+}

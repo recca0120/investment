@@ -1,0 +1,13 @@
+---
+// Starlight Header 覆寫（#22）：原本的頂部列下面加一列網站分區（50rem 以上；更窄時分區在側欄選單裡）
+// 多出來的高度由 site/styles/starlight.css 調整 --sl-nav-height
+import Default from '@astrojs/starlight/components/Header.astro';
+import TopicTabs from './TopicTabs.astro';
+
+const { isPageWithTopic } = Astro.locals.starlightSidebarTopics;
+---
+
+<div class="flex h-full flex-col">
+  <div class="min-h-0 flex-1"><Default /></div>
+  {isPageWithTopic && <TopicTabs class="-mb-3 max-md:hidden" />}
+</div>

@@ -113,6 +113,7 @@ investment/
 - `references/config.md`：完整的設定檔範例（astro.config、content.config、tsconfig、package.json），開始建站或改設定時讀
 - `references/deploy-github-pages.md`：GitHub Actions workflow 與 Pages 設定，要部署或部署出錯時讀
 - `references/tailwind.md`：Tailwind v4 與 Starlight 的圖層、日夜模式 token、MDX 的 `<p>` 陷阱，要改樣式時讀
+- `references/topics-and-overrides.md`：網站分區（starlight-sidebar-topics）、覆寫 Header／Sidebar、外掛遇到 base 的 bug、daisyUI 元件的結構陷阱，要改導覽或側欄時讀
 - `references/mdx-components.md`：Starlight 內建元件、自訂 Astro 元件、互動元件（React island）、未來嵌入回測圖表的做法，要在頁面放元件時讀
 - `assets/rehype-md-links.mjs`：已測試過的相對連結改寫 plugin，直接複製使用
 
