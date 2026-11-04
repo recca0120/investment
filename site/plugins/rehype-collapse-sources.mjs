@@ -6,6 +6,8 @@ import { toString } from 'hast-util-to-string';
 
 const HEADING = '資料來源';
 const isH2 = (node) => node.type === 'element' && node.tagName === 'h2';
+// 名詞小卡（rehype-glossary-links 附在文章最後）不能被收進摺疊區：摺疊區關著時小卡打開也是 0×0、看不到（#60）
+const isGlossaryCard = (node) => node.type === 'element' && [node.properties?.className ?? []].flat().includes('glossary-card');
 
 function countLinks(node) {
   if (node.type !== 'element') return 0;
@@ -19,7 +21,9 @@ export default function rehypeCollapseSources() {
     if (start === -1) return;
     const next = tree.children.findIndex((n, i) => i > start && isH2(n));
     const end = next === -1 ? tree.children.length : next;
-    const body = tree.children.slice(start + 1, end);
+    const section = tree.children.slice(start + 1, end);
+    const body = section.filter((n) => !isGlossaryCard(n));
+    const cards = section.filter(isGlossaryCard);
     const links = body.reduce((sum, n) => sum + countLinks(n), 0);
 
     tree.children.splice(start, end - start, {
@@ -30,6 +34,6 @@ export default function rehypeCollapseSources() {
         { type: 'element', tagName: 'summary', properties: {}, children: [{ type: 'text', value: `${HEADING}（${links} 筆）` }] },
         ...body,
       ],
-    });
+    }, ...cards);
   };
 }

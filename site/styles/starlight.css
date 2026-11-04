@@ -65,8 +65,12 @@
   }
   /* 文字表在手機上依列排（#54 比較表、#58 擴大到所有文字表）：每一列變成一段，第一格是小標題，其他格前面寫欄名
      （class 與 data-label 由 rehype-stack-tables 加上；純數字表維持表格）。
-     依據：NN/g 手機表格研究，每格是文字的表手機上只放得下約兩欄，硬塞會擠成一兩個字一行或要左右滑 */
-  @media (max-width: 50rem) {
+     依據：NN/g 手機表格研究，每格是文字的表手機上只放得下約兩欄，硬塞會擠成一兩個字一行或要左右滑。
+     用「內容欄寬度」判斷（container query），不是畫面寬度：820px、1180px 時側欄／目錄出現，內容欄只剩約 500px（#60） */
+  .sl-markdown-content {
+    container-type: inline-size;
+  }
+  @container (max-width: 37.5rem) {
     .sl-markdown-content table.stack-table:not(:where(.not-content *)) {
       display: block;
       overflow: visible;

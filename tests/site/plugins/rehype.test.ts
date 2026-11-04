@@ -173,3 +173,15 @@ test('[#58-3] 文字表（第一欄以外有不是數字的欄）和 5 欄以上
   expect(wide).toHaveClass('stack-table');
   expect(numbers).not.toHaveClass('stack-table');
 });
+
+test('[#60-1] 名詞小卡附在文章最後，不能被收進「資料來源」摺疊區（關著時小卡是 0×0）', async () => {
+  const { default: rehypeCollapseSources } = await import('../../../site/plugins/rehype-collapse-sources.mjs');
+  const screen = await transform(
+    `<p>內文</p><h2>資料來源</h2><ul><li><a href="https://a.example">A</a></li></ul>
+     <div class="glossary-card" id="glossary-card-0" popover="auto">小卡</div>`,
+    rehypeCollapseSources,
+  );
+  const card = screen.getByText('小卡');
+  expect(card.closest('details'), '小卡不能在摺疊區裡').toBeNull();
+  expect(screen.getByText('資料來源（1 筆）').closest('details')!.textContent).not.toContain('小卡');
+});
