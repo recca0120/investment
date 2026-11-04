@@ -8,6 +8,7 @@ import { within } from '@testing-library/dom';
 import { Window } from 'happy-dom';
 import rehypeMdLinks from '../../../site/plugins/rehype-md-links.mjs';
 import rehypeNumCells from '../../../site/plugins/rehype-num-cells.mjs';
+import rehypeCompareTables from '../../../site/plugins/rehype-compare-tables.mjs';
 
 async function transform(html: string, plugin: any, options?: unknown, path = 'docs/knowledge/01-a.md') {
   const file = new VFile({ value: html, path });
@@ -109,7 +110,6 @@ test('[#15-5] 混了文字的欄位（約 0.08%～0.25%）不算數字欄；只�
 });
 
 test('[#54-2] 比較表（第一格表頭是空的）每一格記下欄名，給手機版顯示；一般表格不動', async () => {
-  const { default: rehypeCompareTables } = await import('../../../site/plugins/rehype-compare-tables.mjs');
   const screen = await transform(
     `<table><thead><tr><th></th><th>複委託</th><th><a href="#x">海外</a>券商</th></tr></thead>
       <tbody><tr><td>手續費</td><td>0.1%</td><td>0 元</td></tr></tbody></table>
@@ -117,9 +117,42 @@ test('[#54-2] 比較表（第一格表頭是空的）每一格記下欄名，給
     rehypeCompareTables,
   );
   const [compare, plain] = screen.getAllByRole('table');
-  expect(compare).toHaveClass('compare-table');
+  expect(compare.className, '原本沒有 class 時只加 compare-table').toBe('compare-table');
   const cells = within(compare).getAllByRole('cell');
   expect(cells.map((c) => c.getAttribute('data-label'))).toEqual([null, '複委託', '海外券商']);
   expect(plain).not.toHaveClass('compare-table');
   expect(within(plain).getAllByRole('cell').every((c) => !c.hasAttribute('data-label'))).toBe(true);
+});
+
+test('[#54-2] Markdown 產生的表格（格子之間有換行）、表頭換行、已有 class、只有表頭的表都處理正確', async () => {
+  const screen = await transform(
+    `<table class="wide">
+      <thead>
+        <tr>
+          <th></th>
+          <th> FinMind（不帶
+            token） </th>
+          <th>yfinance</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>美股</td>
+          <td>有</td>
+          <td>有</td>
+        </tr>
+      </tbody>
+    </table>
+    <table><thead><tr><th></th><th>只有表頭</th></tr></thead></table>`,
+    rehypeCompareTables,
+  );
+  const [compare, headOnly] = screen.getAllByRole('table');
+  expect(compare).toHaveClass('wide');
+  expect(compare).toHaveClass('compare-table');
+  expect(within(compare).getAllByRole('cell').map((c) => c.getAttribute('data-label'))).toEqual([
+    null,
+    'FinMind（不帶 token）',
+    'yfinance',
+  ]);
+  expect(headOnly).not.toHaveClass('compare-table');
 });
