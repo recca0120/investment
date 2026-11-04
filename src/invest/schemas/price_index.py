@@ -21,7 +21,7 @@ class PriceIndexEntry(BaseModel):
     model_config = ConfigDict(
         extra='forbid',
     )
-    symbol: constr(min_length=1)
+    symbol: constr(min_length=1, strict=True)
     currency: Currency
     """
     幣別：台股 TWD、美股 USD

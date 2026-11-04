@@ -7,6 +7,7 @@ tests/acceptance/test_schemas.py 用同一個 models() 檢查 src/invest/schemas
 from pathlib import Path
 
 from datamodel_code_generator import DataModelType, InputFileType, PythonVersion, generate
+from datamodel_code_generator.enums import StrictTypes, TargetPydanticVersion
 from datamodel_code_generator.format import Formatter
 
 SCHEMAS = Path("schemas")
@@ -30,6 +31,14 @@ def models() -> dict[str, str]:
             use_schema_description=True,
             use_field_description=True,
             use_title_as_name=True,  # 用 zod .meta({ title }) 當類別名稱（GoldenInput 而不是 Input）
+            # 和 zod 判斷一致（#46，用 .claude/skills/zod/scripts/parity_check.py 檢查）：
+            # - strict_types：Pydantic 預設會把 "100.5" 轉成數字照樣接受，zod 會拒絕
+            # - use_missing_sentinel：選填欄位明確給 null 時，Pydantic 預設接受（X | None = None），
+            #   zod 的 .optional() 不接受；改用 Pydantic 2.14 的 MISSING 區分「沒給」和「給了 null」
+            #   （strict_nullable 實測沒有效果）
+            strict_types=[StrictTypes.str, StrictTypes.int, StrictTypes.float, StrictTypes.bool],
+            use_missing_sentinel=True,
+            target_pydantic_version=TargetPydanticVersion.V2_14,
             disable_timestamp=True,
             # 明確用內建格式化：不受有沒有裝 black／isort 影響，產生的程式碼才穩定（同步測試會逐字比對）
             formatters=[Formatter.BUILTIN],

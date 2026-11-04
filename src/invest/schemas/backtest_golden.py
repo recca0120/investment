@@ -8,8 +8,10 @@ from pydantic import (
     BaseModel,
     ConfigDict,
     Field,
-    PositiveFloat,
     RootModel,
+    StrictBool,
+    StrictFloat,
+    confloat,
     conint,
     constr,
 )
@@ -19,8 +21,8 @@ class GoldenInput(BaseModel):
     model_config = ConfigDict(
         extra='forbid',
     )
-    symbol: constr(min_length=1)
-    monthly: PositiveFloat
+    symbol: constr(min_length=1, strict=True)
+    monthly: confloat(gt=0.0, strict=True)
     start: date_aliased
     """
     日期（YYYY-MM-DD）
@@ -29,9 +31,9 @@ class GoldenInput(BaseModel):
     """
     日期（YYYY-MM-DD）
     """
-    dividends: bool
-    twd: bool
-    tax: bool
+    dividends: StrictBool
+    twd: StrictBool
+    tax: StrictBool
 
 
 class GoldenWorst(BaseModel):
@@ -42,8 +44,8 @@ class GoldenWorst(BaseModel):
     """
     日期（YYYY-MM-DD）
     """
-    invested: float
-    value: float
+    invested: StrictFloat
+    value: StrictFloat
     recovered: date_aliased | None
 
 
@@ -51,11 +53,11 @@ class GoldenExpected(BaseModel):
     model_config = ConfigDict(
         extra='forbid',
     )
-    totalInvested: float
-    finalValue: float
-    annualized: float
-    maxDrawdown: float
-    days: conint(le=9007199254740991, gt=0)
+    totalInvested: StrictFloat
+    finalValue: StrictFloat
+    annualized: StrictFloat
+    maxDrawdown: StrictFloat
+    days: conint(le=9007199254740991, gt=0, strict=True)
     worst: GoldenWorst = Field(..., title='GoldenWorst')
 
 

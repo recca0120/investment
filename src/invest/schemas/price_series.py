@@ -5,7 +5,15 @@ from __future__ import annotations
 from datetime import date
 from enum import StrEnum
 
-from pydantic import BaseModel, ConfigDict, Field, RootModel, constr
+from pydantic import (
+    MISSING,
+    BaseModel,
+    ConfigDict,
+    Field,
+    RootModel,
+    StrictFloat,
+    constr,
+)
 
 
 class Currency(StrEnum):
@@ -32,7 +40,7 @@ class PriceSeries(BaseModel):
     model_config = ConfigDict(
         extra='forbid',
     )
-    symbol: constr(min_length=1)
+    symbol: constr(min_length=1, strict=True)
     """
     代號，例如 0050、VT
     """
@@ -44,15 +52,15 @@ class PriceSeries(BaseModel):
     """
     交易日（由舊到新）
     """
-    close: list[float]
+    close: list[StrictFloat]
     """
     只調整股票分割的收盤價
     """
-    total: list[float]
+    total: list[StrictFloat]
     """
     含息還原價（股利再投入）
     """
-    totalTaxed: list[float] | None = None
+    totalTaxed: list[StrictFloat] | MISSING = MISSING
     """
     美股：股利扣 30% 預扣稅後的含息價
     """

@@ -2,7 +2,8 @@
 import { z } from 'zod';
 import { FxSeriesSchema, GoldenSchema, PriceIndexSchema, PriceSeriesSchema } from './schemas.ts';
 
-const SCHEMAS = {
+/** 檔名 → zod schema（產生指令、測試、.claude/skills/zod 的 parity_check 共用） */
+export const SCHEMAS = {
   'price-series.schema.json': PriceSeriesSchema,
   'fx-series.schema.json': FxSeriesSchema,
   'price-index.schema.json': PriceIndexSchema,
