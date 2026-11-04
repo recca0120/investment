@@ -46,6 +46,8 @@ uv run python scripts/bad_luck_scenarios.py   # 用真實資料重算，直接�
 uv run streamlit run src/invest/app.py        # 回測器：代號 0050、每月 3000、開始 2021-12-01，按「開始回測」
 ```
 
+回測器的「報酬率走勢」圖有 0% 虛線，掉到線下就是帳上虧損；圖上的點是帳上最慘的時候，圖下方寫出少多少、哪天回到本金。
+
 ## 資料來源
 
 - [FinMind 台股歷史價格與股利資料](https://finmind.github.io/)

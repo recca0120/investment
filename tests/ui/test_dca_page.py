@@ -1,4 +1,5 @@
 """UI 驗收測試：定期定額回測頁面（issue #5）"""
+import json
 from datetime import date
 from pathlib import Path
 
@@ -80,3 +81,25 @@ def test_勾選美股股利預扣稅後_美股含息市值變少():
         taxed = table(run_backtest("VT", include_dividends=True, us_tax=True))[0]["期末市值"]
     # 原幣：1000 / 95 × 100 = 1,052.6；扣 30% 後 1000 / 96.5 × 100 = 1,036.3
     assert (no_tax, taxed) == ("1,053", "1,036")
+
+
+@pytest.mark.criteria("#38-1")
+def test_報酬率走勢圖_有0的基準線():
+    at = run_backtest("0050, VT")
+    assert not at.exception, at.exception[0].message
+    charts = at.get("vega_lite_chart")
+    assert len(charts) == 2, "市值走勢圖＋報酬率走勢圖"
+    spec = json.loads(charts[1].proto.spec)  # 規格裡的中文是 \uXXXX 跳脫，要先解析
+    text = json.dumps(spec, ensure_ascii=False)
+    assert "報酬率" in text
+    assert any(layer["mark"]["type"] == "rule" for layer in spec["layer"]), "要有 0% 的基準線"
+
+
+@pytest.mark.criteria("#38-2")
+def test_標示帳上最慘的時候與回本日():
+    at = run_backtest("0050, VT")
+    text = "\n".join(m.value for m in at.markdown)
+    # VT：2025-01-02 投入 1,000、市值 1,000；2026-01-02 投入 2,000、市值 20×40+1000 = 1,800 → 少 200（-10%），之後沒有資料
+    assert "VT：最慘 2026-01-02，投入 2,000，市值 1,800，少 200 元（-10.0%），到結束時還沒回本" in text
+    # 0050：市值從沒低於投入
+    assert "0050：沒有虧損過" in text

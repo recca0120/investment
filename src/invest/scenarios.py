@@ -7,7 +7,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from datetime import date
 
-from invest.backtest import run_dca, worst_paper_loss
+from invest.backtest import PaperLoss, run_dca, worst_paper_loss
 from invest.prices import PriceSource
 
 START_MARK = "<!-- scenarios:start -->"
@@ -21,7 +21,7 @@ class Scenario:
     end: date
 
 
-def _months_later(start: date, end: date | None) -> str:
+def months_later(start: date, end: date | None) -> str:
     if end is None:
         return "到結束時還沒回本"
     months = (end - start).days / 30.4
@@ -42,7 +42,7 @@ def scenario_table(prices: PriceSource, symbol: str, monthly: float, scenarios: 
             f"| {s.label}（{s.start:%Y-%m}） "
             f"| {worst.date:%Y-%m}，投入 {worst.invested:,.0f}，市值 {worst.value:,.0f} "
             f"| **少 {-worst.loss:,.0f} 元（{worst.loss_ratio:.1%}）** "
-            f"| {_months_later(worst.date, worst.recovered)} "
+            f"| {months_later(worst.date, worst.recovered)} "
             f"| {s.end:%Y-%m}：投入 {result.total_invested:,.0f}，市值 {result.final_value:,.0f}，年化 {result.annualized_return:.1%} |"
         )
     return "\n".join(rows)
@@ -54,3 +54,14 @@ def update_section(article: str, table: str) -> str:
     if start == -1 or end == -1:
         raise ValueError(f"文章裡找不到 {START_MARK} 和 {END_MARK}")
     return f"{article[: start + len(START_MARK)]}\n{table}\n{article[end:]}"
+
+
+def describe_worst(symbol: str, worst: PaperLoss) -> str:
+    """一句話說明帳上最慘的時候（回測器畫面用，issue #38）。"""
+    if worst.loss >= 0:
+        return f"{symbol}：沒有虧損過（市值一直在累計投入以上）"
+    return (
+        f"{symbol}：最慘 {worst.date:%Y-%m-%d}，投入 {worst.invested:,.0f}，市值 {worst.value:,.0f}，"
+        f"少 {-worst.loss:,.0f} 元（{worst.loss_ratio:.1%}），"
+        + ("到結束時還沒回本" if worst.recovered is None else f"{worst.recovered:%Y-%m-%d} 回到本金")
+    )
