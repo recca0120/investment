@@ -107,6 +107,76 @@
     text-decoration-color: currentColor;
   }
 
+  /* 名詞小卡（#50）：電腦貼在名詞下方（CSS anchor positioning，空間不夠時翻到上方），手機從底部升起 */
+  .glossary-card {
+    margin: 0;
+    inset: auto;
+    position-anchor: --glossary-term;
+    top: calc(anchor(bottom) + 0.4rem);
+    left: anchor(left);
+    position-try-fallbacks: flip-block, flip-inline;
+    width: min(22rem, calc(100vw - 2rem));
+    border: 1px solid var(--c-rule);
+    border-radius: 1rem;
+    background: var(--c-cloud);
+    color: var(--c-ink);
+    padding: 0.9rem 1rem;
+    box-shadow: 0 10px 30px color-mix(in srgb, var(--c-shade) 14%, transparent);
+    font-size: var(--sl-text-sm);
+    line-height: 1.7;
+  }
+  .glossary-card p {
+    margin: 0;
+  }
+  .glossary-card .glossary-card-close {
+    float: right;
+    margin: -0.3rem -0.4rem 0 0.5rem;
+    border: 0;
+    background: transparent;
+    color: var(--sl-color-gray-3);
+    font-size: 1rem;
+    line-height: 1;
+    padding: 0.4rem;
+    cursor: pointer;
+  }
+  .glossary-card .glossary-card-term {
+    font-weight: 900;
+    font-size: var(--sl-text-base);
+    margin-bottom: 0.25rem;
+  }
+  .glossary-card .glossary-card-note {
+    margin-top: 0.5rem;
+    color: var(--sl-color-gray-2);
+  }
+  .glossary-card .glossary-card-more {
+    display: inline-block;
+    margin-top: 0.6rem;
+    color: var(--sl-color-text-accent);
+    font-weight: 700;
+  }
+  @media (max-width: 50rem) {
+    .glossary-card {
+      position: fixed;
+      inset: auto 0 0 0;
+      width: 100%;
+      border-radius: 1.25rem 1.25rem 0 0;
+      padding: 1.1rem 1.25rem 1.5rem;
+      font-size: var(--sl-text-base);
+    }
+    .glossary-card::backdrop {
+      background: color-mix(in srgb, var(--c-shade) 30%, transparent);
+    }
+  }
+  /* 不支援 anchor positioning 的瀏覽器：一律用底部卡片 */
+  @supports not (position-anchor: --x) {
+    .glossary-card {
+      position: fixed;
+      inset: auto 0 0 0;
+      width: 100%;
+      border-radius: 1.25rem 1.25rem 0 0;
+    }
+  }
+
   /* 網站分區（#22）：50rem 以上放在頂部列的第二列，頂部列加高 */
   @media (min-width: 50rem) {
     :root:has(header [data-topic-tabs]) {

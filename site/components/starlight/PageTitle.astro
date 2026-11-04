@@ -4,6 +4,7 @@
 // - 再放「重點」（frontmatter 的 summary，最多 3 點）：多數人先掃再決定要不要讀，所以結論放最前面
 import { getCollection } from 'astro:content';
 import Default from '@astrojs/starlight/components/PageTitle.astro';
+import GlossaryCards from '../GlossaryCards.astro';
 
 const { entry } = Astro.locals.starlightRoute;
 const { summary, part } = entry.data;
@@ -16,6 +17,7 @@ const parts = part
 ---
 
 <Default />
+<GlossaryCards />
 {
   parts.length > 1 && (
     <nav aria-label="這篇的分頁" class="tabs tabs-border mt-4 flex-nowrap">

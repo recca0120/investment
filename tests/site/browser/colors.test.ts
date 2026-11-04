@@ -103,3 +103,25 @@ describe.each(['light', 'dark'] as const)('%s 模式', (theme) => {
     }
   });
 });
+
+describe.each(['light', 'dark'] as const)('%s 模式', (theme) => {
+  test('[#50-5] 名詞小卡的文字對比至少 4.5:1', async () => {
+    const page = await openFrame('knowledge/07-dca-backtest-2016-2026/', { theme });
+    try {
+      const link = page.doc.querySelector<HTMLAnchorElement>('.sl-markdown-content a.glossary-link[data-card]')!;
+      link.click();
+      await new Promise((r) => setTimeout(r, 50));
+      const card = page.doc.querySelector('.glossary-card:popover-open');
+      expect(card, '小卡沒有打開').not.toBeNull();
+      const view = page.doc.defaultView!;
+      const low = [...card!.querySelectorAll('*')]
+        .filter((el) => [...el.childNodes].some((n) => n.nodeType === 3 && n.textContent!.trim()))
+        .map((el) => ({ el, ratio: contrast(view.getComputedStyle(el).color, backgroundOf(el)) }))
+        .filter(({ ratio }) => ratio < 4.5)
+        .map(({ el, ratio }) => `「${el.textContent!.trim().slice(0, 12)}」${ratio}`);
+      expect(low).toEqual([]);
+    } finally {
+      page.close();
+    }
+  });
+});
