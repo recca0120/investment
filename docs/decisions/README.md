@@ -29,3 +29,4 @@
 - [0006 網站版面：新手路線＋圖解](0006-site-layout-route.md)
 - [0007 個人入門方案：先練習 3 個月，再走核心＋衛星](0007-starter-plan.md)
 - [0008 網站上的回測器：瀏覽器計算，資料預先產生成 JSON](0008-browser-backtester.md)
+- [0009 網站與 Python 共用資料格式：zod → JSON Schema → Pydantic](0009-shared-schema.md)

@@ -3,11 +3,14 @@
 // 這裡用 TypeScript 算同樣的情境，結果必須一致
 import { readFileSync } from 'node:fs';
 import { describe, expect, test } from 'vitest';
-import { runDca, worstPaperLoss, type FxSeries, type PriceSeries } from '../../../site/lib/backtest';
-import golden from '../fixtures/backtest-golden.json';
+import { runDca, worstPaperLoss } from '../../../site/lib/backtest';
+import { parseFxSeries, parseGolden, parsePriceSeries } from '../../../site/lib/schemas';
+import goldenJson from '../fixtures/backtest-golden.json';
 
-const load = <T>(name: string): T => JSON.parse(readFileSync(`public/data/prices/${name}.json`, 'utf8'));
-const fx = load<FxSeries>('USDTWD');
+// 讀資料時一律經過共用格式驗證（#44）
+const read = (name: string): unknown => JSON.parse(readFileSync(`public/data/prices/${name}.json`, 'utf8'));
+const fx = parseFxSeries(read('USDTWD'));
+const golden = parseGolden(goldenJson);
 
 describe('網站回測器的計算和 Python 一致', () => {
   test('有標準答案可以比', () => {
@@ -20,7 +23,7 @@ describe('網站回測器的計算和 Python 一致', () => {
   test.each(golden.map((g) => [label(g), g] as const))(
     '[#41-2] %s',
     (_name, { input, expected }) => {
-      const result = runDca(load<PriceSeries>(input.symbol), {
+      const result = runDca(parsePriceSeries(read(input.symbol)), {
         monthly: input.monthly,
         start: input.start,
         end: input.end,

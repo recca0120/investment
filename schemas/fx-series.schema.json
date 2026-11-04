@@ -1,0 +1,43 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$ref": "#/$defs/FxSeries",
+  "$defs": {
+    "FxSeries": {
+      "type": "object",
+      "properties": {
+        "dates": {
+          "minItems": 1,
+          "type": "array",
+          "items": {
+            "type": "string",
+            "format": "date",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))$",
+            "description": "日期（YYYY-MM-DD）"
+          }
+        },
+        "toUsd": {
+          "type": "array",
+          "items": {
+            "type": "number"
+          },
+          "description": "買美元的價格（銀行即期賣出）"
+        },
+        "toTwd": {
+          "type": "array",
+          "items": {
+            "type": "number"
+          },
+          "description": "換回新台幣的價格（銀行即期買入）"
+        }
+      },
+      "required": [
+        "dates",
+        "toUsd",
+        "toTwd"
+      ],
+      "additionalProperties": false,
+      "title": "FxSeries",
+      "description": "美元兌新台幣匯率（public/data/prices/USDTWD.json）"
+    }
+  }
+}
