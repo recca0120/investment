@@ -4,7 +4,7 @@
 // - 英文名詞要整個字相符（VTI 裡的 VT 不算）
 // - 樣式在 site/styles/starlight.css 的 .glossary-link（文字色＋點狀底線，不像一般連結那麼搶眼）
 // - 有「一句話」的名詞另外產生名詞小卡（popover，#50），附在文章最後；點名詞時由 GlossaryCards.astro 打開，沒有 JS 時照常是連結
-// - 標題、引言、程式碼、已經是連結的文字不連；只處理 include 列出的資料夾（預設只有 knowledge）
+// - 標題、引言、程式碼、已經是連結的文字不連；手機上會藏起來的表頭（stack-table）也不連；只處理 include 列出的資料夾（預設只有 knowledge）
 import fs from 'node:fs';
 import path from 'node:path';
 import GithubSlugger from 'github-slugger';
@@ -81,6 +81,8 @@ export default function rehypeGlossaryLinks({ terms, glossaryDir, base, contentD
     const cards = [];
     visitParents(tree, 'text', (node, ancestors) => {
       if (ancestors.some((a) => a.type === 'element' && SKIP_TAGS.has(a.tagName))) return;
+      // 手機上依列排的表格，表頭會藏起來（每格前面已經有欄名）：名詞不能第一次出現在這裡，否則手機上點不到（#58）
+      if (ancestors.some((a, i) => a.tagName === 'thead' && ancestors[i - 1]?.properties?.className?.includes?.('stack-table'))) return;
       const remaining = all.filter((t) => !used.has(t.term));
       if (remaining.length === 0) return;
       const re = new RegExp(remaining.map((t) => `(${pattern(t.term)})`).join('|'), 'u');

@@ -17,7 +17,10 @@ const charsPerLine = (el: Element) => {
 };
 
 describe.each(WIDTHS)('電腦 $width px', (size) => {
-  test.each(ARTICLES)('[#52-1] %s：段落與清單一行 36～40 字', async (path) => {
+  // 段落 36～40 字（目標 38）。#58 改成整欄同寬、所有區塊對齊之後：
+  // - 清單有縮排，一行約 35.5 字；引言字比較小，一行約 41 字
+  // - 兩者都還在 W3C clreq 的建議內（書籍內文 17～40 字、橫排不超過 48 字），所以放寬成 34～42，不是為了讓測試過
+  test.each(ARTICLES)('[#52-1] %s：段落一行 36～40 字，清單和引言 34～42 字', async (path) => {
     const page = await openFrame(path, { size });
     try {
       const blocks = [...page.doc.querySelectorAll('.sl-markdown-content :is(p, li)')].filter(
@@ -29,25 +32,14 @@ describe.each(WIDTHS)('電腦 $width px', (size) => {
       );
       expect(blocks.length, '這篇應該有夠長的段落').toBeGreaterThan(0);
       const wrong = blocks
-        .map((el) => ({ text: el.textContent!.trim().slice(0, 10), chars: charsPerLine(el) }))
-        .filter(({ chars }) => chars < 36 || chars > 40)
+        .map((el) => ({ el, text: el.textContent!.trim().slice(0, 10), chars: charsPerLine(el) }))
+        .filter(({ el, chars }) => (el.closest('li, blockquote') ? chars < 34 || chars > 42 : chars < 36 || chars > 40))
         .map(({ text, chars }) => `「${text}」一行 ${chars.toFixed(1)} 字`);
-      expect(wrong).toEqual([]);
+      expect(wrong.join('\n'), '一行字數不對').toBe('');
     } finally {
       page.close();
     }
   });
 });
 
-test('[#52-2] 電腦 1400px：表格比內文寬，不跟著變窄', async () => {
-  const page = await openFrame('knowledge/08-us-stock-channels-tax/');
-  try {
-    const p = page.doc.querySelector('.sl-markdown-content > p')!;
-    const table = [...page.doc.querySelectorAll('.sl-markdown-content table')].find((t) =>
-      t.querySelector('thead')?.textContent?.includes('複委託'),
-    )!;
-    expect(table.getBoundingClientRect().width).toBeGreaterThan(p.getBoundingClientRect().width + 32);
-  } finally {
-    page.close();
-  }
-});
+// [#52-2]「表格比內文寬」已由 #58 取代：整欄同寬、所有區塊對齊（site-wide.test.ts 的 [#58-1]）
