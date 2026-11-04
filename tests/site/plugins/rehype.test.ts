@@ -8,7 +8,7 @@ import { within } from '@testing-library/dom';
 import { Window } from 'happy-dom';
 import rehypeMdLinks from '../../../site/plugins/rehype-md-links.mjs';
 import rehypeNumCells from '../../../site/plugins/rehype-num-cells.mjs';
-import rehypeCompareTables from '../../../site/plugins/rehype-compare-tables.mjs';
+import rehypeStackTables from '../../../site/plugins/rehype-stack-tables.mjs';
 
 async function transform(html: string, plugin: any, options?: unknown, path = 'docs/knowledge/01-a.md') {
   const file = new VFile({ value: html, path });
@@ -109,18 +109,18 @@ test('[#15-5] 混了文字的欄位（約 0.08%～0.25%）不算數字欄；只�
   expect(screen.getByRole('columnheader', { name: '只有' })).not.toHaveClass('num');
 });
 
-test('[#54-2] 比較表（第一格表頭是空的）每一格記下欄名，給手機版顯示；一般表格不動', async () => {
+test('[#54-2] 比較表（第一格表頭是空的）每一格記下欄名，給手機版顯示；四欄以內的數字表不動', async () => {
   const screen = await transform(
     `<table><thead><tr><th></th><th>複委託</th><th><a href="#x">海外</a>券商</th></tr></thead>
       <tbody><tr><td>手續費</td><td>0.1%</td><td>0 元</td></tr></tbody></table>
-     <table><thead><tr><th>代號</th><th>市值</th></tr></thead><tbody><tr><td>0050</td><td>1</td></tr></tbody></table>`,
-    rehypeCompareTables,
+     <table><thead><tr><th>代號</th><th class="num">市值</th></tr></thead><tbody><tr><td>0050</td><td class="num">1</td></tr></tbody></table>`,
+    rehypeStackTables,
   );
   const [compare, plain] = screen.getAllByRole('table');
-  expect(compare.className, '原本沒有 class 時只加 compare-table').toBe('compare-table');
+  expect(compare.className, '原本沒有 class 時只加 stack-table').toBe('stack-table');
   const cells = within(compare).getAllByRole('cell');
   expect(cells.map((c) => c.getAttribute('data-label'))).toEqual([null, '複委託', '海外券商']);
-  expect(plain).not.toHaveClass('compare-table');
+  expect(plain).not.toHaveClass('stack-table');
   expect(within(plain).getAllByRole('cell').every((c) => !c.hasAttribute('data-label'))).toBe(true);
 });
 
@@ -144,15 +144,32 @@ test('[#54-2] Markdown 產生的表格（格子之間有換行）、表頭換行
       </tbody>
     </table>
     <table><thead><tr><th></th><th>只有表頭</th></tr></thead></table>`,
-    rehypeCompareTables,
+    rehypeStackTables,
   );
   const [compare, headOnly] = screen.getAllByRole('table');
   expect(compare).toHaveClass('wide');
-  expect(compare).toHaveClass('compare-table');
+  expect(compare).toHaveClass('stack-table');
   expect(within(compare).getAllByRole('cell').map((c) => c.getAttribute('data-label'))).toEqual([
     null,
     'FinMind（不帶 token）',
     'yfinance',
   ]);
-  expect(headOnly).not.toHaveClass('compare-table');
+  expect(headOnly).not.toHaveClass('stack-table');
+});
+
+test('[#58-3] 文字表（第一欄以外有不是數字的欄）和 5 欄以上的表也依列排；四欄以內的數字表維持表格', async () => {
+  const num = (v: string) => `<td class="num">${v}</td>`;
+  const screen = await transform(
+    `<table><thead><tr><th>商品</th><th>優點</th></tr></thead><tbody><tr><td>ETF</td><td>分散</td></tr></tbody></table>
+     <table><thead><tr><th>代號</th><th>a</th><th>b</th><th>c</th><th>d</th></tr></thead>
+       <tbody><tr><td>0050</td>${num('1')}${num('2')}${num('3')}${num('4')}</tr></tbody></table>
+     <table><thead><tr><th>代號</th><th>a</th><th>b</th><th>c</th></tr></thead>
+       <tbody><tr><td>0050</td>${num('1')}${num('2')}${num('3')}</tr></tbody></table>`,
+    rehypeStackTables,
+  );
+  const [text, wide, numbers] = screen.getAllByRole('table');
+  expect(text).toHaveClass('stack-table');
+  expect(within(text).getAllByRole('cell').map((c) => c.getAttribute('data-label'))).toEqual([null, '優點']);
+  expect(wide).toHaveClass('stack-table');
+  expect(numbers).not.toHaveClass('stack-table');
 });

@@ -16,19 +16,18 @@
     letter-spacing: 0;
   }
 
-  /* 內文一行約 38 字（#52，決策 0006；W3C clreq：橫排不宜超過 48 字）。
-     只限制段落、清單、引言；表格、分頁、圖解維持內文欄的寬度（45rem），放得下更多欄。
-     用 em：引言字比較小，一行的字數一樣。清單有縮排，所以 ul／ol 多給縮排的寬度 */
-  .sl-markdown-content p:not(:where(table *, li *, blockquote *, .not-content *)) {
-    max-inline-size: 38em;
-  }
-  /* 引言有左線和留白：寬度算在內容上（content-box），裡面的字才是 38 字 */
-  .sl-markdown-content blockquote:not(:where(.not-content *)) {
-    box-sizing: content-box;
-    max-inline-size: 38em;
-  }
-  .sl-markdown-content :is(ul, ol):not(:where(table *, li *, .not-content *)) {
-    max-inline-size: calc(38em + 1.5rem);
+  /* 內文一行約 38 字（#52、#58，決策 0006；W3C clreq：書籍 17～40 字、橫排不超過 48 字）。
+     - 整欄同寬：重點框、標題、段落、表格、上一篇／下一篇都對齊同一條邊（#52 只縮段落，邊緣參差不齊）
+     - 電腦：內容欄維持 Starlight 的 45rem（表格才放得下），內文放大到 18px，一行約 37 字；表格維持 16px
+       （#58 試過把整欄縮成 38rem，表格在電腦上被擠成每行四五個字）
+     - 手機：字和寬度不變 */
+  @media (min-width: 50rem) {
+    .sl-markdown-content {
+      font-size: 1.125rem;
+    }
+    .sl-markdown-content table:not(:where(.not-content *)) {
+      font-size: 1rem;
+    }
   }
 
   /* 表格：數字等寬、右對齊（.num 由 rehype-num-cells 加上） */
@@ -64,46 +63,51 @@
     inset-inline-start: 0;
     background: var(--sl-color-bg);
   }
-  /* 比較表在手機上依項目排（#54）：每一列變成一段，第一格是小標題，其他格前面寫欄名（data-label 由 rehype-compare-tables 加上）。
-     依據：NN/g 手機表格研究，每格是文字的比較表手機上只放得下約兩欄；這種表是「同一項目比較各欄」，所以依項目排 */
+  /* 文字表在手機上依列排（#54 比較表、#58 擴大到所有文字表）：每一列變成一段，第一格是小標題，其他格前面寫欄名
+     （class 與 data-label 由 rehype-stack-tables 加上；純數字表維持表格）。
+     依據：NN/g 手機表格研究，每格是文字的表手機上只放得下約兩欄，硬塞會擠成一兩個字一行或要左右滑 */
   @media (max-width: 50rem) {
-    .sl-markdown-content table.compare-table:not(:where(.not-content *)) {
+    .sl-markdown-content table.stack-table:not(:where(.not-content *)) {
       display: block;
       overflow: visible;
     }
-    .sl-markdown-content table.compare-table :is(tbody, tr):not(:where(.not-content *)) {
+    .sl-markdown-content table.stack-table :is(tbody, tr):not(:where(.not-content *)) {
       display: block;
     }
     /* 表頭只對螢幕閱讀器保留（每格前面已經有欄名） */
-    .sl-markdown-content table.compare-table thead:not(:where(.not-content *)) {
+    .sl-markdown-content table.stack-table thead:not(:where(.not-content *)) {
       position: absolute;
       width: 1px;
       height: 1px;
       overflow: hidden;
       clip-path: inset(50%);
     }
-    .sl-markdown-content table.compare-table tr:not(:where(.not-content *)) {
+    .sl-markdown-content table.stack-table tr:not(:where(.not-content *)) {
       padding-block: 0.75rem;
       border-bottom: 1px solid var(--c-rule);
     }
     /* 欄名浮在左邊留白裡，內容照一般文字排：
        - 不用 grid：格子裡的名詞連結會被拆成另一格
        - 不用 absolute：欄名兩行、內容一行時會蓋到下一列；float ＋ flow-root 讓格子高度算進欄名 */
-    .sl-markdown-content table.compare-table :is(td, th):not(:where(.not-content *)) {
+    .sl-markdown-content table.stack-table :is(td, th):not(:where(.not-content *)) {
       display: flow-root;
       min-width: 0;
       padding: 0.2em 0 0.2em 7.25em;
       border: 0;
       white-space: normal;
+      overflow-wrap: anywhere; /* 很長的檔名、網址（例如 site/design/tokens.ts）也能斷行 */
+      text-align: start; /* 數字也靠左，緊接在欄名後面；靠右的話和欄名隔太遠 */
     }
-    .sl-markdown-content table.compare-table td:first-child:not(:where(.not-content *)) {
+    .sl-markdown-content table.stack-table td:first-child:not(:where(.not-content *)) {
       display: block;
       position: static;
       padding: 0 0 0.35em;
       font-size: var(--sl-text-lg);
+      font-weight: 700; /* 每一段的小標題 */
+      color: var(--sl-color-white);
       white-space: normal;
     }
-    .sl-markdown-content table.compare-table td[data-label]::before {
+    .sl-markdown-content table.stack-table td[data-label]::before {
       content: attr(data-label);
       float: inline-start;
       width: 6.5em;
@@ -136,7 +140,7 @@
     background: var(--c-cloud);
     padding: 0.6rem 1rem;
     color: var(--sl-color-gray-3);
-    font-size: var(--sl-text-sm);
+    font-size: 0.95em; /* 比內文略小，跟著內文（電腦 18px）縮放；用 em 而不是 --sl-text-sm（固定 14px） */
   }
 
   /* 側欄目前頁面：圓角的淡色底，像貼了一張便條 */
@@ -164,6 +168,8 @@
     border-color: var(--c-rule);
   }
   .sl-markdown-content details.sources > summary {
+    margin-inline-start: 0; /* Starlight 預設往左凸 0.5rem（給焦點框用），這裡要和內容欄對齊（#58） */
+    padding-inline-start: 0;
     cursor: pointer;
     font-weight: 700;
     color: var(--sl-color-gray-2);

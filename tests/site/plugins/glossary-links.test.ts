@@ -148,3 +148,19 @@ test('[#50-1] 名詞清單讀出「一句話」「新手注意」（去掉 Markd
   // 沒有一句話的名詞：只連結、不做小卡
   expect(document.querySelectorAll('[popover]')).toHaveLength(1);
 });
+
+test('[#58-2] 手機上會藏起來的表頭（stack-table）不放名詞連結，改連內文第一次出現的地方', async () => {
+  const terms = [{ term: 'ETF', href: '/g/#etf' }];
+  const out = String(
+    await unified().use(rehypeParse, { fragment: true })
+      .use(rehypeGlossaryLinks, { terms, contentDir: './docs' }).use(rehypeStringify)
+      .process(new VFile({
+        value: '<table class="stack-table"><thead><tr><th></th><th>ETF</th></tr></thead><tbody><tr><td>費用</td><td>ETF 很低</td></tr></tbody></table>',
+        path: 'docs/knowledge/x.md',
+      })),
+  );
+  const { document } = new Window();
+  document.body.innerHTML = out;
+  expect(document.querySelector('thead a')).toBeNull();
+  expect(document.querySelector('tbody a.glossary-link')?.textContent).toBe('ETF');
+});
