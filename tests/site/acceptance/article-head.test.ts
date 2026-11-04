@@ -58,10 +58,11 @@ describe('資料來源收合', () => {
   });
 });
 
-test('[#22-3] 文章 07 的回測結果用分頁切換：含息／只看價格／換算新台幣', () => {
+// #53：主要結果改成分頁外的一張表（[#53-1]），分頁只放「其他算法」
+test('[#22-3] 文章 07 的其他算法用分頁切換：只看價格／VT 用美元算／匯率和稅', () => {
   const { screen } = openPage('knowledge/07-dca-backtest-2016-2026/');
   const tabs = within(screen.getByRole('tablist')).getAllByRole('tab');
-  expect(tabs.map((t) => t.textContent!.trim())).toEqual(['含息', '只看價格', '換算新台幣']);
+  expect(tabs.map((t) => t.textContent!.trim())).toEqual(['只看價格', 'VT 用美元算', '匯率和稅']);
   expect(tabs[0]).toHaveAttribute('aria-selected', 'true');
   const { document } = openPage('knowledge/07-dca-backtest-2016-2026/');
   for (const tab of tabs) {
