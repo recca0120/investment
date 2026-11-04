@@ -29,6 +29,7 @@ def models() -> dict[str, str]:
             use_union_operator=True,
             use_schema_description=True,
             use_field_description=True,
+            use_title_as_name=True,  # 用 zod .meta({ title }) 當類別名稱（GoldenInput 而不是 Input）
             disable_timestamp=True,
             # 明確用內建格式化：不受有沒有裝 black／isort 影響，產生的程式碼才穩定（同步測試會逐字比對）
             formatters=[Formatter.BUILTIN],

@@ -5,7 +5,9 @@
 """
 from __future__ import annotations
 
+import json
 from datetime import date
+from pathlib import Path
 
 from pydantic import BaseModel
 
@@ -74,3 +76,14 @@ def validated(model: type[BaseModel], data: dict | list) -> dict | list:
     （例如還沒回本的 recovered）要保留；用 exclude_none 會把它也拿掉，網頁的驗證就會失敗
     """
     return model.model_validate(data).model_dump(mode="json", exclude_unset=True)
+
+
+def write_json(path: Path | str, data: dict | list, *, indent: int | None = None) -> None:
+    """寫出網站要讀的 JSON（#46）。
+
+    allow_nan=False：Python 的 json.dumps 預設會寫出 NaN／Infinity，那不是合法 JSON，網頁讀到會直接失敗；
+    先轉成字串再寫檔，有問題時丟出 ValueError，不會留下寫到一半的壞檔案。
+    """
+    separators = None if indent else (",", ":")
+    text = json.dumps(data, ensure_ascii=False, indent=indent, separators=separators, allow_nan=False)
+    Path(path).write_text(text + ("\n" if indent else ""), encoding="utf-8")
