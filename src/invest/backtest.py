@@ -111,6 +111,36 @@ def _align_fx(fx: list[FxRate], dates: list[date]) -> tuple[list[float], list[fl
     return to_usd, to_twd
 
 
+@dataclass(frozen=True)
+class PaperLoss:
+    """帳上最慘的時候（issue #36）"""
+
+    date: date
+    invested: float
+    value: float
+    recovered: date | None  # 之後第一次回到本金以上的日期；還沒回本是 None
+
+    @property
+    def loss(self) -> float:
+        return self.value - self.invested
+
+    @property
+    def loss_ratio(self) -> float:
+        return self.loss / self.invested
+
+
+def worst_paper_loss(result: DcaResult) -> PaperLoss:
+    """持有期間「市值 − 累計投入」最低的那一天，以及之後第一次回到本金的日期。
+
+    看的是金額不是價格：定期定額每月都在投入，股價跌 50% 時帳上不一定少 50%。
+    """
+    history = result.history
+    i = min(range(len(history)), key=lambda k: history[k].value - history[k].invested)
+    worst = history[i]
+    recovered = next((p.date for p in history[i + 1 :] if p.value >= p.invested), None)
+    return PaperLoss(worst.date, worst.invested, worst.value, recovered)
+
+
 def compare_dca(
     prices: PriceSource,
     symbols: list[str],

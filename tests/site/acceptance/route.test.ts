@@ -14,6 +14,7 @@ const ROUTE: Station[] = [
   '04-starter-plans',
   '09-getting-started-actions',
   '07-dca-backtest-2016-2026',
+  '10-bad-luck-scenarios',
   {
     title: '美股投資管道與稅務',
     parts: [
@@ -57,4 +58,9 @@ test('[#22-8] 知識文章的側欄排成路線：依序有站號，目前這一
     }
   });
   expect(within(list).getByRole('link', { name: new RegExp(here.title) })).toHaveAttribute('aria-current', 'page');
+});
+
+test('[#36-3] 讀完定期定額回測，下一篇就是「運氣不好時會怎樣」', () => {
+  const next = openPage('knowledge/07-dca-backtest-2016-2026/').document.querySelector('a[rel="next"]');
+  expect(next?.getAttribute('href')).toBe('/investment/knowledge/10-bad-luck-scenarios/');
 });
