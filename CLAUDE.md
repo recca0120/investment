@@ -56,7 +56,7 @@
   - 視覺設計見 `docs/decisions/0005-site-style-piggy-bank.md`（小豬撲滿）；樣式用 Tailwind v4（`@astrojs/starlight-tailwind`，分工見 0004）
   - 顏色、字體、圓角只改 `site/design/tokens.ts`（設計 token），build 時編譯成 Starlight、Tailwind、daisyUI 三組變數（`site/styles/generated/`，不進 git）；元件、`.mdx`、`site/styles/` 都不寫死顏色（有測試檢查，也會檢查文字對比）
   - 元件優先用 daisyUI（卡片、分頁、統計數字…），daisyUI 沒有的才自己寫；版面規則見 `docs/decisions/0006-site-layout-route.md`
-  - 改網站外觀時用 `frontend-design` skill，並實際截圖檢查日間、夜間、手機（方法見 astro-starlight skill）
+  - 改網站外觀、版面、互動前先讀 `site-design` skill（設計流程、使用者對設計的要求、現行規則、截圖 script）
   - 網站和 Python 交換的資料格式只定義在 `site/lib/schemas.ts`（zod）；改了之後執行 `npm run schemas`，會產生 `schemas/*.schema.json` 和 `src/invest/schemas/`（Pydantic，不要手改）。Python 寫出 JSON 前用 `invest.export.validated()` 驗證，網頁讀取時用 `parse*()` 驗證（見 `docs/decisions/0009-shared-schema.md`）
   - 網站回測器的價格資料：`uv run python scripts/export_prices.py` 產生 `public/data/prices/*.json` 和標準答案 `tests/site/fixtures/backtest-golden.json`；瀏覽器端計算在 `site/lib/backtest.ts`，必須和 Python 的結果一致（見 `docs/decisions/0008-browser-backtester.md`）
   - 文章 10 的情境表：`uv run python scripts/bad_luck_scenarios.py` 用真實資料重算並直接更新文章
@@ -121,6 +121,7 @@
 - 位置：`.claude/skills/`（跟著 repo 版控，只在本專案生效）
 - `astro-starlight`：Astro 7 ＋ Starlight 建站、設定、部署；動到網站相關檔案前先讀
 - `zod`：zod 4 與網站／Python 共用資料格式（zod → JSON Schema → Pydantic）；碰到兩邊交換的資料（新增欄位、新資料檔、匯出腳本、`npm run schemas`）前先讀；附 parity_check（檢查兩邊判斷是否一致）與 verify-zod（升級 zod 後驗證）
+- `site-design`：網站設計流程與規則（不拿設計問題問使用者、先研究再做樣稿、token、daisyUI、閱讀研究）；附 `scripts/shoot.py`（日間／夜間／手機截圖）
 - `atdd`：第一個驗收測試先寫（設計 API）＋確認紅燈、每條驗收條件都要有測試；pytest 與 Vitest 都適用；附 3 個檢查 script（new_feature／check_red／check_criteria）；寫任何程式（含網站）前先讀
 - 共用 skill `atdd-principles`（`~/.claude/skills/`）是通用原則；和 repo 版衝突時以 repo 版為準
 - 新增或修改 skill 時用內建的 `skill-creator`；技術類 skill 要先上網查最新版並實測驗證
