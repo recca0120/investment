@@ -4,9 +4,11 @@ from datetime import date
 import pandas as pd
 import streamlit as st
 
-from invest.backtest import DcaResult, compare_dca
+from invest.backtest import DcaResult, compare_dca, worst_paper_loss
+from invest.charts import return_chart, value_frame
 from invest.container import get_container
 from invest.prices import UnknownSymbolError
+from invest.scenarios import describe_worst
 
 st.set_page_config(page_title="定期定額回測器", layout="wide")
 st.title("定期定額回測器")
@@ -41,12 +43,6 @@ def summary(results: list[DcaResult]) -> pd.DataFrame:
     ])
 
 
-def value_chart(results: list[DcaResult]) -> pd.DataFrame:
-    series = {r.symbol: pd.Series({h.date: h.value for h in r.history}) for r in results}
-    series["累計投入"] = pd.Series({h.date: h.invested for h in results[0].history})
-    return pd.DataFrame(series).sort_index().ffill()
-
-
 if st.button("開始回測", key="run"):
     wanted = [s.strip().upper() for s in symbols.split(",") if s.strip()]
     try:
@@ -62,7 +58,12 @@ if st.button("開始回測", key="run"):
         st.error(str(e))
     else:
         st.dataframe(summary(results), hide_index=True)
-        st.line_chart(value_chart(results))
+        st.line_chart(value_frame(results))
+        # 市值走勢圖看不出前期的下跌（後面漲多時 Y 軸被拉大），所以另外畫報酬率（issue #38）
+        st.altair_chart(return_chart(results), use_container_width=True)
+        st.markdown("**帳上最慘的時候**（市值減累計投入最低的那一天）\n\n" + "\n".join(
+            f"- {describe_worst(r.symbol, worst_paper_loss(r))}" for r in results
+        ))
         st.caption(
             "年化報酬為資金加權報酬率（XIRR）；最大跌幅為持有期間每日價格的時間加權跌幅。"
             + ("美股以當日匯率換算新台幣（買進用銀行即期賣出價、市值用即期買入價）。"
