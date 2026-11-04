@@ -28,6 +28,7 @@
   - 內容更新時直接改檔，不另開新版本檔
 - `docs/` 底下所有 `.md` 都會發佈到網站，寫作規則：
   - 開頭一定要有 frontmatter `title`（少了網站 build 會失敗），內文從 `##` 開始，不要再寫 `# 標題`
+  - `docs/knowledge/` 的文章要在 frontmatter 寫 `sidebar.order`（新手路線的站號，見 `docs/decisions/0006-site-layout-route.md`）
   - 文件之間用相對路徑連到 `.md`（例如 `../knowledge/01-getting-started.md`），GitHub 和網站都能點
   - `README.md` 不會發佈到網站，只給 GitHub 瀏覽資料夾用
   - 新增或修改後跑 `npm run test:site`（build ＋ 網站測試，會檢查側欄和站內連結）
@@ -46,10 +47,11 @@
 - 網站：Astro Starlight（見 `docs/decisions/0002-site-framework.md`），https://recca0120.github.io/investment/
   - Astro 專案在 repo 根目錄（`package.json`、`astro.config.mjs`），原始碼在 `site/`，靜態檔在 `public/`
   - 本機：`npm run dev`；測試：`npm run test:site`（build ＋ 測試）或 `npm test`（只跑測試，要先 build）
-  - 網站測試在 `tests/site/`（Vitest ＋ Testing Library ＋ msw-fetch-mock），寫法見 `atdd` skill；需要 Node 22.12 以上
+  - 網站測試在 `tests/site/`（Vitest ＋ Testing Library ＋ msw-fetch-mock），寫法見 `atdd` skill；需要 Node 22.18 以上（astro.config 會直接載入 site/design 的 .ts）
   - push 到 main 後由 `.github/workflows/site.yml` 自動部署；PR 只建置與檢查連結
   - 視覺設計見 `docs/decisions/0005-site-style-piggy-bank.md`（小豬撲滿）；樣式用 Tailwind v4（`@astrojs/starlight-tailwind`，分工見 0004）
-  - 配色原始值只改 `site/styles/theme.css`，語意 token 在 `site/styles/global.css`；元件和 `.mdx` 只用 utility class，不寫死顏色（有測試檢查）
+  - 顏色、字體、圓角只改 `site/design/tokens.ts`（設計 token），build 時編譯成 Starlight、Tailwind、daisyUI 三組變數（`site/styles/generated/`，不進 git）；元件、`.mdx`、`site/styles/` 都不寫死顏色（有測試檢查，也會檢查文字對比）
+  - 元件優先用 daisyUI（卡片、分頁、統計數字…），daisyUI 沒有的才自己寫；版面規則見 `docs/decisions/0006-site-layout-route.md`
   - 改網站外觀時用 `frontend-design` skill，並實際截圖檢查日間、夜間、手機（方法見 astro-starlight skill）
   - 首頁存摺資料：`uv run python scripts/export_passbook.py` 重新產生 `site/data/passbook.json`
 

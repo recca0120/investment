@@ -24,24 +24,65 @@ export default defineConfig({
 @import '@astrojs/starlight-tailwind';
 @import 'tailwindcss/theme.css' layer(theme);
 @import 'tailwindcss/utilities.css' layer(utilities);
-@import './theme.css';
+@import './generated/tokens.css';   /* 由設計 token 編譯產生，見下一節 */
+@import './starlight.css';          /* Starlight 頁面的調整 */
 ```
 
 - **不載入 preflight**（`tailwindcss/preflight.css`）：Starlight 有自己的 reset。`starlight-tailwind` 只補回 `* { border: 0 solid }`，所以 `border border-rule` 這種 utility 可以直接用
 - 圖層順序：`base < starlight < theme < components < utilities`，**沒有放進圖層的規則最優先**
-- `starlight-tailwind` 在 utilities 圖層把 `--sl-color-*` 設成 Tailwind 的灰階（`--color-gray-200` 等）與 accent 色階，而且日夜模式用固定的色階對應（夜間 gray-1 ＝ gray-200、日間 gray-1 ＝ gray-800）。既有配色不是對稱色階時無法完全對上，所以本 repo 的 `--sl-color-*` 寫在 `theme.css` **不放進圖層**，蓋過它的對應
+- `starlight-tailwind` 在 utilities 圖層把 `--sl-color-*` 設成 Tailwind 的灰階（`--color-gray-200` 等）與 accent 色階，而且日夜模式用固定的色階對應（夜間 gray-1 ＝ gray-200、日間 gray-1 ＝ gray-800）。既有配色不是對稱色階時無法完全對上，所以本 repo 的 `--sl-color-*`（由 token 產生）**不放進圖層**，蓋過它的對應
 - Starlight 頁面樣式的調整（文章表格、側欄）放進 `@layer components`：蓋過 `starlight` 圖層，又能被 utility 覆寫
+
+## 設計 token：一個 TS 檔編譯成三組 CSS 變數（#22）
+
+顏色若分別寫在 Starlight 變數、Tailwind `@theme`、daisyUI 主題三個地方，改一個顏色要改三處。本 repo 的做法：
+
+```
+site/design/tokens.ts        唯一來源：palette.light / palette.dark、contrastPairs、font、shape（有型別）
+site/design/compile.ts       compileTheme(tokens) → CSS 字串（純函式，測試直接呼叫）
+site/design/integration.ts   Astro integration：astro:config:setup 時寫出 site/styles/generated/tokens.css
+```
+
+產生的 CSS（不進 git，每次 build 重新產生，不會和 tokens 不同步）：
+
+```css
+:root { --c-sky: #121b26; …; --sl-color-black: var(--c-sky); … }   /* 夜間＝Starlight 預設 */
+:root[data-theme='light'] { --c-sky: #eaf2fa; … }                   /* 日間只覆蓋 --c-* */
+@plugin 'daisyui/theme' { name: 'light'; --color-base-200: var(--c-sky); … }
+@plugin 'daisyui/theme' { name: 'dark'; default: true; prefersdark: true; … }
+@theme inline { --color-sky: var(--c-sky); … }
+```
+
+- 原始色值只出現在 `--c-*`，其他全部 `var()` 引用，日夜切換只要換 `--c-*`
+- **daisyUI 主題取名 `light`／`dark`**：daisyUI 用 `[data-theme=名稱]` 套主題，剛好對上 Starlight 切換日夜時設在 `<html>` 的 `data-theme`，不用另外同步
+- daisyUI 主題的值可以是 `var()`，實測可用
+- `astro.config.mjs` 直接 import `.ts`：Node 要 22.18 以上（內建 type stripping），import 路徑要寫 `.ts` 副檔名
+- 測試（`tests/site/design/tokens.test.ts`）：改一個 token → 解析編譯結果、展開 `var()`，確認三組變數都變；用 token 直接算 `contrastPairs` 的 WCAG 對比，不用開瀏覽器
+
+## daisyUI 5 和 Starlight 共存
+
+```css
+@plugin 'daisyui' {
+  themes: false;   /* 主題由 tokens 產生 */
+  exclude: reset, rootcolor, rootscrollgutter, rootscrolllock, scrollbar;
+}
+```
+
+- **排除 `reset`**：它等於 Tailwind preflight（`margin:0`、`h1{font-size:inherit}`、`ul{list-style:none}`）。它在 `@layer base`（最低），所以**蓋不過** Starlight 的內文樣式（2026-11-04 實測：打開 reset，文章的清單符號、標題大小都沒變）；但它會作用在 `.not-content` 裡的自訂元件（那裡沒有 Starlight 內文樣式），留著只會多出意外，所以排除
+- `rootcolor` 會設 `:root` 的背景與文字色、`scrollbar`／`rootscroll*` 會改捲軸，和 Starlight 衝突，一起排除
+- build 時 lightningcss 對 daisyUI 的 `@scope (.join)` 報「Invalid empty selector」警告，不影響輸出
+- 2026-11-04 實測：daisyui 5.7.50、Tailwind 4.3.4、Starlight 0.42.8
 
 ## 會隨日夜模式變化的 token：`@theme inline`
 
 ```css
 @theme inline {
-  --color-paper: var(--pb-paper);   /* --pb-paper 在 theme.css 依 data-theme 各定義一次 */
+  --color-sky: var(--c-sky);   /* --c-sky 由 token 依 data-theme 各產生一次 */
   --color-muted: var(--sl-color-gray-3);
 }
 ```
 
-`inline` 讓 utility 直接輸出 `background-color: var(--pb-paper)`，切換日夜模式時跟著變。不加 `inline` 的話，值會在 `:root` 被解析一次，夜間模式不會更新。
+`inline` 讓 utility 直接輸出 `background-color: var(--c-sky)`，切換日夜模式時跟著變。不加 `inline` 的話，值會在 `:root` 被解析一次，夜間模式不會更新。
 
 字級沿用 Starlight 的尺度，全站只有一套：
 

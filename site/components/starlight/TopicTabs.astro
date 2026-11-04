@@ -1,0 +1,24 @@
+---
+// 網站三個分區（投資知識／決策紀錄／討論紀錄）的分頁，資料來自 starlight-sidebar-topics（#22）
+// 桌機放在頂部（Header），手機放在側欄選單最上方（Sidebar）
+// daisyUI tabs：.tab 必須是 .tabs 的直接子元素；aria-current="page" 就是選中狀態
+// 未選中的文字用 text-muted（daisyUI 預設的半透明文字對比不到 4.5:1）
+interface Props {
+  class?: string;
+}
+const { topics } = Astro.locals.starlightSidebarTopics;
+---
+
+<nav aria-label="網站分區" class:list={['tabs tabs-border flex-nowrap print:hidden', Astro.props.class]} data-topic-tabs>
+  {
+    topics.map((topic) => (
+      <a
+        href={topic.link}
+        aria-current={topic.isCurrent ? 'page' : undefined}
+        class="tab h-10 px-4 text-base font-bold whitespace-nowrap text-muted no-underline hover:text-ink aria-[current=page]:text-ink"
+      >
+        {topic.label}
+      </a>
+    ))
+  }
+</nav>

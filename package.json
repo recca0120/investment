@@ -3,7 +3,7 @@
   "type": "module",
   "private": true,
   "engines": {
-    "node": ">=22.12"
+    "node": ">=22.18"
   },
   "scripts": {
     "dev": "astro dev",
@@ -19,7 +19,9 @@
     "@astrojs/starlight-tailwind": "^5.0.0",
     "@tailwindcss/vite": "^4.3.4",
     "astro": "^7.4.5",
+    "daisyui": "^5.7.50",
     "sharp": "^0.35.5",
+    "starlight-sidebar-topics": "^0.9.0",
     "tailwindcss": "^4.3.4",
     "unist-util-visit": "^5.2.0"
   },

@@ -52,6 +52,7 @@ title: 0004 網站視覺設計：存摺帳本
 
 | 檔案 | 放什麼 |
 |---|---|
-| `site/styles/theme.css` | 配色原始值（日間／夜間各一組 `--c-*`）、Starlight 變數 `--sl-color-*`、文章表格與側欄的調整 |
-| `site/styles/global.css` | Tailwind 入口；把配色包成語意 token（0005 之後是 `sky`、`cloud`、`ink`、`coin`、`pig`、`rule`、`muted`、`link`…）、字級、字體、印章動畫 |
+| `site/design/tokens.ts` | 顏色（日間／夜間各一組）、字體、圓角的原始值。2026-11-04 起（#22）唯一來源，build 時編譯成 `site/styles/generated/tokens.css`（Starlight `--sl-color-*`、Tailwind `@theme`、daisyUI 主題） |
+| `site/styles/starlight.css` | 文章表格、引言、側欄等 Starlight 頁面的調整（#22 之前叫 `theme.css`，也放配色） |
+| `site/styles/global.css` | Tailwind ＋ daisyUI 入口；token 以外的設定：字級、版寬、斷點、動畫 |
 | 元件、`docs/*.mdx` | 只用 utility class 和 token，**不能寫死顏色**（`tests/site/acceptance/no-hardcoded-colors.test.ts` 會檢查） |

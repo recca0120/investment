@@ -5,6 +5,8 @@ import tailwindcss from '@tailwindcss/vite';
 import { unified } from '@astrojs/markdown-remark';
 import rehypeMdLinks from './site/plugins/rehype-md-links.mjs';
 import rehypeNumCells from './site/plugins/rehype-num-cells.mjs';
+import designTokens from './site/design/integration.ts';
+import starlightSidebarTopics from 'starlight-sidebar-topics';
 
 const base = '/investment'; // GitHub Pages 專案站：/<repo 名稱>
 
@@ -20,10 +22,11 @@ export default defineConfig({
     }),
   },
   integrations: [
+    designTokens(), // site/design/tokens.ts → site/styles/generated/tokens.css
     starlight({
       title: '投資學習筆記',
       description: '股市新手的投資學習筆記',
-      customCss: ['./site/styles/global.css'], // Tailwind ＋ 配色 token；配色原始值在 theme.css
+      customCss: ['./site/styles/global.css'], // Tailwind ＋ daisyUI；顏色原始值在 site/design/tokens.ts
       head: [
         { tag: 'link', attrs: { rel: 'preconnect', href: 'https://fonts.googleapis.com' } },
         { tag: 'link', attrs: { rel: 'preconnect', href: 'https://fonts.gstatic.com', crossorigin: true } },
@@ -47,12 +50,23 @@ export default defineConfig({
       editLink: {
         baseUrl: 'https://github.com/recca0120/investment/edit/main/',
       },
-      sidebar: [
-        // Starlight 0.39+：autogenerate 必須包在 items 裡
-        { label: '投資知識', items: [{ autogenerate: { directory: 'docs/knowledge' } }] },
-        { label: '決策紀錄', items: [{ autogenerate: { directory: 'docs/decisions' } }] },
-        { label: '討論紀錄', items: [{ autogenerate: { directory: 'docs/log' } }] },
+      // 網站分成三區，各有自己的側欄，「上一篇／下一篇」不跨區（#22，決策 0006）
+      // link 不含 base（外掛會自動加上 /investment）
+      plugins: [
+        starlightSidebarTopics(
+          [
+            { id: 'knowledge', label: '投資知識', link: '/knowledge/01-getting-started/', items: [{ autogenerate: { directory: 'docs/knowledge' } }] },
+            { id: 'decisions', label: '決策紀錄', link: '/decisions/0001-repo-structure/', items: [{ autogenerate: { directory: 'docs/decisions' } }] },
+            { id: 'log', label: '討論紀錄', link: '/log/2026-11-03-kickoff/', items: [{ autogenerate: { directory: 'docs/log' } }] },
+          ],
+          { exclude: ['/'] }, // 首頁不屬於任何一區
+        ),
       ],
+      routeMiddleware: './site/route-middleware.ts', // 上一篇／下一篇不跨區（補外掛遇到 base 時的問題）
+      components: {
+        Header: './site/components/starlight/Header.astro', // 頂部加上三個分區
+        Sidebar: './site/components/starlight/Sidebar.astro', // 知識區畫成路線；手機版在選單裡放分區
+      },
     }),
   ],
 });
