@@ -1,6 +1,6 @@
 // 配色：小豬撲滿風格（#19）。對比度依 WCAG 2.x 的相對亮度公式計算
 import { describe, expect, test } from 'vitest';
-import { openFrame } from './frame';
+import { MOBILE, openFrame } from './frame';
 
 function luminance(rgb: string) {
   const [r, g, b] = rgb.match(/\d+(\.\d+)?/g)!.slice(0, 3).map(Number).map((v) => {
@@ -119,6 +119,29 @@ describe.each(['light', 'dark'] as const)('%s 模式', (theme) => {
         .map((el) => ({ el, ratio: contrast(view.getComputedStyle(el).color, backgroundOf(el)) }))
         .filter(({ ratio }) => ratio < 4.5)
         .map(({ el, ratio }) => `「${el.textContent!.trim().slice(0, 12)}」${ratio}`);
+      expect(low).toEqual([]);
+    } finally {
+      page.close();
+    }
+  });
+});
+
+describe.each(['light', 'dark'] as const)('%s 模式', (theme) => {
+  test('[#54-4] 手機上的比較表：項目、欄名、內容的文字對比至少 4.5:1', async () => {
+    const page = await openFrame('knowledge/08-us-stock-channels-tax/', { theme, size: MOBILE });
+    try {
+      const view = page.doc.defaultView!;
+      const table = [...page.doc.querySelectorAll('.sl-markdown-content table')].find(
+        (t) => t.querySelector('thead th')?.textContent?.trim() === '',
+      )!;
+      const low: string[] = [];
+      for (const cell of table.querySelectorAll('tbody td')) {
+        const bg = backgroundOf(cell);
+        const own = contrast(view.getComputedStyle(cell).color, bg);
+        const label = contrast(view.getComputedStyle(cell, '::before').color, bg);
+        if (own < 4.5) low.push(`「${cell.textContent!.slice(0, 8)}」${own}`);
+        if (label < 4.5) low.push(`「${cell.textContent!.slice(0, 8)}」的欄名 ${label}`);
+      }
       expect(low).toEqual([]);
     } finally {
       page.close();

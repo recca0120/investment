@@ -64,6 +64,55 @@
     inset-inline-start: 0;
     background: var(--sl-color-bg);
   }
+  /* 比較表在手機上依項目排（#54）：每一列變成一段，第一格是小標題，其他格前面寫欄名（data-label 由 rehype-compare-tables 加上）。
+     依據：NN/g 手機表格研究，每格是文字的比較表手機上只放得下約兩欄；這種表是「同一項目比較各欄」，所以依項目排 */
+  @media (max-width: 50rem) {
+    .sl-markdown-content table.compare-table:not(:where(.not-content *)) {
+      display: block;
+      overflow: visible;
+    }
+    .sl-markdown-content table.compare-table :is(tbody, tr):not(:where(.not-content *)) {
+      display: block;
+    }
+    /* 表頭只對螢幕閱讀器保留（每格前面已經有欄名） */
+    .sl-markdown-content table.compare-table thead:not(:where(.not-content *)) {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      overflow: hidden;
+      clip-path: inset(50%);
+    }
+    .sl-markdown-content table.compare-table tr:not(:where(.not-content *)) {
+      padding-block: 0.75rem;
+      border-bottom: 1px solid var(--c-rule);
+    }
+    /* 欄名浮在左邊留白裡，內容照一般文字排：
+       - 不用 grid：格子裡的名詞連結會被拆成另一格
+       - 不用 absolute：欄名兩行、內容一行時會蓋到下一列；float ＋ flow-root 讓格子高度算進欄名 */
+    .sl-markdown-content table.compare-table :is(td, th):not(:where(.not-content *)) {
+      display: flow-root;
+      min-width: 0;
+      padding: 0.2em 0 0.2em 7.25em;
+      border: 0;
+      white-space: normal;
+    }
+    .sl-markdown-content table.compare-table td:first-child:not(:where(.not-content *)) {
+      display: block;
+      position: static;
+      padding: 0 0 0.35em;
+      font-size: var(--sl-text-lg);
+      white-space: normal;
+    }
+    .sl-markdown-content table.compare-table td[data-label]::before {
+      content: attr(data-label);
+      float: inline-start;
+      width: 6.5em;
+      margin-inline-start: -7.25em;
+      color: var(--sl-color-gray-2);
+      font-weight: 700;
+      font-size: var(--sl-text-sm);
+    }
+  }
   .sl-markdown-content :is(td, th).num:not(:where(.not-content *)) {
     text-align: right;
     white-space: nowrap;

@@ -33,18 +33,20 @@ describe('文章 08「四種管道比較」表格', () => {
     }
   });
 
-  // 頁面不能水平捲動由 [#15-7]（mobile-layout.test.ts）對每一篇知識文章檢查，這裡只看表格本身
-  test('[#22-4] 手機 375px：表格自己可以左右滑', async () => {
-    const page = await openFrame(ARTICLE_08, { size: MOBILE });
-    try {
-      const table = tableWith(page.doc, '複委託', '海外券商');
-      const scroller = table.closest<HTMLElement>('[data-table-scroll]') ?? table;
-      expect(page.doc.defaultView!.getComputedStyle(scroller).overflowX).toMatch(/auto|scroll/);
-      expect(scroller.scrollWidth, '表格內容比畫面寬，要能滑動').toBeGreaterThan(scroller.clientWidth);
-    } finally {
-      page.close();
-    }
-  });
+  // 比較表在手機上改成依項目排（#54，compare-table.test.ts），這裡不再要求左右滑
+});
+
+// 頁面不能水平捲動由 [#15-7]（mobile-layout.test.ts）對每一篇知識文章檢查，這裡只看表格本身
+test('[#22-4] 手機 375px：放不下的數字表自己可以左右滑（文章 10 的情境表）', async () => {
+  const page = await openFrame('knowledge/10-bad-luck-scenarios/', { size: MOBILE });
+  try {
+    const table = tableWith(page.doc, '多久回本');
+    const scroller = table.closest<HTMLElement>('[data-table-scroll]') ?? table;
+    expect(page.doc.defaultView!.getComputedStyle(scroller).overflowX).toMatch(/auto|scroll/);
+    expect(scroller.scrollWidth, '表格內容比畫面寬，要能滑動').toBeGreaterThan(scroller.clientWidth);
+  } finally {
+    page.close();
+  }
 });
 
 test.each(['light', 'dark'] as const)('[#22-12] %s：加入 daisyUI 後，內文的清單、標題、段落樣式不變', async (theme) => {

@@ -107,3 +107,19 @@ test('[#15-5] 混了文字的欄位（約 0.08%～0.25%）不算數字欄；只�
   expect(screen.getByRole('columnheader', { name: '報酬' })).toHaveClass('num');
   expect(screen.getByRole('columnheader', { name: '只有' })).not.toHaveClass('num');
 });
+
+test('[#54-2] 比較表（第一格表頭是空的）每一格記下欄名，給手機版顯示；一般表格不動', async () => {
+  const { default: rehypeCompareTables } = await import('../../../site/plugins/rehype-compare-tables.mjs');
+  const screen = await transform(
+    `<table><thead><tr><th></th><th>複委託</th><th><a href="#x">海外</a>券商</th></tr></thead>
+      <tbody><tr><td>手續費</td><td>0.1%</td><td>0 元</td></tr></tbody></table>
+     <table><thead><tr><th>代號</th><th>市值</th></tr></thead><tbody><tr><td>0050</td><td>1</td></tr></tbody></table>`,
+    rehypeCompareTables,
+  );
+  const [compare, plain] = screen.getAllByRole('table');
+  expect(compare).toHaveClass('compare-table');
+  const cells = within(compare).getAllByRole('cell');
+  expect(cells.map((c) => c.getAttribute('data-label'))).toEqual([null, '複委託', '海外券商']);
+  expect(plain).not.toHaveClass('compare-table');
+  expect(within(plain).getAllByRole('cell').every((c) => !c.hasAttribute('data-label'))).toBe(true);
+});

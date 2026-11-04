@@ -35,6 +35,12 @@
 - 手機上沒有滑鼠停留，改成點擊後從底部升起（bottom sheet）
 - 本站實作：#50（`site/plugins/rehype-glossary-links.mjs`、`site/components/GlossaryCards.astro`）
 
+## 手機上的比較表：依項目排（#54）
+
+- NN/g 手機表格研究：每格是一段文字的比較表，手機上大約只放得下兩欄；硬塞就只能左右滑，滑過去又看不到前面的
+- 比較表的用途是「同一項目比較各欄」→ 手機上每個項目一個小標題、各欄一行並寫欄名（不是每欄一張卡，那樣要上下來回翻才能比）
+- 實作踩過的坑：格子用 grid 排會把名詞連結拆成另一格；欄名用 absolute 會在兩行時蓋到下一列 → 用 float ＋ flow-root
+
 ## 資料來源：同一頁收合
 
 - 查證時要對照內文，跳到別頁會失去脈絡 → 留在文末，預設收合並標示筆數（`rehype-collapse-sources`）
@@ -56,6 +62,7 @@
 - [NN/g：The Layer-Cake Pattern of Scanning Content on the Web](https://www.nngroup.com/articles/layer-cake-pattern-scanning/)
 - [Carbon Design System：Tabs usage](https://carbondesignsystem.com/components/tabs/usage/)
 - [EU Component Library：Tabs usage](https://ec.europa.eu/component-library/eu/components/navigation/tabs/usage)
+- [NN/g：Mobile Tables](https://www.nngroup.com/articles/mobile-tables/)
 - [Wikimedia：Page Previews](https://www.mediawiki.org/wiki/Page_Previews)
 - [web.dev：Popover API 進入 Baseline](https://web.dev/blog/popover-baseline)
 - [web.dev：New to the web platform in January（2026，anchor positioning）](https://web.dev/blog/web-platform-01-2026)
