@@ -47,9 +47,14 @@ def main() -> None:
                 target.click()
                 page.wait_for_timeout(400)
             overflow = page.evaluate("document.documentElement.scrollWidth > document.documentElement.clientWidth")
+            broken = page.evaluate("[...document.images].filter(i => i.complete && i.naturalWidth === 0).map(i => i.src.slice(-40))")
             file = out / f"{name}.png"
             page.screenshot(path=str(file), full_page=a.full)
-            notes = [n for n in ["水平捲動！" if overflow else "", f"JS 錯誤：{errors}" if errors else ""] if n]
+            notes = [n for n in [
+                "水平捲動！" if overflow else "",
+                f"JS 錯誤：{errors}" if errors else "",
+                f"圖片沒載入：{broken}" if broken else "",
+            ] if n]
             print(f"{file}  {'｜'.join(notes) or 'OK'}")
         browser.close()
 
