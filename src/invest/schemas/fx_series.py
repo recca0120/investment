@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from datetime import date
 
-from pydantic import BaseModel, ConfigDict, Field, RootModel
+from pydantic import BaseModel, ConfigDict, Field, RootModel, StrictFloat
 
 
 class Date(RootModel[date]):
@@ -23,11 +23,11 @@ class FxSeries(BaseModel):
         extra='forbid',
     )
     dates: list[Date] = Field(..., min_length=1)
-    toUsd: list[float]
+    toUsd: list[StrictFloat]
     """
     買美元的價格（銀行即期賣出）
     """
-    toTwd: list[float]
+    toTwd: list[StrictFloat]
     """
     換回新台幣的價格（銀行即期買入）
     """

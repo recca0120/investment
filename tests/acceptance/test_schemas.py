@@ -83,3 +83,14 @@ def test_NaN或無限大_寫出JSON前就報錯(tmp_path):
         with pytest.raises(ValueError):
             write_json(tmp_path / "bad.json", {"close": [bad]})
         assert not (tmp_path / "bad.json").exists(), "壞資料不能寫出檔案"
+
+
+@pytest.mark.criteria("#46-1")
+def test_數字寫成字串_選填欄位給null_Python和zod一樣拒絕():
+    # parity_check.py 找到的：Pydantic 預設會把 "100.5" 轉成數字、選填欄位接受 null，zod 都拒絕
+    # 產生器用 strict_types 與 use_missing_sentinel 對齊（scripts/generate_models.py）
+    good = {"symbol": "VT", "currency": "USD", "dates": ["2025-01-02"], "close": [100.0], "total": [100.0]}
+    for bad in ({**good, "close": ["100.5"]}, {**good, "totalTaxed": None}, {**good, "dates": [20250102]}):
+        with pytest.raises(ValidationError):
+            validated(PriceSeries, bad)
+    assert validated(PriceSeries, {**good, "close": [100]})["close"] == [100]  # 整數照樣可以（zod 也接受）
