@@ -3,8 +3,8 @@ import { describe, expect, test } from 'vitest';
 import { MOBILE, openFrame } from './frame';
 
 // 每一篇知識文章（表格最多、最容易撐破版面）＋首頁
-const articles = Object.keys(import.meta.glob('/docs/knowledge/[0-9]*.md')).map(
-  (f) => `knowledge/${f.split('/').pop()!.replace(/\.md$/, '')}/`,
+const articles = Object.keys(import.meta.glob('/docs/knowledge/[0-9]*.{md,mdx}')).map(
+  (f) => `knowledge/${f.split('/').pop()!.replace(/\.mdx?$/, '')}/`,
 );
 const pages = [{ name: '首頁', path: '' }, ...articles.map((path) => ({ name: path, path }))];
 

@@ -52,3 +52,20 @@ test('[#15-6] 連到其他 .md 的相對連結轉成網站路由（含 base 與�
   expect(href('頁內錨點')).toBe('#段落');
   expect(href('docs 外面')).toBe('../../README.md');
 });
+
+test('[#22-14] 「資料來源」段落收成 details，摘要標示筆數；後面的段落不受影響', async () => {
+  const { default: rehypeCollapseSources } = await import('../../../site/plugins/rehype-collapse-sources.mjs');
+  const screen = await transform(
+    `<h2>結論</h2><p>內文</p>
+     <h2>資料來源</h2><ul><li><a href="https://a.example">A</a></li><li><a href="https://b.example">B</a></li></ul>
+     <h2>之後的段落</h2><p>還在</p>`,
+    rehypeCollapseSources,
+  );
+  const details = screen.getByRole('group');
+  expect(details.tagName).toBe('DETAILS');
+  expect(details).not.toHaveAttribute('open');
+  expect(details.querySelector('summary')!.textContent).toBe('資料來源（2 筆）');
+  expect(details.querySelectorAll('a')).toHaveLength(2);
+  expect(screen.queryByRole('heading', { name: '資料來源' })).toBeNull();
+  expect(screen.getByRole('heading', { name: '之後的段落' }).closest('details')).toBeNull();
+});

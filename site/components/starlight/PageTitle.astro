@@ -1,0 +1,26 @@
+---
+// Starlight PageTitle 覆寫（#22，決策 0006）：標題下方先放「重點」（frontmatter 的 summary，最多 3 點）
+// 多數人先掃再決定要不要讀，所以結論放最前面
+import Default from '@astrojs/starlight/components/PageTitle.astro';
+
+const { summary } = Astro.locals.starlightRoute.entry.data;
+---
+
+<Default />
+{
+  summary && (
+    <section
+      aria-labelledby="page-summary"
+      class="not-content mt-6 rounded-r-2xl border-l-4 border-coin bg-cloud px-5 py-3 text-ink"
+    >
+      <p id="page-summary" class="m-0 font-black">
+        重點
+      </p>
+      <ul class="m-0 mt-1 list-disc pl-5 marker:text-coin">
+        {summary.map((point) => (
+          <li class="my-1 leading-relaxed">{point}</li>
+        ))}
+      </ul>
+    </section>
+  )
+}

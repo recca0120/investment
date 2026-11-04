@@ -75,6 +75,25 @@
     border-radius: 0.6rem;
   }
 
+  /* 資料來源（#22）：預設收合，字小一點、顏色淡一點，點開才看到連結 */
+  /* Starlight 的 details 有左邊框，和這裡的上框線疊在一起很怪，所以拿掉 */
+  .sl-markdown-content details.sources {
+    margin-top: 3rem;
+    border: 0;
+    border-top: 1px solid var(--c-rule);
+    padding: 1rem 0 0;
+    font-size: var(--sl-text-sm);
+    color: var(--sl-color-gray-3);
+  }
+  .sl-markdown-content details.sources:hover {
+    border-color: var(--c-rule);
+  }
+  .sl-markdown-content details.sources > summary {
+    cursor: pointer;
+    font-weight: 700;
+    color: var(--sl-color-gray-2);
+  }
+
   /* 名詞連結（#24）：一篇文章可能有二三十個，維持文字原色、只加點狀底線，滑過才變連結色 */
   .sl-markdown-content a.glossary-link {
     color: inherit;

@@ -49,12 +49,31 @@ describe('文章 08「四種管道比較」表格', () => {
 });
 
 test.each(['light', 'dark'] as const)('[#22-12] %s：加入 daisyUI 後，內文的清單、標題、段落樣式不變', async (theme) => {
-  const page = await openFrame('knowledge/01-getting-started/', { theme });
+  // 01 的外層清單只有資料來源（已收進 details），清單改看 02 的「共同點」
+  const list = await openFrame('knowledge/02-recommended-methods/', { theme });
+  const text = await openFrame('knowledge/01-getting-started/', { theme });
   try {
-    expect(page.style('.sl-markdown-content > ul > li').listStyleType).toBe('disc');
-    expect(Number(page.style('.sl-markdown-content h2').fontWeight)).toBeGreaterThanOrEqual(700);
-    expect(parseFloat(page.style('.sl-markdown-content h2').fontSize)).toBeGreaterThan(24);
-    expect(parseFloat(page.style('.sl-markdown-content > .sl-heading-wrapper + p').marginTop)).toBeGreaterThan(0);
+    expect(list.style('.sl-markdown-content > ul > li').listStyleType).toBe('disc');
+    expect(Number(text.style('.sl-markdown-content h2').fontWeight)).toBeGreaterThanOrEqual(700);
+    expect(parseFloat(text.style('.sl-markdown-content h2').fontSize)).toBeGreaterThan(24);
+    expect(parseFloat(text.style('.sl-markdown-content > .sl-heading-wrapper + p').marginTop)).toBeGreaterThan(0);
+  } finally {
+    list.close();
+    text.close();
+  }
+});
+
+test('[#22-3] 文章 07 的結果分頁可以用鍵盤左右鍵切換', async () => {
+  const page = await openFrame('knowledge/07-dca-backtest-2016-2026/');
+  try {
+    const tabs = [...page.doc.querySelectorAll<HTMLElement>('[role="tab"]')];
+    expect(tabs.map((t) => t.textContent!.trim())).toEqual(['含息', '只看價格', '換算新台幣']);
+    tabs[0].focus();
+    tabs[0].dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowRight', bubbles: true }));
+    expect(tabs[1].getAttribute('aria-selected')).toBe('true');
+    expect(page.doc.activeElement).toBe(tabs[1]);
+    const panel = page.doc.getElementById(tabs[1].getAttribute('href')!.slice(1))!; // Starlight 的分頁用 href 指向面板
+    expect(panel.hidden, '切換後要看得到第二個分頁的內容').toBe(false);
   } finally {
     page.close();
   }

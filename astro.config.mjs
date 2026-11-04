@@ -6,6 +6,7 @@ import { unified } from '@astrojs/markdown-remark';
 import rehypeMdLinks from './site/plugins/rehype-md-links.mjs';
 import rehypeNumCells from './site/plugins/rehype-num-cells.mjs';
 import rehypeGlossaryLinks from './site/plugins/rehype-glossary-links.mjs';
+import rehypeCollapseSources from './site/plugins/rehype-collapse-sources.mjs';
 import designTokens from './site/design/integration.ts';
 import starlightSidebarTopics from 'starlight-sidebar-topics';
 
@@ -24,6 +25,7 @@ export default defineConfig({
         rehypeNumCells,
         // 知識文章裡的名詞第一次出現時連到名詞解釋（#24）
         [rehypeGlossaryLinks, { glossaryDir: './docs/glossary', contentDir: './docs', base }],
+        rehypeCollapseSources, // 結尾的「資料來源」收合並標示筆數（#22）
       ],
     }),
   },
@@ -73,6 +75,7 @@ export default defineConfig({
       components: {
         Header: './site/components/starlight/Header.astro', // 頂部加上三個分區
         Sidebar: './site/components/starlight/Sidebar.astro', // 知識區畫成路線；手機版在選單裡放分區
+        PageTitle: './site/components/starlight/PageTitle.astro', // 標題下方的「重點」
       },
     }),
   ],

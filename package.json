@@ -20,10 +20,13 @@
     "@tailwindcss/vite": "^4.3.4",
     "astro": "^7.4.5",
     "daisyui": "^5.7.50",
+    "github-slugger": "^2.0.0",
+    "hast-util-to-string": "^3.0.1",
     "sharp": "^0.35.5",
     "starlight-sidebar-topics": "^0.9.0",
     "tailwindcss": "^4.3.4",
-    "unist-util-visit": "^5.2.0"
+    "unist-util-visit": "^5.2.0",
+    "unist-util-visit-parents": "^6.1.0"
   },
   "devDependencies": {
     "@testing-library/dom": "^10.4.2",
