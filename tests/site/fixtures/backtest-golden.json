@@ -98,6 +98,30 @@
   {
     "input": {
       "symbol": "006208",
+      "monthly": 5000.0,
+      "start": "2016-01-01",
+      "end": "2026-10-31",
+      "dividends": true,
+      "twd": true,
+      "tax": true
+    },
+    "expected": {
+      "totalInvested": 650000.0,
+      "finalValue": 3105869.667364865,
+      "annualized": 0.2691214015320612,
+      "maxDrawdown": 0.33813228897245073,
+      "days": 2514,
+      "worst": {
+        "date": "2020-03-19",
+        "invested": 255000.0,
+        "value": 253088.27922628558,
+        "recovered": "2020-03-20"
+      }
+    }
+  },
+  {
+    "input": {
+      "symbol": "006208",
       "monthly": 1000.0,
       "start": "2020-01-01",
       "end": "2024-12-31",

@@ -29,6 +29,7 @@ SCENARIOS = [
     {"symbol": "0050", "monthly": 5000, "start": "2016-01-01", "end": "2026-10-31", "dividends": False, "twd": True, "tax": True},
     {"symbol": "0050", "monthly": 3000, "start": "2021-12-01", "end": "2026-10-31", "dividends": True, "twd": True, "tax": True},
     {"symbol": "0050", "monthly": 3000, "start": "2007-10-01", "end": "2012-12-31", "dividends": True, "twd": True, "tax": True},
+    {"symbol": "006208", "monthly": 5000, "start": "2016-01-01", "end": "2026-10-31", "dividends": True, "twd": True, "tax": True},  # 文章 07（#53）
     {"symbol": "006208", "monthly": 1000, "start": "2020-01-01", "end": "2024-12-31", "dividends": True, "twd": True, "tax": True},
     {"symbol": "VT", "monthly": 5000, "start": "2016-01-01", "end": "2026-10-31", "dividends": True, "twd": True, "tax": True},
     {"symbol": "VT", "monthly": 5000, "start": "2016-01-01", "end": "2026-10-31", "dividends": True, "twd": False, "tax": False},

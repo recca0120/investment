@@ -66,13 +66,26 @@ test('[#22-3] 文章 07 的結果分頁可以用鍵盤左右鍵切換', async ()
   const page = await openFrame('knowledge/07-dca-backtest-2016-2026/');
   try {
     const tabs = [...page.doc.querySelectorAll<HTMLElement>('[role="tab"]')];
-    expect(tabs.map((t) => t.textContent!.trim())).toEqual(['含息', '只看價格', '換算新台幣']);
+    // #53 起分頁改成「其他算法」：主要結果不放在分頁裡
+    expect(tabs.map((t) => t.textContent!.trim())).toEqual(['只看價格', 'VT 用美元算', '匯率和稅']);
     tabs[0].focus();
     tabs[0].dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowRight', bubbles: true }));
     expect(tabs[1].getAttribute('aria-selected')).toBe('true');
     expect(page.doc.activeElement).toBe(tabs[1]);
     const panel = page.doc.getElementById(tabs[1].getAttribute('href')!.slice(1))!; // Starlight 的分頁用 href 指向面板
     expect(panel.hidden, '切換後要看得到第二個分頁的內容').toBe(false);
+  } finally {
+    page.close();
+  }
+});
+
+test('[#53-4] 手機 375px：文章 07「結果」第一張表四欄都看得到，不用左右滑', async () => {
+  const page = await openFrame('knowledge/07-dca-backtest-2016-2026/', { size: MOBILE });
+  try {
+    const table = page.doc.querySelector<HTMLElement>('.sl-markdown-content table')!;
+    expect(table.querySelector('thead')!.textContent).toContain('最大跌幅');
+    const scroller = table.closest<HTMLElement>('[data-table-scroll]') ?? table;
+    expect(scroller.scrollWidth, '表格比畫面寬').toBeLessThanOrEqual(scroller.clientWidth);
   } finally {
     page.close();
   }

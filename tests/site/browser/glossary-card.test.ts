@@ -47,7 +47,9 @@ describe('名詞小卡', () => {
       expect(open(page), 'Esc 要關閉').toBeNull();
 
       await realClick(link);
-      await realClick(page.doc.querySelector('h1')!); // 卡片外面
+      // 卡片外面：頁面左上角（頁首的空白處）。不用某個元素，因為捲到名詞時那個元素可能在畫面外，點了不算數
+      await commands.mouseClick(frameRect.left + 4, frameRect.top + 4);
+      await wait();
       expect(open(page), '點外面要關閉').toBeNull();
 
       await realClick(link);

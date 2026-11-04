@@ -67,6 +67,17 @@
   .sl-markdown-content :is(td, th).num:not(:where(.not-content *)) {
     text-align: right;
     white-space: nowrap;
+    min-width: 0; /* 數字不換行，不需要「至少 4 個字」的寬度 */
+  }
+  /* 手機：格子留白縮小，四欄的數字表（文章 07 的結果）一個畫面放得下（#53） */
+  @media (max-width: 30rem) {
+    .sl-markdown-content :is(th, td):not(:where(.not-content *)) {
+      padding-inline: 0.5em;
+    }
+    /* 留白變小，「至少 4 個字」的寬度跟著縮：5em 扣掉左右 0.5em 還是 4 個字 */
+    .sl-markdown-content td:not(:where(.num, .not-content *)) {
+      min-width: 5em;
+    }
   }
 
   /* 引言（每篇開頭的日期與免責說明）：像存摺上的附註 */
