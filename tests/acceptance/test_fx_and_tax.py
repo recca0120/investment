@@ -87,3 +87,52 @@ def test_比較多個標的時_只有美股換算匯率與扣稅_台股不受影
     assert tw.final_value == pytest.approx(1000 / 95 * 100)
     # VT：1000 新台幣 = 40 美元 → 40 / 96.5 股 × 100 美元 × 25 = 1000 / 96.5 × 100（匯率不變，結果同扣稅後）
     assert us.final_value == pytest.approx(1000 / 96.5 * 100)
+
+
+@pytest.mark.criteria("#12-2")
+def test_扣稅後的含息價_多次配息時由新到舊累乘():
+    # 突變測試發現：只用 2 個交易日時，索引寫錯、乘除寫反都抓不到，所以用 4 天、2 次配息、而且最後一天不是除息日
+    from invest.backtest import after_dividend_tax
+    from invest.prices import PricePoint
+
+    # Given 收盤價都是 100；含息還原價／收盤價的比值 a 以最後一天為 1：
+    #   第 4 天除息、殖利率 5% → a3 = 1 × (1 − 5%) = 0.95；第 3 天沒配息 → a2 = 0.95
+    #   第 2 天除息、殖利率 2% → a1 = 0.95 × (1 − 2%) = 0.931
+    days = [date(2025, 1, 2), date(2025, 1, 3), date(2025, 1, 6), date(2025, 1, 7)]
+    points = [PricePoint(d, 100.0, 100.0 * a) for d, a in zip(days, [0.931, 0.95, 0.95, 1.0])]
+
+    # When 股利扣 30%，只有 70% 再投入
+    taxed = after_dividend_tax(points, 0.3)
+
+    # Then 調整因子由新到舊累乘，每次除息只算 70% 的殖利率：
+    #   第 4 天 1；第 3 天 1 × (1 − 0.7 × 5%) = 0.965；第 2 天 0.965（沒配息）
+    #   第 1 天 0.965 × (1 − 0.7 × 2%) = 0.965 × 0.986 = 0.95149
+    assert taxed == pytest.approx([95.149, 96.5, 96.5, 100.0])
+
+
+@pytest.mark.criteria("#12-1")
+def test_同時比較台股與美股_匯率與預扣稅只套用在美股():
+    # 突變測試發現：把匯率也套用到台股（或預設就扣稅），原本的測試抓不到
+    from invest.backtest import compare_dca
+    from tests.fakes.prices import FakeFxSource
+
+    # Given 0050 與 VT 價格相同：100 → 110；VT 有配息（含息價和收盤價不同）
+    rows = [(date(2025, 1, 2), 100.0, 98.0), (date(2025, 2, 3), 110.0, 110.0)]
+    prices = FakePriceSource({"0050": rows, "VT": rows})
+    fx = FakeFxSource([FxRate(date(2025, 1, 2), 30.0, 30.0), FxRate(date(2025, 2, 3), 32.0, 32.0)])
+    start, end = date(2025, 1, 1), date(2025, 2, 28)
+
+    tw, us = compare_dca(prices, ["0050", "VT"], monthly_amount=3000, start=start, end=end, fx=fx, us_dividend_tax=0.3)
+
+    # Then 0050 不換匯、不扣稅：和單獨回測一樣
+    alone = run_dca(prices, "0050", monthly_amount=3000, start=start, end=end)
+    assert tw.final_value == pytest.approx(alone.final_value)
+    # VT 換匯又扣稅：和單獨回測（帶匯率與 30% 稅）一樣，而且和台股不同
+    us_alone = run_dca(prices, "VT", monthly_amount=3000, start=start, end=end, fx=fx.usd_twd(start, end), dividend_tax=0.3)
+    assert us.final_value == pytest.approx(us_alone.final_value)
+    assert us.final_value != pytest.approx(tw.final_value)
+
+    # 沒有指定稅率時預設不扣稅
+    [default] = compare_dca(prices, ["VT"], monthly_amount=3000, start=start, end=end, fx=fx)
+    no_tax = run_dca(prices, "VT", monthly_amount=3000, start=start, end=end, fx=fx.usd_twd(start, end))
+    assert default.final_value == pytest.approx(no_tax.final_value)

@@ -69,3 +69,41 @@ test('[#22-14] 「資料來源」段落收成 details，摘要標示筆數；後
   expect(screen.queryByRole('heading', { name: '資料來源' })).toBeNull();
   expect(screen.getByRole('heading', { name: '之後的段落' }).closest('details')).toBeNull();
 });
+
+// 突變測試發現的邊界情況
+test('[#22-14] 資料來源在文章最後（最常見）也會收合；相對連結與錨點不算筆數；沒有資料來源的文章不動', async () => {
+  const { default: rehypeCollapseSources } = await import('../../../site/plugins/rehype-collapse-sources.mjs');
+  const last = await transform(
+    `<p>內文</p><h2>資料來源</h2><ul><li><a href="https://a.example">A</a></li><li><a href="../x.md">站內</a></li><li><a href="#top">錨點</a></li></ul>`,
+    rehypeCollapseSources,
+  );
+  const details = last.getByRole('group');
+  expect(details.querySelector('summary')!.textContent).toBe('資料來源（1 筆）');
+  expect(details.querySelectorAll('a')).toHaveLength(3);
+  expect(details).toHaveClass('sources');
+
+  const none = await transform('<h2>結論</h2><p>沒有資料來源</p>', rehypeCollapseSources);
+  expect(none.queryByRole('group')).toBeNull();
+  expect(none.getByRole('heading', { name: '結論' })).toBeInTheDocument();
+});
+
+test('[#15-6] docs 以外的檔案不改；連到 index.md 變成資料夾路由', async () => {
+  const outside = await transform('<a href="./a.md">外面</a>', rehypeMdLinks, { contentDir: './docs', base: '/investment' }, 'README.md');
+  expect(outside.getByRole('link', { name: '外面' })).toHaveAttribute('href', './a.md');
+  const index = await transform('<a href="../index.md">首頁</a><a href="./sub/index.md">子目錄</a>', rehypeMdLinks, { contentDir: './docs', base: '/investment' });
+  expect(index.getByRole('link', { name: '首頁' })).toHaveAttribute('href', '/investment/');
+  expect(index.getByRole('link', { name: '子目錄' })).toHaveAttribute('href', '/investment/knowledge/sub/');
+});
+
+test('[#15-5] 混了文字的欄位（約 0.08%～0.25%）不算數字欄；只有表頭的表格不動', async () => {
+  const screen = await transform(
+    `<table><tr><th>管道</th><th>手續費</th><th>報酬</th></tr>
+      <tr><td>複委託</td><td>約 0.08%～0.25%</td><td>12.6%</td></tr>
+      <tr><td>海外券商</td><td>0 元</td><td>13.0%</td></tr></table>
+     <table><tr><th>只有</th><th>表頭</th></tr></table>`,
+    rehypeNumCells,
+  );
+  expect(screen.getByRole('columnheader', { name: '手續費' })).not.toHaveClass('num');
+  expect(screen.getByRole('columnheader', { name: '報酬' })).toHaveClass('num');
+  expect(screen.getByRole('columnheader', { name: '只有' })).not.toHaveClass('num');
+});

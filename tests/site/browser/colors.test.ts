@@ -18,8 +18,8 @@ const SKY = { light: 'rgb(234, 242, 250)', dark: 'rgb(18, 27, 38)' }; // #EAF2FA
 
 describe.each(['light', 'dark'] as const)('%s 模式', (theme) => {
   test(`[#19-4] 內文、次要文字、連結和底色的對比至少 4.5:1`, async () => {
+    // 首頁的文字對比由 [#22-7] 逐一檢查每一段，這裡只看文章頁
     const article = await openFrame('knowledge/01-getting-started/', { theme });
-    const home = await openFrame('', { theme });
     try {
       const bg = article.style('body').backgroundColor;
       const pairs = {
@@ -28,14 +28,12 @@ describe.each(['light', 'dark'] as const)('%s 模式', (theme) => {
         引言: article.style('.sl-markdown-content blockquote').color,
         連結: article.style('.sl-markdown-content li > a').color,
         側欄: article.style('.sidebar-content a:not([aria-current])').color,
-        首頁說明: home.style('[aria-labelledby="home-route-title"] li p').color,
       };
       for (const [name, color] of Object.entries(pairs)) {
         expect(contrast(color, bg), `${name} ${color} 對 ${bg}`).toBeGreaterThanOrEqual(4.5);
       }
     } finally {
       article.close();
-      home.close();
     }
   });
 

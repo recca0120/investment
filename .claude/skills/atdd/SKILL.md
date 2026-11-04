@@ -36,6 +36,15 @@ description: 本 repo 的 ATDD 規則，Python 投資輔助系統（pytest）和
    - 網站：元件的資料和 base 用 props 傳入；HTTP 由 msw-fetch-mock 攔截，沒設定的請求一律失敗
 5. **為既有行為補測試時，故意弄壞一次**：測試一寫就綠，沒有紅燈可確認。暫時把程式改壞（重現 bug），確認測試失敗而且訊息指出問題，再改回來
 
+## 測試的保護力比數量重要
+
+驗收條件都有測試，不代表測試抓得到錯。功能做完、要關 issue 前，用**突變測試**檢查：自動把程式改壞幾百種方式，看測試抓不抓得到。漏網的逐條判斷（等價突變不用管、外觀細節用截圖），真正的漏洞補測試後**再跑一次確認抓到**。重複的測試合併、抓不到任何錯的測試刪掉或改寫。做法見 `references/mutation-testing.md`。
+
+```bash
+uv run --with mutmut==3.8.1 mutmut run && uv run --with mutmut==3.8.1 mutmut results   # Python
+npm run test:mutation                                                                   # TS／JS
+```
+
 ## 完成前：用真實資料跑一次
 
 假資料只涵蓋你想得到的情況。功能接上真實資料來源後，合併前要**實際跑一次端到端**（例如用 `AppTest` 不 override、直接跑真實 container），看有沒有例外、數字是否合理。
@@ -116,6 +125,7 @@ GH_TOKEN=$(gh auth token -u recca0120) python3 .claude/skills/atdd/scripts/check
 | 做有畫面的功能 | `references/streamlit-apptest.md` |
 | 第一次建立 Python 專案或調整 pytest 設定 | `references/pytest-setup.md` |
 | 寫網站測試（驗收、元件、外掛、瀏覽器、HTTP） | `references/vitest-site.md` |
+| 檢查測試的保護力、判斷漏網的突變、手動突變 | `references/mutation-testing.md` |
 | 想看完整可執行的例子 | `assets/example/`（回測器：驗收、UI、性質測試、container，共 7 個測試） |
 
 ## Scripts

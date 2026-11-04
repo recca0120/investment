@@ -49,3 +49,14 @@ def test_還沒回本時_回本日是None():
     assert worst.date == date(2026, 1, 20)
     assert worst.loss == pytest.approx(-200)
     assert worst.recovered is None
+
+
+@pytest.mark.criteria("#36-1")
+def test_市值剛好等於投入的那天就算回到本金():
+    # 定義：「回到本金」是市值 ≥ 累計投入（突變測試發現 ≥ 改成 > 抓不到）
+    # 1/2 價格 100 買 10 股（投入 1,000）→ 1/15 價格 80（市值 800）→ 1/20 價格 100（市值剛好 1,000）
+    prices = FakePriceSource({"X": [(date(2026, 1, 2), 100.0), (date(2026, 1, 15), 80.0), (date(2026, 1, 20), 100.0)]})
+    result = run_dca(prices, "X", monthly_amount=1000, start=date(2026, 1, 1), end=date(2026, 1, 31))
+    worst = worst_paper_loss(result)
+    assert (worst.date, worst.loss) == (date(2026, 1, 15), pytest.approx(-200))
+    assert worst.recovered == date(2026, 1, 20)

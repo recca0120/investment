@@ -142,3 +142,46 @@ def test_美元匯率_買美元用即期賣出價_換回新台幣用即期買入
         FxRate(date(2026, 10, 20), to_usd=32.68, to_twd=32.58),
         FxRate(date(2026, 10, 21), to_usd=32.535, to_twd=32.435),
     ]
+
+
+def test_查詢期間的最後一天要包含在內():
+    # 突變測試發現：把 <= end 改成 < end（最後一天被丟掉）抓不到
+    source = FinMindPriceSource(taiwan(prices=[("2025-01-02", 195.0), ("2025-02-03", 200.0)]))
+    points = source.daily("0050", date(2025, 1, 2), date(2025, 2, 3))
+    assert [p.date for p in points] == [date(2025, 1, 2), date(2025, 2, 3)]
+
+
+def test_匯率只有一邊沒報價的日子也略過():
+    # 突變測試發現：把「買價、賣價都要有報價」改成「其中一個有就好」抓不到；用到 -1 的匯率會算出負的市值
+    from invest.finmind import FinMindFxSource
+
+    fetch = FakeFetch({("TaiwanExchangeRate", "USD"): [
+        {"date": "2026-10-20", "spot_buy": 32.58, "spot_sell": 32.68},
+        {"date": "2026-10-21", "spot_buy": -1, "spot_sell": 32.535},
+        {"date": "2026-10-22", "spot_buy": 32.4, "spot_sell": -1},
+    ]})
+    rates = FinMindFxSource(fetch).usd_twd(date(2026, 10, 1), date(2026, 10, 31))
+    assert [r.date for r in rates] == [date(2026, 10, 20)]
+
+
+def test_HTTP_結果快取在本機_有效期限內不重複呼叫(tmp_path):
+    # FinMind 不帶 token 每小時只能呼叫 300 次；快取壞掉的話每次回測都會重新呼叫
+    from invest.finmind import FinMindHttpFetch
+
+    class CountingFetch(FinMindHttpFetch):
+        calls: list[tuple[str, str]] = []
+
+        def _request(self, dataset, data_id):
+            CountingFetch.calls.append((dataset, data_id))
+            return [{"date": "2025-01-02", "close": 100.0}]
+
+    fetch = CountingFetch(cache_dir=tmp_path, max_age_hours=12)
+    first = fetch("TaiwanStockPrice", "0050")
+    second = fetch("TaiwanStockPrice", "0050")
+    assert first == second == [{"date": "2025-01-02", "close": 100.0}]
+    assert CountingFetch.calls == [("TaiwanStockPrice", "0050")], "有效期限內要用快取，而且查的是同一個代號"
+    assert (tmp_path / "TaiwanStockPrice_0050.json").exists()
+
+    expired = CountingFetch(cache_dir=tmp_path, max_age_hours=0)
+    expired("TaiwanStockPrice", "0050")
+    assert len(CountingFetch.calls) == 2, "過期後要重新呼叫"

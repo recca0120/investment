@@ -67,3 +67,21 @@ describe('[#22-13] 設計 token', () => {
     }
   });
 });
+
+// 突變測試發現：變數名稱的規則（coinInk → --c-coin-ink）改了也抓不到，因為測試只比對編譯結果內部是否一致；
+// 但手寫的 site/styles/starlight.css 和回測器的圖表（Backtester.astro）直接用這些名稱，名稱一變顏色就消失
+describe('[#22-13] 給手寫 CSS 和程式用的名稱', () => {
+  const css = compileTheme(tokens);
+
+  test('[#22-13] 調色盤變數的名稱固定（camelCase 轉成 kebab-case，數字前也加 -）', () => {
+    for (const name of ['--c-sky', '--c-coin-ink', '--c-text-accent', '--c-gray-3', '--c-accent-low']) {
+      expect(css, name).toMatch(new RegExp(`${name}:\\s*#`));
+    }
+  });
+
+  test('[#22-13] daisyUI 的夜間主題是預設（沒有 JS 時也用夜間，和 Starlight 一致）', () => {
+    const theme = (name: string) => css.match(new RegExp(`@plugin 'daisyui/theme' \\{[^}]*name: '${name}';[^}]*\\}`))![0];
+    expect(theme('dark')).toMatch(/default: true;[\s\S]*prefersdark: true;[\s\S]*color-scheme: dark;/);
+    expect(theme('light')).toMatch(/default: false;[\s\S]*prefersdark: false;[\s\S]*color-scheme: light;/);
+  });
+});

@@ -33,15 +33,14 @@ describe('文章 08「四種管道比較」表格', () => {
     }
   });
 
-  test('[#22-4] 手機 375px：表格自己可以左右滑，頁面不會水平捲動', async () => {
+  // 頁面不能水平捲動由 [#15-7]（mobile-layout.test.ts）對每一篇知識文章檢查，這裡只看表格本身
+  test('[#22-4] 手機 375px：表格自己可以左右滑', async () => {
     const page = await openFrame(ARTICLE_08, { size: MOBILE });
     try {
       const table = tableWith(page.doc, '複委託', '海外券商');
       const scroller = table.closest<HTMLElement>('[data-table-scroll]') ?? table;
       expect(page.doc.defaultView!.getComputedStyle(scroller).overflowX).toMatch(/auto|scroll/);
       expect(scroller.scrollWidth, '表格內容比畫面寬，要能滑動').toBeGreaterThan(scroller.clientWidth);
-      const { scrollWidth, clientWidth } = page.doc.documentElement;
-      expect(scrollWidth, `頁面寬 ${scrollWidth}px 超出畫面 ${clientWidth}px`).toBeLessThanOrEqual(clientWidth);
     } finally {
       page.close();
     }
