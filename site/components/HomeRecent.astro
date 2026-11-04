@@ -1,0 +1,36 @@
+---
+// 首頁：最近更新（#22-6）。日期來自 git 的最後修改日期（CI 要 checkout 完整歷史，見 .github/workflows/site.yml）
+import { SECTIONS, loadDocs, type DocInfo } from '../lib/docs';
+
+interface Props {
+  docs?: DocInfo[];
+  base?: string;
+  limit?: number;
+}
+const { limit = 5 } = Astro.props;
+const docs = Astro.props.docs ?? (await loadDocs());
+const base = (Astro.props.base ?? import.meta.env.BASE_URL).replace(/\/$/, '');
+const sectionLabel = (id: string) => SECTIONS.find((s) => id.startsWith(`${s.dir}/`))?.label ?? '';
+const recent = [...docs]
+  .filter((d) => d.updated)
+  .sort((a, b) => Date.parse(b.updated) - Date.parse(a.updated) || a.id.localeCompare(b.id))
+  .slice(0, limit);
+---
+
+<section class="not-content" aria-labelledby="home-recent-title">
+  <h2 id="home-recent-title" class="m-0 text-h3 font-black text-heading">最近更新</h2>
+  <ul class="mt-4 list-none divide-y divide-rule p-0">
+    {
+      recent.map((d) => (
+        <li class="m-0 py-3">
+          <p class="m-0 text-sm text-muted">
+            <time datetime={d.updated.slice(0, 10)}>{d.updated.slice(0, 10)}</time>・{sectionLabel(d.id)}
+          </p>
+          <a href={`${base}/${d.id}/`} class="font-bold text-ink no-underline hover:text-link hover:underline">
+            {d.part ? `${d.part.group}：${d.part.label}` : d.title}
+          </a>
+        </li>
+      ))
+    }
+  </ul>
+</section>

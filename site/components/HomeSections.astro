@@ -1,0 +1,36 @@
+---
+// 首頁：網站分區的入口卡片（#22-6），篇數從文章自動算
+import { SECTIONS, loadDocs, sectionDocs, type DocInfo } from '../lib/docs';
+
+interface Props {
+  docs?: DocInfo[];
+  base?: string;
+}
+const docs = Astro.props.docs ?? (await loadDocs());
+const base = (Astro.props.base ?? import.meta.env.BASE_URL).replace(/\/$/, '');
+const sections = SECTIONS.map((s) => ({ ...s, docs: sectionDocs(docs, s.dir) })).filter((s) => s.docs.length > 0);
+---
+
+<section class="not-content" aria-labelledby="home-sections-title">
+  <h2 id="home-sections-title" class="m-0 text-h3 font-black text-heading">網站分區</h2>
+  <ul class="mt-4 grid list-none gap-3 p-0 sm:grid-cols-2">
+    {
+      sections.map((s) => (
+        <li class="m-0">
+          <a
+            href={`${base}/${s.docs[0].id}/`}
+            class="card card-border h-full border-rule bg-cloud no-underline transition-colors hover:border-link"
+          >
+            <span class="card-body gap-1 p-4">
+              <span class="flex items-center gap-2 font-black text-ink">
+                {s.label}
+                <span class="badge badge-sm badge-accent">{s.docs.length} 篇</span>
+              </span>
+              <span class="text-sm text-muted">{s.description}</span>
+            </span>
+          </a>
+        </li>
+      ))
+    }
+  </ul>
+</section>

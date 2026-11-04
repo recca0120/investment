@@ -2,11 +2,15 @@
 title: 投資學習筆記
 description: 股市新手從零開始的投資學習紀錄：整理過的知識、做過的決定，和自己寫的回測工具
 template: splash
+editUrl: false # 首頁是版面，不是文章，不顯示「編輯頁面」
 ---
 
 import { LinkButton } from '@astrojs/starlight/components';
 import PiggyBank from '@site/components/PiggyBank.astro';
-import ReadingOrder from '@site/components/ReadingOrder.astro';
+import HomeStats from '@site/components/HomeStats.astro';
+import HomeRoute from '@site/components/HomeRoute.astro';
+import HomeSections from '@site/components/HomeSections.astro';
+import HomeRecent from '@site/components/HomeRecent.astro';
 
 <div class="home-hero grid items-center gap-10 pt-8 pb-4 lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)] lg:gap-14">
   <div class="home-intro">
@@ -21,4 +25,11 @@ import ReadingOrder from '@site/components/ReadingOrder.astro';
   <PiggyBank />
 </div>
 
-<ReadingOrder />
+<HomeStats />
+
+<HomeRoute />
+
+<div class="mt-14 grid gap-10 lg:grid-cols-[1.3fr_1fr]">
+  <HomeSections />
+  <HomeRecent />
+</div>
