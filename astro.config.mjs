@@ -5,6 +5,7 @@ import tailwindcss from '@tailwindcss/vite';
 import { unified } from '@astrojs/markdown-remark';
 import rehypeMdLinks from './site/plugins/rehype-md-links.mjs';
 import rehypeNumCells from './site/plugins/rehype-num-cells.mjs';
+import rehypeCompareTables from './site/plugins/rehype-compare-tables.mjs';
 import rehypeGlossaryLinks from './site/plugins/rehype-glossary-links.mjs';
 import rehypeCollapseSources from './site/plugins/rehype-collapse-sources.mjs';
 import designTokens from './site/design/integration.ts';
@@ -23,6 +24,7 @@ export default defineConfig({
       rehypePlugins: [
         [rehypeMdLinks, { contentDir: './docs', base }],
         rehypeNumCells,
+        rehypeCompareTables, // 比較表手機上依項目排（#54）
         // 知識文章裡的名詞第一次出現時連到名詞解釋（#24）
         [rehypeGlossaryLinks, { glossaryDir: './docs/glossary', contentDir: './docs', base }],
         rehypeCollapseSources, // 結尾的「資料來源」收合並標示筆數（#22）
