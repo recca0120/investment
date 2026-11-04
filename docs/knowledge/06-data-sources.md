@@ -6,7 +6,7 @@ summary:
   - 美股用 FinMind 的 Adj_Close
   - yfinance 只做交叉驗證，證交所只用來抽查
 sidebar:
-  order: 7 # 新手路線第 7 站（決策 0006）
+  order: 8 # 新手路線第 8 站（決策 0006）
 ---
 
 > 2026-11-03 實測（issue #3）。API 限制與資料集可能變動，使用前請以官方文件為準。

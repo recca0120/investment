@@ -4,12 +4,13 @@ import { expect, test } from 'vitest';
 import { openPage } from '../support/dist';
 import { publishedDocs } from '../support/docs';
 
-// 路線順序：新手先看結果（回測），資料來源與系統規劃是進階內容放最後
+// 路線順序：選好方案就動手（開始行動），再看結果（回測）；資料來源與系統規劃是進階內容放最後
 const ROUTE = [
   '01-getting-started',
   '02-recommended-methods',
   '03-products-comparison',
   '04-starter-plans',
+  '09-getting-started-actions',
   '07-dca-backtest-2016-2026',
   '08-us-stock-channels-tax',
   '06-data-sources',
